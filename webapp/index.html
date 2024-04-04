@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="msapplication-tap-highlight" content="no" />
+    <meta
+      name="viewport"
+      content="initial-scale=1, width=device-width, viewport-fit=cover"
+    />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="stylesheet" type="text/css" href="css/index.css" />
+    <link href="css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css" />
+    <link href="css/font-awesome.css" rel="stylesheet" />
+    <title>APP Big Pollo</title>
+    <link
+      rel="stylesheet prefetch"
+      href="//fonts.googleapis.com/css?family=Roboto:400,300,700"
+    />
+    <link
+      rel="stylesheet prefetch"
+      href="//code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css"
+    />
+    <link rel="stylesheet prefetch" href="css/animate.min.css" />
+    <link rel="stylesheet prefetch" href="css/estilo.css" />
+    <script src="js/sweetalert2.js"></script>
+    <link rel="stylesheet" href="css/sweetalert2.css" />
+  </head>
+  <body>
+    <div class="autorizacion mobile">
+      <center id="imagenCarga">
+        <img src="img/logo.png" /><br />Confirme la carga en su camion.
+      </center>
+      <hr style="margin-top: 0px" />
+      <div class="lista_autorizar"></div>
+      <hr />
+      <div
+        class="btnera_auth action center flipInY animated"
+        id="botoneraCarga"
+        style="display: none"
+      >
+        <button class="btn btn-success" onclick="modal_pin()">
+          <i class="fa fa-check"></i> Confirmar
+        </button>
+      </div>
+    </div>
+
+    <div class="mobile-wrap">
+      <div class="mobile clearfix">
+        <div class="header">
+          <span class="ion-ios-navicon pull-left"><i></i></span>
+          <span class="title">Inicio</span>
+          <span class="cliente_select" style="display: none"></span>
+          <div id="botonera_cliente" class="pull-right" style="display: none; font-size: 30px;">
+            
+            <i class="fa fa-university" onclick="lnkint('cc_cliente')"></i
+            >&nbsp;&nbsp;<i
+              class="fa fa-cart-arrow-down"
+              onclick="lnkint('pedido')"
+            ></i
+            >&nbsp;&nbsp;<i
+              class="fa fa-money"
+              onclick="lnkint('pagos')"
+              aria-hidden="true"
+            ></i>
+          </div>
+          <!--  <span class="ion-ios-search pull-right"></span> -->
+          <div class="search" style="display: none">
+            <form method="post">
+              <input type="search" placeholder="Search Here" />
+            </form>
+          </div>
+          
+        </div>
+        <div class="sidebar">
+          <div class="sidebar-overlay"></div>
+          <div class="sidebar-content">
+            <div
+              class="top-head"
+              style="text-align: center; padding-bottom: 25px"
+            >
+              <img src="img/logo.png" />
+              <!-- <div class="name">DM Group</div>
+            <div class="email">correo</div> -->
+              <br /><br /><span id="username"></span>
+            </div>
+
+            <div class="nav-left">
+              <a href="#home"
+                ><span class="ion-ios-home-outline"></span> Home</a
+              >
+
+              <a href="#clientes">
+                <span class="fa fa-users"></span> Clientes
+              </a>
+              <a href="#billetera">
+                <span class="fa fa-stack-overflow"></span> Billetera
+              </a>
+              <a href="#movimientos">
+                <span class="fa fa-random"></span> Movimientos
+              </a>
+
+              <a href="#devoluciones">
+                <span class="fa fa-refresh" aria-hidden="true"></span>
+                Devoluciones
+              </a>
+            </div>
+            <a
+              href="login.html"
+              onclick="localStorage.clear();"
+              style="
+                color: #333;
+                display: block;
+                font-size: 16px;
+                padding: 10px 0;
+                line-height: 24px;
+                vertical-align: top;
+                text-decoration: none;
+              "
+            >
+              <span
+                class="fa fa-sign-out"
+                aria-hidden="true"
+                style="
+                  color: #aaa;
+                  font-size: 24px;
+                  min-width: 40px;
+                  display: inline-block;
+                "
+              ></span>
+              Salir
+              <!-- showConfirm() -->
+            </a>
+          </div>
+        </div>
+        <div class="content">
+          <!-- -->
+          <div class="html search">
+            <div class="title bounceInDown animated">Search Result</div>
+            <p class="flipInX animated">
+              Sorry,<br />no matches found for <b class="key"></b>
+            </p>
+          </div>
+          <!-- -->
+          <div class="html welcome visible">
+            <div class="datetime">
+              <div class="day lightSpeedIn animated"></div>
+              <div class="date lightSpeedIn animated"></div>
+              <div class="time lightSpeedIn animated"></div>
+            </div>
+            <div class="hyperlinks">
+              <a href="#clientes" class="nav-item nav-count-3 hyp"
+                ><span >Clientes</span></a
+              >
+              <a href="#billetera" class="nav-item nav-count-2 hyp"
+                ><span>Billetera</span></a
+              >
+              <a href="#devoluciones" class="nav-item nav-count-1 hyp"
+                ><span >Devoluciones</span></a
+              >
+              <!--<a href="javascript:void(0)" class="nav-item nav-count-4 hyp"
+                ><span>Escaner</span></a
+              >-->
+            </div>
+          </div>
+          
+          <!-- -->
+          <div class="html cc_cliente"></div>
+          <!-- -->
+          <!-- -->
+          <div class="html movimientos"></div>
+          <!-- -->
+          <div class="html pagos"></div>
+          <!-- -->
+
+          <!-- -->
+          <div class="html buscaprod">
+            <div class="row forecast">
+              <div id="listado_buscaprod" class="col-md-12"></div>
+              <div class="forms cobranza-list">
+                <br />
+                <div class="action center flipInY animated">
+                  <a href="index.html"
+                    ><button
+                      class="btn btn-danger"
+                      style="background-color: #2196f3"
+                    >
+                      <i class="ion-ios-arrow-back"></i> Regresar
+                    </button></a
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- -->
+          <div class="html creditos">
+            <div class="forecast clearfix">
+              <div class="datetime pull-left bounceInLeft animated">
+                <div class="cliente"></div>
+                <div class="date">05 January, 2017</div>
+              </div>
+              <div class="temperature pull-right bounceInRight animated">
+                <div class="unit">
+                  <span class="ion-ios-sunny-outline"></span> 34<i>°</i>
+                </div>
+                <div class="location">Fort Lauderdale, FL</div>
+              </div>
+            </div>
+            <div class="alarm-list">
+              <div class="note clearfix slideInRight animated">
+                <div class="time pull-left">
+                  <div class="user-list clearfix"></div>
+                </div>
+                <div class="to-do pull-left">
+                  <div class="title">Finish HTML Coding</div>
+                  <div class="subject">App UI</div>
+                </div>
+              </div>
+              <div class="note clearfix slideInRight animated">
+                <div class="time pull-left">
+                  <div class="hour">1</div>
+                  <div class="shift">PM</div>
+                </div>
+                <div class="to-do pull-left">
+                  <div class="title">Lunch Break</div>
+                  <div class="subject"></div>
+                </div>
+              </div>
+              <div
+                class="note clearfix slideInRight animated"
+                data-revert="slideOutRight"
+              >
+                <div class="time pull-left">
+                  <div class="hour">3</div>
+                  <div class="shift">PM</div>
+                </div>
+                <div class="to-do pull-left">
+                  <div class="title">Developer Stand Up</div>
+                  <div class="subject">Hangouts</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- -->
+          <div class="html pedido">
+            <div class="row forecast">
+              <center id="nohayprod">
+                Aun no se ha seleccionado un producto<br /><br />
+                <!--<button class="btn btn-info" style="background: #2196f3;" onclick="lnkint('productos')"><i class="fa fa-cart-arrow-down" aria-hidden="true"></i> Seleccionar Productos</button>-->
+              </center>
+
+              <div id="listado_pedidos" class="col-md-12"></div>
+              <div class="forms pedidos-list">
+                <br />
+                <div class="action center flipInY animated">
+                  <button
+                    class="btn btn-danger"
+                    onclick="lnkint('productos')"
+                    style="background-color: #2196f3"
+                  >
+                    Agregar mas productos
+                  </button>
+
+                  <button
+                    class="btn btn-danger btn-confirma"
+                    onclick="envia_pedido()"
+                    style="background-color: #2196f3"
+                  >
+                    <i class="ion-ios-check"></i> Confirmar
+                  </button>
+                </div>
+              </div>
+              <!--  <input type='text' id="regcant" style="width: 100%;color:#fff;background-color:black"> -->
+            </div>
+          </div>
+          <!-- -->
+          <!-- Rutas View -->
+          <div class="html rutas">
+            <div class="row forecast">
+              <div id="listado_rutas" class="col-md-12"></div>
+              <div class="forms cobranza-list">
+                <br />
+                <div class="action center flipInY animated">
+                  <a href="index.html"
+                    ><button
+                      class="btn btn-danger"
+                      style="background-color: #2196f3"
+                    >
+                      <i class="ion-ios-arrow-back"></i> Regresar
+                    </button></a
+                  >
+                </div>
+              </div>
+              <!--  <input type='text' id="regcant" style="width: 100%;color:#fff;background-color:black"> -->
+            </div>
+          </div>
+          <!-- fin rutas view -->
+
+          <!-- Clientes View -->
+          <div class="html clientes">
+            <div class="row">
+              <div
+                class="row col-md-12"
+                style="padding-bottom: 10px; margin: auto"
+              >
+                <input
+                  type="search"
+                  id="search_clie"
+                  placeholder="Buscar Cliente..."
+                  style="width: 80%"
+                />
+                <button
+                  onclick="filtra_cliente()"
+                  class="btn btn-success"
+                  style="border-radius: 0px; padding: 3px 15px 3px 15px"
+                >
+                  Ok
+                </button>
+              </div>
+              <div
+                class="row col-md-12"
+                style="padding-bottom: 10px; margin: auto"
+              >
+                <!--<button
+                  onclick="lnkint('agregarCliente')"
+                  class="btn btn-success"
+                  style="
+                    width: 100%;
+                    border-radius: 0px;
+                    padding: 3px 15px 3px 15px;
+                  "
+                >
+                  Agregar cliente
+                </button>-->
+              </div>
+
+              <div id="listado_clientes" class="col-md-12"></div>
+
+              <div class="forms cobranza-list">
+                <br />
+                <div class="action center flipInY animated">
+                  <a href="index.html"
+                    ><button
+                      class="btn btn-danger"
+                      style="background-color: #2196f3"
+                    >
+                      <i class="ion-ios-arrow-back"></i> Regresar
+                    </button></a
+                  >
+                </div>
+              </div>
+              <!--  <input type='text' id="regcant" style="width: 100%;color:#fff;background-color:black"> -->
+            </div>
+          </div>
+          <!-- fin Clientes view -->
+          <!-- Agregar clientes View -->
+          <div class="html agregarCliente" style="margin-top: 10px">
+            <form>
+              <div class="form-group formAgregarCliente">
+                <input
+                  type="text"
+                  class="form-control"
+                  id="razonSocial"
+                  placeholder="Razon social/nombre del local"
+                />
+              </div>
+              <div class="form-group formAgregarCliente">
+                <select class="form-control" id="rubro"></select>
+              </div>
+              <div class="form-group formAgregarCliente">
+                <input
+                  type="number"
+                  class="form-control"
+                  id="celularCliente"
+                  placeholder="Telefono"
+                />
+              </div>
+              <div class="form-group formAgregarCliente">
+                <input
+                  type="text"
+                  class="form-control"
+                  id="calleCliente"
+                  placeholder="Calle"
+                />
+              </div>
+              <div class="form-group formAgregarCliente">
+                <input
+                  type="number"
+                  class="form-control"
+                  id="numeroCliente"
+                  placeholder="Numero"
+                />
+              </div>
+              <div
+                class="form-group formAgregarCliente"
+                id="displayprovincia"
+                style="display: none"
+              >
+                <select
+                  class="form-control"
+                  id="provinciaCliente"
+                  onchange="llenalocalidad(this.value);"
+                ></select>
+              </div>
+              <div
+                class="form-group formAgregarCliente"
+                id="displayciudad"
+                style="display: none"
+              >
+                <select class="form-control" id="ciudadCliente"></select>
+              </div>
+              <div
+                class="row col-md-12"
+                style="padding-bottom: 10px; margin: auto"
+              >
+                <button
+                  type="button"
+                  onclick="agregarCliente()"
+                  class="btn btn-primary"
+                  style="
+                    width: 100%;
+                    border-radius: 0px;
+                    padding: 3px 15px 3px 15px;
+                  "
+                >
+                  Agregar
+                </button>
+              </div>
+            </form>
+          </div>
+          <!-- fin Agregar clientes view -->
+          <!-- productos View -->
+          <div class="html productos">
+            <div class="row forecast">
+              <div class="col-xs-12" style="color: #0a1050; border: 1px solid #0a1050; border-radius: 5px;margin-bottom: 10px;font-weight: 600;text-align: center;">   Total: $<span id="total"></span> </div>
+              <div id="listado_productos" class="col-md-12"></div>
+              <div class="forms cobranza-list">
+                <br />
+                <div class="action center flipInY animated">
+                  <a href="index.html"
+                    ><button
+                      class="btn btn-danger"
+                      style="background-color: #2196f3"
+                    >
+                      <i class="ion-ios-arrow-back"></i> Regresar
+                    </button></a
+                  >
+                </div>
+              </div>
+              <!--  <input type='text' id="regcant" style="width: 100%;color:#fff;background-color:black"> -->
+            </div>
+          </div>
+          <!-- fin productos view -->
+
+          <!-- Rutas detalle View -->
+          <div class="html rutas_det">
+            <div class="row forecast">
+              <div id="listado_rutas_detalle" class="col-md-12"></div>
+              <br />
+              <div class="forms cobranza-list">
+                <div class="action center flipInY animated">
+                  <button class="btn btn-danger">
+                    <i
+                      class="ion-ios-arrow-back"
+                      style="background-color: #2196f3"
+                    ></i>
+                    Regresar
+                  </button>
+                </div>
+              </div>
+              <!-- <input type='text' id="regcant" style="width: 100%;color:#fff;background-color:black"> -->
+            </div>
+          </div>
+          <!-- fin rutas detalle view -->
+
+          <div class="html billetera"></div>
+
+          <div class="html compose">
+            <div class="forms compose-list">
+              <div class="group clearfix slideInRight animated">
+                <label class="pull-left" for="compose-time"
+                  ><span class="ion-ios-time-outline"></span> Time</label
+                >
+                <input class="pull-right" id="compose-time" type="time" />
+              </div>
+              <div class="group clearfix slideInLeft animated">
+                <label class="pull-left" for="compose-date"
+                  ><span class="ion-ios-calendar-outline"></span> Date</label
+                >
+                <input class="pull-right" id="compose-date" type="date" />
+              </div>
+              <div class="group clearfix slideInRight animated">
+                <label class="pull-left" for="compose-title"
+                  ><span class="ion-ios-paper-outline"></span> Title</label
+                >
+                <input class="pull-right" id="compose-title" type="text" />
+              </div>
+              <div class="group clearfix slideInLeft animated">
+                <label class="visible" for="compose-detail"
+                  ><span class="ion-ios-list-outline"></span> Task</label
+                >
+                <textarea
+                  class="visible"
+                  id="compose-detail"
+                  rows="3"
+                ></textarea>
+              </div>
+              <div class="action flipInY animated">
+                <a href="#home"
+                  ><button class="btn">
+                    <i class="ion-ios-arrow-back"></i> Atras
+                  </button></a
+                >
+              </div>
+            </div>
+          </div>
+          <div class="html chats">
+            <div class="tabs-list clearfix">
+              <a href="#" class="tab active">Users</a>
+              <a href="#" class="tab">Messages</a>
+              <a href="#" class="tab">Groups</a>
+            </div>
+            <div class="active-users">
+              <div class="user clearfix rotateInDownLeft animated">
+                <div class="photo pull-left"></div>
+                <div class="desc pull-left">
+                  <p class="name">Connor Hartigan</p>
+                  <p class="position">Web & UI Designer</p>
+                </div>
+                <div class="idle pull-right">
+                  <span class="away caca"></span>
+                </div>
+              </div>
+              <div class="user clearfix rotateInDownRight animated">
+                <div class="photo pull-left"></div>
+                <div class="desc pull-left">
+                  <p class="name">Jacob Lennon</p>
+                  <p class="position">Front-End Developer</p>
+                </div>
+                <div class="idle pull-right"><span class="offline"></span></div>
+              </div>
+              <div class="user clearfix rotateInDownLeft animated">
+                <div class="photo pull-left"></div>
+                <div class="desc pull-left">
+                  <p class="name">Didier Mailly</p>
+                  <p class="position">Co-Founder</p>
+                </div>
+                <div class="idle pull-right"><span class="away"></span></div>
+              </div>
+              <div class="user clearfix rotateInDownRight animated">
+                <div class="photo pull-left"></div>
+                <div class="desc pull-left">
+                  <p class="name">Miguel Cunha Ferreira</p>
+                  <p class="position">Sales Manager</p>
+                </div>
+                <div class="idle pull-right"><span class="online"></span></div>
+              </div>
+              <div class="user clearfix rotateInDownLeft animated">
+                <div class="photo pull-left"></div>
+                <div class="desc pull-left">
+                  <p class="name">Eric Yuriev</p>
+                  <p class="position">App Developer</p>
+                </div>
+                <div class="idle pull-right"><span class="online"></span></div>
+              </div>
+              <div class="user clearfix rotateInDownRight animated">
+                <div class="photo pull-left"></div>
+                <div class="desc pull-left">
+                  <p class="name">Theodore Clark</p>
+                  <p class="position">Project Manager</p>
+                </div>
+                <div class="idle pull-right"><span class="online"></span></div>
+              </div>
+            </div>
+          </div>
+          <div class="html settings">
+            <div class="setting-list">
+              <div class="gear clearfix slideInRight animated">
+                <div class="title pull-left">General</div>
+                <div class="action pull-right">
+                  <span class="ion-ios-arrow-right"></span>
+                </div>
+              </div>
+              <div class="gear clearfix slideInLeft animated">
+                <div class="title pull-left">
+                  <label for="gear-notice">Notification</label>
+                </div>
+                <div class="action pull-right">
+                  <input
+                    id="gear-notice"
+                    class="on-off"
+                    type="checkbox"
+                  /><label for="gear-notice"></label>
+                </div>
+              </div>
+              <div class="gear clearfix slideInRight animated">
+                <div class="title pull-left">
+                  <label for="gear-sound">Sound</label>
+                </div>
+                <div class="action pull-right">
+                  <input
+                    id="gear-sound"
+                    class="on-off"
+                    type="checkbox"
+                    checked
+                  /><label for="gear-sound"></label>
+                </div>
+              </div>
+              <div class="gear clearfix slideInLeft animated">
+                <div class="title pull-left">Theme</div>
+                <div class="action pull-right">
+                  Standard <span class="ion-ios-arrow-right"></span>
+                </div>
+              </div>
+              <div class="gear clearfix slideInRight animated">
+                <div class="title pull-left">Support</div>
+                <div class="action pull-right">
+                  <span class="ion-ios-arrow-right"></span>
+                </div>
+              </div>
+              <div class="gear clearfix slideInLeft animated">
+                <div class="title pull-left">Privacy</div>
+                <div class="action pull-right">
+                  <span class="ion-ios-arrow-right"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="html devoluciones">
+            <div class="photo flipInX animated">
+              <img src="" id="avatar" />
+            </div>
+            <div class="details" style="text-align: center">
+              <p class="heading flipInY animated">
+                <span class="name" id="fecha_sync"></span
+                ><span class="position"></span>
+              </p>
+              <p class="text fadeInUp animated" id="txtcobranza">
+                A continuacion mostramos la mercaderia que aun esta en su
+                camion!
+              </p>
+              <div id="listado_devolucion" class="col-md-12"></div>
+              <div id="fechasaliquidar"></div>
+            </div>
+          </div>
+          <div class="html credits">
+            <div class="title flipInY animated">-</div>
+            <div class="credit-ol">
+              <div class="credit-li lightSpeedIn animated">
+                <a
+                  href="https://www.google.com/fonts/specimen/Roboto"
+                  target="_blank"
+                  >roboto</a
+                >
+                <span>for typography</span>
+              </div>
+              <div class="credit-li lightSpeedIn animated">
+                <a href="https://jquery.com" target="_blank">jquery</a>
+                <span>for design/ui</span>
+              </div>
+              <div class="credit-li lightSpeedIn animated">
+                <a href="http://ionicons.com/" target="_blank">ionicons</a>
+                <span>for icons</span>
+              </div>
+              <div class="credit-li lightSpeedIn animated">
+                <a href="http://uifaces.com/authorized" target="_blank"
+                  >ui faces</a
+                >
+                <span>for avatar</span>
+              </div>
+              <div class="credit-li lightSpeedIn animated">
+                <a href="https://daneden.github.io/animate.css/" target="_blank"
+                  >animate.css</a
+                >
+                <span>for animation</span>
+              </div>
+              <div class="credit-li lightSpeedIn animated">
+                <a
+                  href="https://dribbble.com/shots/1928064-Secret-Project"
+                  target="_blank"
+                  >concept of design</a
+                >
+                <span>for layout</span>
+              </div>
+              <div class="credit-li lightSpeedIn animated">
+                <a
+                  href="https://unsplash.com/photos/6asyCyR0K1Q/download"
+                  target="_blank"
+                  >unsplash.com</a
+                >
+                <span>for background</span>
+              </div>
+            </div>
+            <div class="text zoomInUp animated">-</div>
+          </div>
+        </div>
+        <!--<div class="nav">
+          <a href="#devoluciones" class="nav-item nav-count-1"
+            ><i class="fa fa-refresh" aria-hidden="true"></i
+            ><span class="invisible">Devoluciones</span></a
+          >
+          <a href="#billetera" class="nav-item nav-count-2"
+            ><i class="fa fa-stack-overflow" aria-hidden="true"></i
+            ><span class="invisible">Billetera</span></a
+          >
+          <a href="#clientes" class="nav-item nav-count-3"
+            ><i class="fa fa-users" aria-hidden="true"></i
+            ><span class="invisible">Clientes</span></a
+          >
+          <a href="javascript:void(0)" class="nav-item nav-count-4"
+            ><i class="fa fa-qrcode" aria-hidden="true"></i
+            ><span class="invisible">Escaner</span></a
+          > -->
+          <!-- onclick="lnk('scan')" -->
+         <!-- <a href="#toggle" class="mask"
+            ><i class="fa fa-plus" aria-hidden="true"></i
+          ></a>
+        </div>-->
+      </div>
+    </div>
+
+    <modal></modal>
+
+    <script src="js/jquery-1.11.1.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="cordova.js"></script>
+    <script src="js/index.js"></script>
+    <script type="text/javascript" src="js/md5.js"></script>
+    <script type="text/javascript" src="js/barcode.js"></script>
+    <script type="text/javascript" src="js/app.js"></script>
+    <script
+      type="text/javascript"
+      src="js/sql.js?v='+(new Date()).getTime();"
+    ></script>
+    <script type="text/javascript" src="js/gps.js"></script>
+    <script type="text/javascript" src="js/btn-number.js"></script>
+    <script src="js/touchSwipe.js"></script>
+    <script type="text/javascript">
+      var url = window.location.pathname;
+      var filename = url.substring(url.lastIndexOf("/") + 1);
+      if (localStorage.login == "true" && filename == "login.html") {
+        window.location.href = "index.html";
+      } else if (localStorage.login == null) {
+        window.location.href = "login.html";
+      } else if (localStorage.login == "false" && filename != "login.html") {
+        window.location.href = "login.html";
+      }
+
+      function syncro() {
+        var dataString = "sincroniza&u=" + localStorage.id;
+
+        $.ajax({
+          type: "POST",
+          url: url_gral,
+          data: dataString,
+          dataType: "json",
+          crossDomain: true,
+          cache: false,
+          success: function (data) {
+            console.log(data);
+            if (data != "FALSE") {
+              syncroniza(data, "clientes");
+              syncroniza(data, "perfil");
+            } else {
+              alert("error al recuperar");
+            }
+          },
+        });
+      }
+
+      $("body").on("click", "#perfil", function () {});
+
+      if (localStorage.marcador == "billetera") {
+        console.log("entra a la bille");
+        loadbilletera();
+      }
+
+      if (localStorage.marcador == "devoluciones") {
+        loadbilletera();
+      }
+
+      if (localStorage.ruta != undefined) {
+        $("#ruta_head").show();
+        $(".cobranza-list").show();
+      } else {
+        $("#ruta_head").hide();
+        $(".cobranza-list").hide();
+      }
+
+      $("#username").html(localStorage.nombrecobrador);
+
+      function showConfirm() {
+        navigator.notification.confirm(
+          "¿Seguro que quieres cerrar la aplicación?", // mensaje a mostrar
+          exitFromApp, // callback a invocar cuando el botón es presionado
+          "Salir", // titulo de la ventana
+          "Cancelar,Si" // etiquetas de los botones
+        );
+      }
+
+      function exitFromApp(buttonIndex) {
+        if (buttonIndex == 2) {
+          localStorage.clear();
+          navigator.app.exitApp();
+        }
+      }
+
+      chequeo_carga();
+    </script>
+  </body>
+</html>
