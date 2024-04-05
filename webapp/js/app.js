@@ -1,5 +1,5 @@
 //localStorage.clear();
-var url_gral ='http://localhost/ERP/procesos/functions-online.php?';
+var url_gral ='https://matildebigpollo.mayoristasbahia.com/procesos/functions-online.php?';
 
 function addZero(i) {
     if (i < 10) {
