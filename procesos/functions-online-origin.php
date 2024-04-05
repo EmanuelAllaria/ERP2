@@ -6,10 +6,14 @@ ini_set('memory_limit', '-1');
 
 date_default_timezone_set("America/Argentina/Buenos_Aires");
 setlocale(LC_ALL, "es_ES");
-$link= mysqli_connect('localhost', 'u598064194_matildebig', 'CBV#*Bi0');
-$db_select = mysqli_select_db($link, "u598064194_matildebig");
-if (!$db_select) {
-	die("Database selection failed: " . mysqli_error());
+try {
+    $link = mysqli_connect('localhost', 'u598064194_matildebig', 'CBV#*Bi0');
+    $db = 'u598064194_matildebig';
+    $db_select = mysqli_select_db($link, $db);
+} catch (\Exception) {
+    $link = mysqli_connect('localhost', 'root', '');
+    $db = 'bpgestion';
+    $db_select = mysqli_select_db($link, $db);
 }
 
 $ip = $_SERVER['REMOTE_ADDR'];

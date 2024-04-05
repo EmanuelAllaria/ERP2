@@ -1,7 +1,14 @@
 <?php if (isset($_GET['add']) && $_GET['add'] == '1') {
     include('clientes_add.php');
-} else { ?><div class="container-fluid">
-
+} else { ?>
+    <?php
+    $id = $_SESSION['id'];
+    $autorizados = $link->query("SELECT * FROM carga_camion
+                                INNER JOIN stock_depositos ON quien_stockd = '$id' AND carga_camion.personal_cargac = stock_depositos.idpersona_stockd AND stock_depositos.idcarga_stockd = carga_camion.id_cargac
+                                WHERE autoriza_cargac LIKE '0000-00-00%'");
+    $autorizado = mysqli_num_rows($autorizados);
+    ?>
+    <div class="container-fluid">
         <div class="row page-titles">
             <div class="col-md-12">
                 <h4 class="text-white">Listado de Cargas</h4>
@@ -32,7 +39,8 @@
                                     </div>
                                 </a>
                                 <div class="ml-auto">
-                                    <h2 class="counter text-primary"><?php if(isset($cuento_nuevos))echo $cuento_nuevos; else echo 0;?></h2>
+                                    <h2 class="counter text-primary"><?php if (isset($cuento_nuevos)) echo $cuento_nuevos;
+                                                                        else echo 0; ?></h2>
                                 </div>
                             </div>
                         </div>
@@ -83,7 +91,7 @@
                                     </div>
                                 </a>
                                 <div class="ml-auto">
-                                    <h2 class="counter text-success">0</h2>
+                                    <h2 class="counter text-success"><?php echo $autorizado ?></h2>
                                 </div>
                             </div>
                         </div>
@@ -106,7 +114,7 @@
                                 <h4 class="card-title">Listado</h4>
                             </div>
                             <div class="col-md-2"><small class="form-control-feedback"> Desde </small>
-                                <input class="form-control filtro" type="date" id="d" name="d" value="<?php if (isset( $_GET['d']) && $_GET['d']) {
+                                <input class="form-control filtro" type="date" id="d" name="d" value="<?php if (isset($_GET['d']) && $_GET['d']) {
                                                                                                             echo $_GET['d'];
                                                                                                         } else {
                                                                                                             echo date('Y-m-01');
@@ -163,7 +171,7 @@
                                             WHERE `estado_stockd` != 0 AND `tipomov_stockd` LIKE 'carga' GROUP BY idcarga_stockd
                                             ORDER BY idcarga_stockd DESC");
                                     while ($row = mysqli_fetch_array($con_pedidos)) {
-                                        
+
                                     ?>
                                         <tr>
 

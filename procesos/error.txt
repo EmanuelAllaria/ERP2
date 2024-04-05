@@ -1,0 +1,1 @@
+INSERT INTO transaccion SET id_camion=63, cliente='353',	fecha='2024-04-05 16:30:51',	detalle='', observacion='',	monto2='280000', tipo_pedido='0', tipo='pago', abonada='0',	quien='11',	estado='1',	 forma_pago='2', liquidacion='0' 
