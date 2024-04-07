@@ -513,6 +513,7 @@ if (isset($_GET['e']) && $_GET['e'] == 'crcok') {
                                     <input type="number" id="cantproducto_card" class="form-control " value="1" min="1">
                                 </div>
                             </div>
+
                             <div class="col-md-3">
                                 <div class="form-group" style="margin-top: 30px;">
                                     <label class="control-label"></label>
@@ -521,6 +522,39 @@ if (isset($_GET['e']) && $_GET['e'] == 'crcok') {
                             </div>
                             <div id="list_prod_card" style="width:100%"></div>
                             <!--/span-->
+                        </div>
+                        <div class="modal" id="myModal">
+                          <div class="modal-dialog">
+                            <div class="modal-content">
+
+                              <!-- Encabezado del modal -->
+                              <div class="modal-header">
+                                <h4 class="modal-title" id="tituloModal">Editar Producto - </h4>
+                                <h4 class="modal-title" id="idCanasta"></h4>
+                                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                              </div>
+
+                              <!-- Contenido del modal -->
+                              <div class="modal-body">
+                                <div class="row">
+                                    <h4 class="col-md-12">Producto: </h4>
+                                    <h4 class="col-md-12" id="producto"></h4>
+                                </div>
+                                <div class="row">
+                                    <h4 class="col-md-12">Cantidad: </h4>
+                                    <input type="number" id="ncantproducto_card" class="form-control" min="1">
+                                </div>
+                                
+                              </div>
+
+                              <!-- Pie del modal -->
+                              <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                                <button type="button" class="btn btn-primary" onclick="edita_canasta_compra_stock();">Guardar cambios</button>
+                              </div>
+
+                            </div>
+                          </div>
                         </div>
                         <!--/row-->
                         <hr>

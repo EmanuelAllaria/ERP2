@@ -7,6 +7,7 @@ var fechas_liquidar = '';
 var cant_clientess = [];
 
 
+
 var url_gral = 'https://matildebigpollo.mayoristasbahia.com/procesos/functions-online.php?';
 
 $(document).ready(function() {
