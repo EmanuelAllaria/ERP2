@@ -278,7 +278,7 @@
 
                                                         $acumula_recaudacion += $acumula_cobros;
 
-                                                        if (date('Y-m-d') == date('Y-m-d', strtotime($row['fecha_cargac']))) {
+                                                        if ('0000-00-00' == date('Y-m-d', strtotime($row['fecha_cargac']))) {
                                                           $acumula_pendi++;
                                                         }
                                                         ?></td>
@@ -395,7 +395,7 @@
                         }
                         if ($stock_finald > 0) {
 
-                          if ($_SESSION['tipo'] === 'Deposito' || $_SESSION['tipo'] === 'Admin') {
+                          if ($_SESSION['tipo'] === 'Deposito') {
                             $modal_liqui .= '
                               <div class="row">
                               <div class="col-md-9">' . $devo['detalle_producto'] . ' (' . $devo['presentacion_producto'] . ')</div>
