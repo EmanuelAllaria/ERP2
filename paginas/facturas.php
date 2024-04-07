@@ -80,8 +80,10 @@
                       <div class="col-md-2" style="align-self: center;">
                         <a href="#" onclick="filtrar_prov()" class="btn btn-info btn-lg" role="button">Filtrar</a>
                       </div>
+                      <?php if (isset($_GET['d']) || isset($_GET['h']) || isset($_GET['p']) || isset($_GET['s'])) { ?><div class="col-md-2" style="align-self: center;"><a href="index.php?pagina=facturas">Quitar Filtros</a></div><?php } ?>
+
                       <div class="col-md-2" style="align-self: center;">
-                        <?php if (isset($_GET['d']) || isset($_GET['h']) || isset($_GET['p']) || isset($_GET['s'])) { ?><a href="index.php?pagina=facturas">Quitar Filtros</a><?php } ?>
+                        <div id="total_periodo">Total $</div>
                       </div>
                     </div>
                   </td>
@@ -123,6 +125,8 @@
                   $vendedor = '';
                 }
 
+                $montoTotal = 0;
+
                 $con_facturas = $link->query("SELECT facturas.*,proveedores.razon_com_proveedor as proveedor,tipo_comprobantes.nombre_comprobantes
                     FROM facturas left join proveedores on facturas.id_proveedor=proveedores.id_proveedor 
                     left join tipo_comprobantes on facturas.tipo = tipo_comprobantes.id_comprobantes
@@ -162,6 +166,7 @@
                       <td>$<?php echo number_format($pago['monto'], 2, ',', '.'); ?></td>
                       <?php
                       $saldo -= $pago['monto'];
+                      $montoTotal += $saldo;
                       ?>
                       <td>$<?php echo number_format($saldo, 2, ',', '.'); ?></td>
                       <td><a target="_blank" href="./paginas/recibo_factura_pago.php?id_factura=<?php echo $id_factura; ?>&id_pago=<?php echo $pago['id'] ?>"><i class="fa-solid fa-receipt"></i></a></td>
@@ -219,4 +224,7 @@
     }
     return false;
   };
+</script>
+<script>
+  $('#total_periodo').html('<span class="btn btn-success pull-right"><b>TOTAL: $<?php echo number_format($montoTotal,0,'','.');?></b></span>')
 </script>
