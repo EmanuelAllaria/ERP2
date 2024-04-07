@@ -6,6 +6,7 @@ var total_billetera = 0;
 var fechas_liquidar = '';
 var cant_clientess = [];
 
+
 var url_gral = 'https://matildebigpollo.mayoristasbahia.com/procesos/functions-online.php?';
 
 $(document).ready(function() {
@@ -674,7 +675,7 @@ function confirma_pago() {
               localStorage.removeItem('pedido');
               $('.cliente_select').hide();
               $('#botonera_cliente').hide();
-              lnkint('welcome');
+              lnkint('clientes');
               chequeo_lectura();
             }
           })
@@ -774,7 +775,7 @@ function envia_pedido_ok() {
                     localStorage.removeItem('pedido');
                     $('.cliente_select').hide();
                     $('#botonera_cliente').hide();
-                    lnkint('welcome');
+                    lnkint('clientes');
                     chequeo_lectura();
                   }
                 })
