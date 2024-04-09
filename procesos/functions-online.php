@@ -9,8 +9,8 @@ date_default_timezone_set("America/Argentina/Buenos_Aires");
 setlocale(LC_ALL, "es_ES");
 
 try {
-  $link = mysqli_connect('localhost', 'u598064194_matildebig', 'CBV#*Bi0');
-  $db = 'u598064194_matildebig';
+  $link = mysqli_connect('localhost', 'u598064194_sistemabig', 'CBV#*Bi0');
+  $db = 'u598064194_sistemabig';
   $db_select = mysqli_select_db($link, $db);
 } catch (\Exception) {
   $link = mysqli_connect('localhost', 'root', '');
@@ -257,13 +257,15 @@ if (isset($_POST['a']) && $_POST['a'] == 'pago') {
     $detalle = null;
   }
   if ($camion == 'undefined') {
-    $camion = null;
+    $id_camion = $link->query("SELECT id_camion FROM transaccion WHERE cliente='$cliente' AND quien='$personal' AND tipo='pago'");
+    $camion = mysqli_fetch_array($id_camion)[0] ?: null;
   }
 
 
   $detallepedido = '';
 
   $sql_inserto_monto = "INSERT INTO transaccion SET id_camion=$camion, cliente='$cliente',	fecha='$fecha',	detalle='$detalle', observacion='$detalle',	monto2='$monto_abona', tipo_pedido='0', tipo='pago', abonada='0',	quien='$personal',	estado='1',	 forma_pago='$opcion', liquidacion='0' ";
+  
   file_put_contents('error.txt', $sql_inserto_monto);
   $inserto_monto = $link->query($sql_inserto_monto);
 

@@ -125,6 +125,7 @@ if ($_SESSION['usuario'] != '') { ?>
       </div>
     </div>
 
+    <script src="https://kit.fontawesome.com/15fbf0e0d4.js" crossorigin="anonymous"></script>
   </body>
 
   </html>
