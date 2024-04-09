@@ -214,7 +214,7 @@
 
                     $diferencia = ($acumula_cobros - (int)$row['entrega_liquidacion']) - $acumula_gastos;
 
-                    $buscastock = $link->query("SELECT * FROM stock_depositos WHERE idpersona_stockd='$personal' and DATE(fecha_stockd) like '$periodo'");
+                    $buscastock = $link->query("SELECT * FROM stock_depositos WHERE idpersona_stockd='$personal' and DATE(fecha_stockd) like '$periodo' and estado_stockd='1'");
                     $carga = 0;
                     $carga2 = 0;
                     $venta = 0;
