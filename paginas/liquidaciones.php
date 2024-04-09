@@ -136,10 +136,8 @@
                     <!--  <th class="footable-sortable">Cliente<span class="footable-sort-indicator"></span></th> -->
                     <!--   <th class="footable-sortable">Detalle<span class="footable-sort-indicator"></span></th> -->
                     <th class="footable-sortable">Observacion<span class="footable-sort-indicator"></span></th>
+                    <th class="footable-sortable">Devoluciones<span class="footable-sort-indicator"></span></th>
                     <?php
-                    if ($_SESSION['tipo'] === 'Deposito') {
-                      echo '<th class="footable-sortable">Devoluciones<span class="footable-sort-indicator"></span></th>';
-                    }
                     if ($_SESSION['tipo'] === 'Admin') {
                     ?>
                       <th class="footable-sortable">Recaudacion<span class="footable-sort-indicator"></span></th>
@@ -193,7 +191,7 @@
                     $sql_liqui = "SELECT * FROM `transaccion`
                                                 INNER JOIN clientes on clientes.id_clientes = transaccion.cliente and transaccion.quien='$personal'
                                                 INNER JOIN carga_camion on carga_camion.id_cargac = transaccion.id_camion AND carga_camion.id_cargac = $row[0]
-                                                WHERE DATE(fecha) LIKE '$periodo' AND `tipo` LIKE 'pago' AND `abonada` LIKE '0' /* $ulti_liqui */ AND `estado` = 1 ORDER BY transaccion.id DESC";
+                                                WHERE DATE(fecha) LIKE '$periodo%' AND `tipo` LIKE 'pago' AND `abonada` LIKE '0' /* $ulti_liqui */ AND `estado` = 1 ORDER BY transaccion.id DESC";
                     $cobros = $link->query($sql_liqui);
                     $sql_gastos = "SELECT * FROM `gastos` INNER JOIN tipo_gastos on tipo_gastos.id_tipogasto = gastos.tipo_gasto WHERE estado_gasto = 1 and DATE(fecha_gasto) LIKE '$periodo'  and personal_gasto = $personal";
                     $gast = $link->query($sql_gastos);
@@ -218,16 +216,28 @@
 
                     $buscastock = $link->query("SELECT * FROM stock_depositos WHERE idpersona_stockd='$personal' and DATE(fecha_stockd) like '$periodo' and estado_stockd='1'");
                     $carga = 0;
+                    $carga2 = 0;
                     $venta = 0;
+                    $venta2 = 0;
                     while ($calculo = mysqli_fetch_array($buscastock)) {
                       if (isset($calculo['tipomov_stockd']) && $calculo['tipomov_stockd'] == 'carga') {
-                        $carga = $carga + $calculo['cantidad_stockd'];
+                        if (intval($calculo['estado_stockd']) === 1) {
+                          $carga = $carga + $calculo['cantidad_stockd'];
+                        } else if (intval($calculo['estado_stockd']) === 2) {
+                          $carga2 = $carga2 + $calculo['cantidad_stockd'];
+                        }
                       }
                       if (isset($calculo['tipomov_stockd']) && ($calculo['tipomov_stockd'] == 'venta'  || $calculo['tipomov_stockd'] == 'devolucion')) {
-                        $venta = $venta + $calculo['cantidad_stockd'];
+                        if (intval($calculo['estado_stockd']) === 1) {
+                          $venta = $venta + $calculo['cantidad_stockd'];
+                        } else if (intval($calculo['estado_stockd']) === 2) {
+                          $venta2 = $venta2 + $calculo['cantidad_stockd'];
+                        }
                       }
                     }
-                    $stock_final = $carga - $venta;
+                    $stock1 = $carga >= $venta ? $carga - $venta : $venta - $carga;
+                    $stock2 = $carga2 >= $venta2 ? $carga2 - $venta2 : $venta2 - $carga2;
+                    $stock_final = $stock1 >= $stock2 ? $stock1 - $stock2 : $stock2 - $stock1;
                     if ($row['entrega_liquidacion'] == null) {
                       $stock_final = 0;
                     }
@@ -243,12 +253,8 @@
                       </td>
                       <td class="font-weight-normal"><?php echo $row['apellido'] . ', ' . $row['nombre'] ?></td>
                       <td class="font-weight-normal"><?php echo $row['observaciones_liquidacion']; ?></td>
+                      <td class="font-weight-normal"><?php echo $row['devoluciones_liquidacion'] ?: 0; ?></td>
                       <?php
-                      if ($_SESSION['tipo'] === 'Deposito') {
-                      ?>
-                        <td class="font-weight-normal"><?php echo $stock_final; ?></td>
-                      <?php
-                      }
                       if ($_SESSION['tipo'] === 'Admin') {
                       ?>
                         <td class="font-weight-normal"><?php echo '$ ' . number_format($acumula_cobros, 2, ',', '.') ?> <span data-container="body" title="Detalle de Movimientos" data-toggle="popover" data-placement="top" data-html="true" data-content='<?php echo $movimientos; ?>'><i class="fa fa-th-list"></i></span></td>
@@ -288,14 +294,14 @@
                       <td class="font-weight-normal" style="display:flex;align-items:center;gap:20px;">
                         <?php
                         if (intval($row['deposito']) !== 1 || intval($row['venta']) !== 1) {
-                          if ($_SESSION['tipo'] === 'Deposito' && intval($row['deposito']) !== 1) {
-                            echo '<a class="btn-pure btn-outline-success success-row-btn btn-lg" style="padding:0px;" href="#" data-toggle="modal" data-target="#liquida_' . $row[0] . '" data-toggle="tooltip" data-original-title="Cerrar Jornada"><i class="fa fa-truck" aria-hidden="true"></i></a>';
+                          if (intval($row['deposito']) !== 1) {
+                            echo '<a class="btn-pure btn-outline-success success-row-btn btn-lg" style="padding:0px;" href="#" data-toggle="modal" data-target="#liquida_deposito_' . $row[0] . '" data-toggle="tooltip" data-original-title="Cerrar Jornada"><i class="fa fa-truck" aria-hidden="true"></i></a>';
                           }
-                          if ($_SESSION['tipo'] === 'Deposito' && intval($row['deposito']) === 1) {
+                          if (intval($row['deposito']) === 1) {
                             echo '<i class="fa fa-check" style="color:green;"></i>';
                           }
                           if ($_SESSION['tipo'] === 'Admin' && intval($row['venta']) !== 1) {
-                            echo '<a class="btn-pure btn-outline-success success-row-btn btn-lg" style="padding:0px;" href="#" data-toggle="modal" data-target="#liquida_' . $row[0] . '" data-toggle="tooltip" data-original-title="Cerrar Jornada"><i class="fa fa-money" aria-hidden="true"></i></a>';
+                            echo '<a class="btn-pure btn-outline-success success-row-btn btn-lg" style="padding:0px;" href="#" data-toggle="modal" data-target="#liquida_venta_' . $row[0] . '" data-toggle="tooltip" data-original-title="Cerrar Jornada"><i class="fa fa-money" aria-hidden="true"></i></a>';
                           }
                           if ($_SESSION['tipo'] === 'Admin' && intval($row['venta']) === 1) {
                             echo '<i class="fa fa-check" style="color:green;"></i>';
@@ -332,8 +338,8 @@
                                             </div>';
 
                     if ($row['deposito'] !== 0 && $row['venta'] !== 0) {
-                      $modal_liqui = '
-                        <div class="modal fade" id="liquida_' . $row[0] . '" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                      $modal_liqui_venta = '
+                        <div class="modal fade" id="liquida_venta_' . $row[0] . '" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
                           <div class="modal-dialog modal-lg" role="document">
                           <div class="modal-content">
                           <div class="modal-header">
@@ -342,8 +348,7 @@
                            </button>
                             </div>
                           <div class="modal-body">';
-                      if ($_SESSION['tipo'] === 'Admin') {
-                        $modal_liqui .= '<h4 ><center>Esta por realizar el cierre de la Jornada de la carga # "' . $row[0] . '" (' . $row['fecha_cargac'] . ') de ' . $row['apellido'] . ', ' . $row['nombre'] . '</center></h4><br>
+                      $modal_liqui_venta .= '<h4 ><center>Esta por realizar el cierre de la Jornada de la carga # "' . $row[0] . '" (' . $row['fecha_cargac'] . ') de ' . $row['apellido'] . ', ' . $row['nombre'] . '</center></h4><br>
                              <div class="row"><div class="col-md-6">
                              + Recaudacion: $' . $acumula_cobros . '<br>
                              - Gastos&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: $' . $acumula_gastos . '<br>
@@ -354,21 +359,29 @@
                                <input type="hidden" value="' . ($acumula_cobros - $acumula_gastos) . '" id="tot_a_cobrar_' . $row[0] . '">
                                <input type="hidden" value="' . $personal . '" id="personal_' . $row[0] . '">
                                <input type="hidden" value="' . $row['fecha_cargac'] . '" id="fecha_' . $row[0] . '">';
-                      }
-                      if ($_SESSION['tipo'] === 'Deposito') {
-                        $modal_liqui .= '
+                      $modal_liqui_deposito = '
+                          <div class="modal fade" id="liquida_deposito_' . $row[0] . '" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-lg" role="document">
+                            <div class="modal-content">
+                            <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+                             <span aria-hidden="true">&times;</span>
+                             </button>
+                              </div>
+                            <div class="modal-body">';
+                      $modal_liqui_deposito .= '
                             <p>Ademas se realiza de devolucion al stock general de:</p>
                             <div class="row">
                               <div class="col-md-9"><b>Poducto</b></div>
-                            <div class="col-md-3"><b>Cantidad</b></div>
+                              <div class="col-md-3"><b>Cantidad</b></div>
                             </div>';
-                      }
                       $periodo_dia = date('Y-m-d', strtotime($periodo));
 
+                      $idcarga_stockd = $row[0];
                       $buscadevo = $link->query("
                         SELECT DISTINCT(`idproducto_stockd`), detalle_producto, presentacion_producto FROM stock_depositos
                           INNER JOIN productos on productos.id_producto = stock_depositos.idproducto_stockd
-                              WHERE idpersona_stockd ='$personal' and DATE(fecha_stockd) like '$periodo_dia' and estado_stockd='1' ");
+                              WHERE idpersona_stockd ='$personal' and DATE(fecha_stockd) like '$periodo_dia' and idcarga_stockd = '$idcarga_stockd' and estado_stockd='1' ");
 
                       while ($devo = mysqli_fetch_array($buscadevo)) {
 
@@ -390,28 +403,26 @@
                             $ventad = $ventad + $calculod['cantidad_stockd'];
                             //  echo 'Cantidad '.$id_dev.': '.$ventad.'<br>';
                           }
-                          $stock_finald = $cargad - $ventad;
+                          $stock_finald = $cargad >= $ventad ? $cargad - $ventad : $ventad - $cargad;
                           //  echo '----------------------------------<br>Final: '.$stock_finald.'------------';
                         }
                         if ($stock_finald > 0) {
 
-                          if ($_SESSION['tipo'] === 'Deposito') {
-                            $modal_liqui .= '
+                          $modal_liqui_deposito .= '
                               <div class="row">
-                              <div class="col-md-9">' . $devo['detalle_producto'] . ' (' . $devo['presentacion_producto'] . ')</div>
-                               <div class="col-md-3"><input value="' . $stock_finald . '" class="form-control cantidades" id="cantdevol_' . $cant_item . '"></div>
-                              <input type="hidden" value="' . $id_dev . '" id="iddevol_' . $cant_item . '">
-                                </div>';
-                          }
+                                <div class="col-md-9">' . $devo['detalle_producto'] . ' (' . $devo['presentacion_producto'] . ')</div>
+                                <div class="col-md-3">
+                                  <input value="' . $stock_finald . '" class="form-control cantidades" id="cantdevol_' . $row[0] . '">
+                                </div>
+                                <input type="hidden" value="' . $id_dev . '" id="iddevol_' . $cant_item . '">
+                              </div>';
                           $cant_item++;
                         }
 
-                        $modal_liqui .= '  <input type="hidden" value="' . $stock_final . '" id="cantidadprod_' . $row[0] . '"><input type="hidden" value="0" id="items_' . $row[0] . '">';
+                        $modal_liqui_deposito .= '  <input type="hidden" value="' . $stock_final . '" id="cantidadprod_' . $row[0] . '"><input type="hidden" value="0" id="items_' . $row[0] . '">';
                       }
 
-                      $accion = ($_SESSION['tipo'] === 'Deposito') ? 'deposito' : (($_SESSION['tipo'] === 'Admin') ? 'venta' : '');
-
-                      $modal_liqui .= '<hr/>
+                      $modal_liqui_venta .= '<hr/>
                           <div class="row">
                               <div class="col-md-12">
                                   <textarea placeholder="Ingrese una observacion" class="form-control" id="observacion_liq_' . $row[0] . '"></textarea>
@@ -420,13 +431,30 @@
                       </div>
                       <div class="modal-footer">
                           <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
-                          <button onclick="liquidacion(' . $row[0] . ', \'' . $accion . '\')" class="btn btn-primary">Si, Confirmar</button>
+                          <button onclick="liquidacion(' . $row[0] . ', \'venta\')" class="btn btn-primary">Si, Confirmar</button>
                       </div>
                       </div>
                       </div>
                       </div>';
 
-                      echo $modal_liqui;
+                      echo $modal_liqui_venta;
+
+                      $modal_liqui_deposito .= '<hr/>
+                          <div class="row">
+                              <div class="col-md-12">
+                                  <textarea placeholder="Ingrese una observacion" class="form-control" id="observacion_liq_' . $row[0] . '"></textarea>
+                              </div>
+                          </div>
+                      </div>
+                      <div class="modal-footer">
+                          <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
+                          <button onclick="liquidacion(' . $row[0] . ', \'deposito\')" class="btn btn-primary">Si, Confirmar</button>
+                      </div>
+                      </div>
+                      </div>
+                      </div>';
+
+                      echo $modal_liqui_deposito;
                     }
                   } ?>
                 </tbody>
