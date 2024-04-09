@@ -1208,24 +1208,21 @@ if (isset($_POST['productos'])) {
   }
 
   $productos = $link->query("SELECT * FROM productos LEFT JOIN categorias on categorias.id_categoria = productos.categoria_producto LEFT JOIN marcas on marcas.id_marca = productos.marca_producto WHERE productos.estado_producto='1' $categoria $marca $busca $filtro") or die(mysqli_error());
+
   $p = '0';
   if (mysqli_num_rows($productos) > 0) {
     if ($usuario != 2) {
       while ($row = mysqli_fetch_array($productos)) {
         $prod_id = $row['id_producto'];
-        $buscastock = $link->query("SELECT * FROM stock_depositos WHERE idpersona_stockd='$usuario' and idproducto_stockd='$prod_id' and fecha_stockd like '$hoy%' and estado_stockd='1' ") or die(mysqli_error());
+        $buscastock = $link->query("SELECT * FROM stock_depositos WHERE idpersona_stockd='$usuario' and idproducto_stockd='$prod_id' and fecha_stockd like '$hoy%' and estado_stockd='1' and tipomov_stockd='carga'") or die(mysqli_error());
         $carga = 0;
-        $venta = 0;
         $stock_final = 0;
-        while ($calculo = mysqli_fetch_array($buscastock)) {
-          if ($calculo['tipomov_stockd'] == 'carga') {
+        if (mysqli_num_rows($buscastock) > 0) {
+          while ($calculo = mysqli_fetch_array($buscastock)) {
             $carga = $carga + $calculo['cantidad_stockd'];
           }
-          if ($calculo['tipomov_stockd'] == 'venta' || $calculo['tipomov_stockd'] == 'devolucion') {
-            $venta = $venta + $calculo['cantidad_stockd'];
-          }
         }
-        $stock_final = $carga - $venta;
+        $stock_final = $carga;
         //
         if ($stock_final > 0) {
           if ($stock_final < 10) {
@@ -1282,13 +1279,13 @@ if (isset($_POST['productos'])) {
       $stock_final = 0;
       while ($calculo = mysqli_fetch_array($buscastock)) {
         if ($calculo['tipomov_stockd'] == 'carga') {
-          $carga = $carga + $calculo['cantidad_stockd'];
+          $carga = $carga >= $calculo['cantidad_stockd'] ? $carga + $calculo['cantidad_stockd'] : $calculo['cantidad_stockd'] + $carga;
         }
         if ($calculo['tipomov_stockd'] == 'venta' || $calculo['tipomov_stockd'] == 'devolucion') {
-          $venta = $venta + $calculo['cantidad_stockd'];
+          $carga = $venta >= $calculo['cantidad_stockd'] ? $venta + $calculo['cantidad_stockd'] : $calculo['cantidad_stockd'] + $venta;
         }
       }
-      $stock_final = $carga - $venta;
+      $stock_final = $carga >= $venta ? $carga - $venta : $calculoventa - $carga;
       //
       if ($stock_final > 0) {
         if ($stock_final < 10) {
