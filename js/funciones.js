@@ -738,13 +738,12 @@ function liquidacion(id, tipo){
   var idcarga = id;
   var vendedor = $('#personal_'+id).val();
   var camion = vendedor;
-  var devoluciones = $('#cantidadprod_'+id).val();
+  var devoluciones = $('#cantdevol_'+id).val();
   var montototal = $('#tot_a_cobrar_'+id).val();
   var entrega = $('#total_rendido_'+id).val();
   var fecha = $('#fecha_'+id).val();
   var observaciones = $('#observacion_liq_'+id).val();
   var items = $('#items_'+id).val();
-  console.log(tipo);
 
   $.ajax({
       type: "POST",

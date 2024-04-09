@@ -6,7 +6,7 @@ var total_billetera = 0;
 var fechas_liquidar = '';
 var cant_clientess = [];
 
-var url_gral = 'https://matildebigpollo.mayoristasbahia.com/procesos/functions-online.php?';
+var url_gral = 'https://sistemabigpollo.mayoristasbahia.com/procesos/functions-online.php?';
 
 $(document).ready(function() {
   $("#carga").swipe({
