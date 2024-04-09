@@ -674,7 +674,7 @@ function confirma_pago() {
               localStorage.removeItem('pedido');
               $('.cliente_select').hide();
               $('#botonera_cliente').hide();
-              lnkint('welcome');
+              lnkint('clientes');
               chequeo_lectura();
             }
           })
@@ -774,7 +774,7 @@ function envia_pedido_ok() {
                     localStorage.removeItem('pedido');
                     $('.cliente_select').hide();
                     $('#botonera_cliente').hide();
-                    lnkint('welcome');
+                    lnkint('clientes');
                     chequeo_lectura();
                   }
                 })

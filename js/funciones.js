@@ -49,6 +49,34 @@ function llena_canasta_compra_stock(){
   }
 }
 
+function edita_canasta_compra_stock() {
+  var idProducto = $("#idCanasta").text();
+  var detalle = $("#producto").text();
+  var cantidad = $("#ncantproducto_card").val();
+
+  var indiceProducto = canasta.items.findIndex(function(elemento) {
+    return elemento.id === idProducto;
+  });
+
+  if (indiceProducto !== -1) { // Verifica si se encontró el producto
+    // Modifica el producto en el arreglo canasta.items
+    canasta.items[indiceProducto] = {
+      'id': idProducto,
+      'detalle': detalle,
+      'cant': cantidad
+    };
+
+    // Vuelve a dibujar la canasta
+    dibuja_canasta();
+    $('#myModal').modal('hide');
+  } else {
+    // Si no se encontró el producto, muestra un mensaje de error
+    alert('El producto no se encontró en la canasta.');
+  }
+
+}
+
+
 
 function llenaprod(){
   var prov=$('#provee_card').val();
@@ -123,6 +151,13 @@ canasta.items.splice(id, 1);
 dibuja_canasta();
 }
 
+function editar_item_canasta(id){
+  var cantidadActual = canasta.items[id].cant;
+  $('#ncantproducto_card').val(cantidadActual);
+  $('#producto').html(canasta.items[id].detalle);
+  $('#idCanasta').html(canasta.items[id].id);
+}
+
 function envia_a_stock(){
 
   if($('#provee_card').val()=='' || $('#provee_card').val()==null){
@@ -165,14 +200,14 @@ var canasta_json = {
 
 function dibuja_canasta(){
   var can = canasta.items.length;
-  var esqueleto='<table style="width:100%"><th>Producto</th><th>Cantidad</th><th>Accion</th>';
+  var esqueleto='<table style="width:100%"><th>Producto</th><th>Cantidad</th><th>Acciones</th>';
   for(var i=0; i < can ;i++){
-    esqueleto += '<tr><td>'+canasta.items[i].detalle+'</td><td>'+canasta.items[i].cant+'</td><td><i class="ti-close" onclick="del_item_canasta('+i+')" aria-hidden="true"></i></td></tr>'
-
+    esqueleto += '<tr><td>'+canasta.items[i].detalle+'</td><td>'+canasta.items[i].cant+'</td><td><i class="ti-close" onclick="del_item_canasta('+i+')" aria-hidden="true"></i> <i class="fa fa-pencil" onclick="editar_item_canasta('+i+')" aria-hidden="true" data-toggle="modal" data-target="#myModal"></i></td></tr>';
   }
-  esqueleto += '</table>'
+  esqueleto += '</table>';
   $('#list_prod_card').html(esqueleto);
 }
+
 
   $('#agregar_cliente').click(function(){
   //  if (controlCorrecto()) {
