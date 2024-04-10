@@ -938,7 +938,6 @@ $("#agregarGasto").click(function(){
   var nroComp = $('#comprobante').val();
   var monto = $('#monto').val();
   var observaciones = $('#detalle-alqui').val();
-
   var string2 = "accion=add_gasto&mov="+mov+"&nroComp="+nroComp+"&monto="+monto+"&observaciones="+observaciones;
           $.ajax({
               type: "POST",
