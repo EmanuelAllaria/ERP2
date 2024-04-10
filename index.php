@@ -27,7 +27,7 @@ if ($_SESSION['usuario'] != '') { ?>
   </head>
 
   <body class="skin-default fixed-layout">
-  <?php if (isset($_GET['msg']) && $_GET['msg'] == 'error') {
+    <?php if (isset($_GET['msg']) && $_GET['msg'] == 'error') {
       echo '<script>alert("Datos Incorrectos")</script>';
     } ?>
 
@@ -48,10 +48,9 @@ if ($_SESSION['usuario'] != '') { ?>
             include 'paginas/estadocamion.php';
           } elseif ($_SESSION['tipo'] == 'Deposito') {
             include 'paginas/estadocamion.php';
-          }else {
+          } else {
             include 'partes/escritorio.php';
           }
-          
         } else {
           include 'paginas/' . $_GET['pagina'] . '.php';
         }
@@ -126,6 +125,42 @@ if ($_SESSION['usuario'] != '') { ?>
     </div>
 
     <script src="https://kit.fontawesome.com/15fbf0e0d4.js" crossorigin="anonymous"></script>
+    <script>
+      $(document).ready(function() {
+        let tipo_pago = $('#tipo_pago_factura_pago').val();
+        $('.row.banco').hide();
+        $('.row.nro_cheque').hide();
+        $('.row.fecha_emision').hide();
+        $('.row.fecha_cobro').hide();
+        if (tipo_pago === 'cheque' || tipo_pago === 'mp' || tipo_pago === 'transferencia') {
+          $('.row.banco').show();
+          $('.row.fecha_emision').show();
+          $('.row.fecha_cobro').show();
+        }
+        if (tipo_pago === 'cheque') {
+          $('.row.nro_cheque').show();
+        }
+        $('#tipo_pago_factura_pago').on('change', function() {
+          let tipo_pago = $(this).val();
+
+          // Oculta todas las filas
+          $('.row.banco').hide();
+          $('.row.nro_cheque').hide();
+          $('.row.fecha_emision').hide();
+          $('.row.fecha_cobro').hide();
+
+          // Muestra las filas según el tipo de pago seleccionado
+          if (tipo_pago === 'cheque' || tipo_pago === 'mp' || tipo_pago === 'transferencia') {
+            $('.row.banco').show();
+            $('.row.fecha_emision').show();
+            $('.row.fecha_cobro').show();
+          }
+          if (tipo_pago === 'cheque') {
+            $('.row.nro_cheque').show();
+          }
+        });
+      });
+    </script>
   </body>
 
   </html>

@@ -246,7 +246,7 @@ if ($_SESSION['usuario'] != '') {
       echo 'FALSE';
     }
   }
-/*termina insercion adelanto*/
+  /*termina insercion adelanto*/
 
 
   //--------------------------------------//
@@ -304,7 +304,7 @@ if ($_SESSION['usuario'] != '') {
   }
 
   if (isset($_POST['accion']) && $_POST['accion'] == 'add_compras') {
-     /*guardo en variables los datos traidos desde funciones.js*/
+    /*guardo en variables los datos traidos desde funciones.js*/
     $prov = $_POST['proveedor_id'];
     $proveedor_nombre = $_POST['prov_nombre'];
     $fecha_compra = $_POST['fecha'];
@@ -350,7 +350,7 @@ if ($_SESSION['usuario'] != '') {
       $id_compra = $link->query("SELECT id_compram FROM compra_mercaderia ORDER BY id_compram DESC LIMIT 1");
       $rowm = mysqli_fetch_array($id_compra);
       $id_ult_compra = $rowm['id_compram'];
-      
+
       /*inserto las cantidades y el id de los productos a una productos comprados*/
       for ($i = 0; $i < count($itemDecodificados); $i++) {
         $id_producto = $itemDecodificados[$i]['id'];
@@ -363,8 +363,6 @@ if ($_SESSION['usuario'] != '') {
           echo 'FALSE';
         }
       }
-
-
     }
   }
 
@@ -955,6 +953,7 @@ if ($_SESSION['usuario'] != '') {
   if (isset($_POST['accion']) && $_POST['accion'] == 'add_facturas_pago') {
     $id_factura = $_POST['factura'];
     $fecha = $_POST['fecha'];
+    $tipo_pago = $_POST['tipo_pago'];
     $banco = $_POST['banco'];
     $numero_cheque = $_POST['numero_cheque'];
     $fecha_emision = $_POST['fecha_emision'];
@@ -971,8 +970,10 @@ if ($_SESSION['usuario'] != '') {
     $inserta = null;
     $inserta2 = null;
 
+    $factura = null;
+
     if (intval($total) >= intval($monto)) {
-      $inserta = $link->query("INSERT INTO facturas_pagos SET id_factura='$id_factura', fecha='$fecha', banco='$banco', numero_cheque='$numero_cheque', fecha_emision='$fecha_emision', fecha_cobro='$fecha_cobro', titular='$titular', cuit='$cuit', monto='$monto', origen='$origen', observaciones='$obs'");
+      $inserta = $link->query("INSERT INTO facturas_pagos SET id_factura='$id_factura', tipo_pago='$tipo_pago', fecha='$fecha', banco='$banco', numero_cheque='$numero_cheque', fecha_emision='$fecha_emision', fecha_cobro='$fecha_cobro', titular='$titular', cuit='$cuit', monto='$monto', origen='$origen', observaciones='$obs'");
     } else {
       $facturaMayor = null;
       foreach ($facturas as $factura) {
@@ -990,12 +991,12 @@ if ($_SESSION['usuario'] != '') {
         }
         $get_nro_factura = $consulta_nro_factura->fetch_assoc();
 
-        $inserta = $link->query("INSERT INTO facturas_pagos SET id_factura='$id_factura', fecha='$fecha', banco='$banco', numero_cheque='$numero_cheque', fecha_emision='$fecha_emision', fecha_cobro='$fecha_cobro', titular='$titular', cuit='$cuit', monto='$total', origen='$origen', observaciones='$obs'");
+        $inserta = $link->query("INSERT INTO facturas_pagos SET id_factura='$id_factura', tipo_pago='$tipo_pago', fecha='$fecha', banco='$banco', numero_cheque='$numero_cheque', fecha_emision='$fecha_emision', fecha_cobro='$fecha_cobro', titular='$titular', cuit='$cuit', monto='$total', origen='$origen', observaciones='$obs'");
         if (!$inserta) {
           echo "MySQL Error: " . $link->error;
         }
 
-        $inserta2 = $link->query("INSERT INTO facturas_pagos SET id_factura='$facturaMayor', fecha='$fecha', banco='$banco', numero_cheque='$numero_cheque', fecha_emision='$fecha_emision', fecha_cobro='$fecha_cobro', titular='$titular', cuit='$cuit', monto='$monto', origen='$origen', observaciones='Sobró del pago a la factura: " . $get_nro_factura['nro_factura'] . "'");
+        $inserta2 = $link->query("INSERT INTO facturas_pagos SET id_factura='$facturaMayor', tipo_pago='$tipo_pago', fecha='$fecha', banco='$banco', numero_cheque='$numero_cheque', fecha_emision='$fecha_emision', fecha_cobro='$fecha_cobro', titular='$titular', cuit='$cuit', monto='$monto', origen='$origen', observaciones='Sobró del pago a la factura: " . $get_nro_factura['nro_factura'] . "'");
         if (!$inserta2) {
           echo "MySQL Error: " . $link->error;
         }
@@ -1007,7 +1008,11 @@ if ($_SESSION['usuario'] != '') {
     $id = mysqli_insert_id($link);
 
     if ($inserta || $inserta2) {
-      echo $id . '@' . $factura['nro_factura'] . '@' . $monto;
+      if ($factura !== null && isset($factura['nro_factura'])) {
+        echo $id . '@' . $factura['nro_factura'] . '@' . $monto;
+      } else {
+        echo $id . '@' . $id_factura . '@' . $monto;
+      }
     } else {
       echo 'FALSE';
     }

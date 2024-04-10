@@ -900,6 +900,7 @@ function add_factura_pago(){
   var factura = $('#nro_factura_pago').val();
   var fecha = $('#fecha_factura_pago').val();
   var banco = $('#banco_factura_pago').val();
+  var tipo_pago = $('#tipo_pago_factura_pago').val();
   var numero_cheque = $('#numero_cheque_factura_pago').val();
   var fecha_emision = $('#fecha_emision_factura_pago').val();
   var fecha_cobro = $('#fecha_cobro_factura_pago').val();
@@ -910,7 +911,7 @@ function add_factura_pago(){
   var facturas = $('#facturas_factura_pago').val();
   var origen = $('#origen_factura_pago').val();
   var obs = $('#detalle_factura_pago').val();
-  var string2 = "accion=add_facturas_pago&factura="+factura+"&fecha="+fecha+"&banco="+banco+"&numero_cheque="+numero_cheque+"&fecha_emision="+fecha_emision+"&fecha_cobro="+fecha_cobro+"&titular="+titular+"&cuit="+cuit+"&monto="+monto+"&total="+total+"&facturas="+facturas+"&origen="+origen+"&obs="+obs;
+  var string2 = "accion=add_facturas_pago&factura="+factura+"&fecha="+fecha+"&banco="+banco+"&numero_cheque="+numero_cheque+"&fecha_emision="+fecha_emision+"&fecha_cobro="+fecha_cobro+"&titular="+titular+"&cuit="+cuit+"&monto="+monto+"&total="+total+"&facturas="+facturas+"&origen="+origen+"&obs="+obs+"&tipo_pago="+tipo_pago;
   if(!factura || factura==''){
     alert('Seleccionar numero factura')
   }else if(!monto || monto==''){
