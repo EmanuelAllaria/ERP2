@@ -11,3 +11,5 @@ try {
     $db = 'bpgestion';
     $db_select = mysqli_select_db($link, $db);
 }
+
+

@@ -419,8 +419,8 @@ if (isset($_GET['e']) && $_GET['e'] == 'crcok') {
                                             <span class="input-group-text" id="basic-addon2"><i class="fa fa-exchange"></i></span>
                                         </div>
                                         <select class="form-control" id="movimiento" name="tipo" aria-describedby="basic-addon2">
-                                            <option value="salida">Salida</option>
-                                            <option value="salida">Sueldos</option>
+                                            <option value="0">Salida</option>
+                                            <option value="1">Sueldos</option>
                                         </select>
                                     </div>
                                 </div>

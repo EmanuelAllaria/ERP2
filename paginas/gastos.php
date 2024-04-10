@@ -30,12 +30,22 @@
                             <small class="form-control-feedback"> Hasta </small>
                             <input class="form-control filtro" type="date" id="h" name="h" value="<?php if(isset($_GET['h'])){echo $_GET['h'];}else{echo date('Y-m-d');}?>">
                         </div>
+                        <div class="col-md-2"><small class="form-control-feedback"> Tipo de Gasto </small><br>
+                            <select class="form-control" id="vendedorsel">
+                              <option value='' selected>Todos</option>
+                              <option value="0" <?php if (isset($_GET['m']) && $_GET['m'] == '0') echo 'selected'; ?>>Salida</option>
+                              <option value="1" <?php if (isset($_GET['m']) && $_GET['m'] == '1') echo 'selected'; ?>>Sueldos</option>
+                            </select>
+
+                          </div>
                         <div class="col-md-2" style="margin-top:17px">
                             <a href="#" onclick="filtrar_gasto()" class="btn btn-info btn-lg" role="button" >Filtrar</a>
                                   <?php if(isset($_GET['d']) || isset($_GET['h'])){?>
                             <a href="index.php?pagina=gastos">Quitar Filtros</a><?php }?>
                         </div>
+                        <div id="total_periodo">Total $</div>
                     </div>
+
                     <div class="table-responsive">
                         <table id="clientes_lista" class="table m-t-30 table-hover contact-list footable-loaded footable" data-page-size="10">
                             <thead>
@@ -62,17 +72,25 @@
                                     } else {
                                         $hasta = date('Y-m-d H:i:s');
                                     }
+                                    if (isset($_GET['m']) && $_GET['m'] !== '') {
+                                      $mov = ' and gastos.tipo_gasto = ' . $_GET['m'];
+                                  } else {
+                                      $mov = '';
+                                  }
 
+                                  $acumula = 0;
                                     $con_gastos = $link->query("
                                         SELECT * FROM `gastos`
                                             left join usuarios on usuarios.id = gastos.quien_gasto
-                                            WHERE gastos.estado_gasto='1' and date(gastos.fecha_gasto) >= '$desde' and date(gastos.fecha_gasto) <= '$hasta' order by gastos.fecha_gasto DESC");
+                                            WHERE gastos.estado_gasto='1' and date(gastos.fecha_gasto) >= '$desde' and date(gastos.fecha_gasto) <= '$hasta' $mov order by gastos.fecha_gasto DESC");
                                     while ($row = mysqli_fetch_array($con_gastos)) {
+                                        $preciocrudo = number_format($row['monto_gasto'], 0, '.', '');
+                                        $acumula = ($acumula + $preciocrudo);
                                     ?>
                                     <tr>
                                         <td class="font-weight-normal"><span class="footable-toggle"></span><?php echo date('d/m/Y',strtotime($row['fecha_gasto']))?></td>
                                         <td class="font-weight-normal"><span class="footable-toggle"></span><?php echo $row['nombre']?></td>
-                                        <td class="font-weight-normal"><span class="footable-toggle"></span><?php if($row['tipo_gasto']== 0){echo "Salida";}
+                                        <td class="font-weight-normal"><span class="footable-toggle"></span><?php if($row['tipo_gasto']== 0){echo "Salida";}else{echo "Sueldos";}
                                             ?></td>
                                         <td class="font-weight-normal"><span class="footable-toggle"></span><?php echo $row['observacion_gasto']?></td>
                                         <td class="font-weight-normal"><span class="footable-toggle"></span>$<?php
@@ -94,13 +112,15 @@
 </div>
 
 <script>
-
+    $('#total_periodo').html('<span class="btn btn-success pull-right"><b>TOTAL: $<?php echo number_format($acumula, 0, '', '.'); ?></b></span>')
     // bind change event to select
     function filtrar_gasto() {
       var datodesde = $('#d').val(); // get selected value
       var datohasta = $('#h').val(); // get selected value
+      var datovendedor = $('#vendedorsel option:selected').val();
+
       if (datodesde) { // require a URL
-        window.location = 'index.php?pagina=gastos&d=' + datodesde + '&h=' + datohasta
+        window.location = 'index.php?pagina=gastos&d=' + datodesde + '&h=' + datohasta+'&m='+datovendedor
       }
       return false;
     };

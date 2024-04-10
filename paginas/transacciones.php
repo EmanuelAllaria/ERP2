@@ -45,7 +45,7 @@
 
 
                             </div>
-                            <div class="col-md-2" style="align-self: center;"><?php if (isset($_GET['d']) || isset($_GET['h'])) { ?><a href="index.php?pagina=pedidos">Quitar Filtros</a><?php } ?></div>
+                            <div class="col-md-2" style="align-self: center;"><?php if (isset($_GET['d']) || isset($_GET['h'])) { ?><a href="index.php?pagina=transacciones">Quitar Filtros</a><?php } ?></div>
                         </div>
                         <h6 class="card-subtitle"></h6>
                         <div class="table-responsive">
@@ -84,7 +84,7 @@
                                     ?>
                                         <tr>
                                             <td class="font-weight-normal">
-                                                <a href="index.php?pagina=clientes_view&id=<?php echo $row['id_clientes'] ?>" style="color:#262626;" class="font-weight-normal"><!--<img src="img/comercios/<?php echo $row['foto_comclientes'] ?>" alt="user" width="40" style="margin-right: 5px;" class="img-circle"> --> <?php echo $row['nombre_clientes'] . ' ' . $row['apellido_clientes'] ?></a>
+                                                <a href="index.php?pagina=clientes_view&id=<?php echo $row['id_clientes'] ?>" style="color:#262626;" class="font-weight-normal"><!--<img src="img/comercios/<?php echo $row['foto_comclientes'] ?>" alt="user" width="40" style="margin-right: 5px;" class="img-circle"> --> <?php echo $row['razon_com_clientes'] ?></a>
                                             </td>
                                             <td class="font-weight-normal"><span class="footable-toggle"></span><?php echo date('d/m/Y', strtotime($row['fecha'])) ?></td>
                                             <!--    <td class="font-weight-normal"><?php echo $row['apellido_clientes'] . ', ' . $row['nombre_clientes'] ?></td> -->
