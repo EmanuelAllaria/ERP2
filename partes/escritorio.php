@@ -274,6 +274,21 @@ if (isset($_GET['e']) && $_GET['e'] == 'crcok') {
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="form-group">
+                                    <label for="comprobante">Seleccione el Tipo de Pago</label>
+                                    <div class="input-group mb-3">
+                                        <select class="form-control" name="tipo_pago" id="tipo_pago_factura_pago">
+                                            <option selected value="cheque">Cheque</option>
+                                            <option value="mp">Mercado Pago</option>
+                                            <option value="efectivo">Efectivo</option>
+                                            <option value="transferencia">Transferencia</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row banco">
+                            <div class="col-md-12">
+                                <div class="form-group">
                                     <label for="comprobante">Ingrese banco</label>
                                     <div class="input-group mb-3">
                                         <div class="input-group-prepend">
@@ -284,7 +299,7 @@ if (isset($_GET['e']) && $_GET['e'] == 'crcok') {
                                 </div>
                             </div>
                         </div>
-                        <div class="row">
+                        <div class="row nro_cheque">
                             <div class="col-md-12">
                                 <div class="form-group">
                                     <label for="comprobante">Ingrese numero de cheque</label>
@@ -297,7 +312,7 @@ if (isset($_GET['e']) && $_GET['e'] == 'crcok') {
                                 </div>
                             </div>
                         </div>
-                        <div class="row">
+                        <div class="row fecha_emision">
                             <div class="col-md-12">
                                 <div class="form-group">
                                     <label for="comprobante">Ingrese fecha de emision</label>
@@ -307,7 +322,7 @@ if (isset($_GET['e']) && $_GET['e'] == 'crcok') {
                                 </div>
                             </div>
                         </div>
-                        <div class="row">
+                        <div class="row fecha_cobro">
                             <div class="col-md-12">
                                 <div class="form-group">
                                     <label for="comprobante">Ingrese fecha de cobro</label>
@@ -389,7 +404,7 @@ if (isset($_GET['e']) && $_GET['e'] == 'crcok') {
         <div class="col-lg-6">
             <div class="card">
                 <div class="card-header bg-info">
-                    <h4 class="m-b-0 text-white">Ingreso de gastos</h4>
+                    <h4 class="m-b-0 text-white">Ingreso de stock</h4>
                 </div>
                 <div class="card-body">
 

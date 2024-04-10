@@ -127,10 +127,23 @@
 
                 $montoTotal = 0;
 
-                $con_facturas = $link->query("SELECT facturas.*,proveedores.razon_com_proveedor as proveedor,tipo_comprobantes.nombre_comprobantes
-                    FROM facturas left join proveedores on facturas.id_proveedor=proveedores.id_proveedor 
-                    left join tipo_comprobantes on facturas.tipo = tipo_comprobantes.id_comprobantes
-                    where facturas.id>0 $busqueda order by facturas.fecha ASC ");
+                $deudas = '';
+                if (isset($_GET['s']) && ($_GET['s'] == 1 || $_GET['s'] == 2)) {
+                  $deudas = ($_GET['s'] == 1) ? 'HAVING saldo <= 0' : 'HAVING saldo > 0';
+                }
+
+                // Consulta SQL modificada para incluir la suma de los pagos y el saldo
+                $con_facturas = $link->query("SELECT facturas.*, proveedores.razon_com_proveedor as proveedor, tipo_comprobantes.nombre_comprobantes,
+                                SUM(facturas_pagos.monto) AS total_pagado,
+                                (facturas.monto - SUM(facturas_pagos.monto)) AS saldo
+                            FROM facturas
+                            LEFT JOIN proveedores ON facturas.id_proveedor = proveedores.id_proveedor
+                            LEFT JOIN tipo_comprobantes ON facturas.tipo = tipo_comprobantes.id_comprobantes
+                            LEFT JOIN facturas_pagos ON facturas.id = facturas_pagos.id_factura
+                            WHERE facturas.id > 0 $busqueda
+                            GROUP BY facturas.id
+                            $deudas
+                            ORDER BY facturas.fecha ASC");
 
                 while ($row = mysqli_fetch_assoc($con_facturas)) {
                   $saldo = $row['monto'];
@@ -143,7 +156,7 @@
                   }
 
                 ?>
-                  <tr>
+                  <tr style="background:red;color:#fff;">
                     <td><?php echo $row['nro_factura'] ?></td>
                     <td><?php echo $row['proveedor'] ?></td>
                     <td><?php echo $row['fecha'] ?></td>
@@ -157,7 +170,11 @@
 
                   foreach ($factura_pago as $pago) {
                   ?>
-                    <tr>
+                    <?php if (strpos($pago['observaciones'], 'Sobró del pago a la factura') !== false) { ?>
+                      <tr style="background:blue;color:#fff;">
+                      <?php } else { ?>
+                      <tr style="background:green;color:#fff;">
+                      <?php } ?>
                       <td><?php echo $row['nro_factura'] ?></td>
                       <td></td>
                       <td><?php echo $pago['fecha_emision'] ?></td>
@@ -169,12 +186,12 @@
                       $montoTotal += $saldo;
                       ?>
                       <td>$<?php echo number_format($saldo, 2, ',', '.'); ?></td>
-                      <td><a target="_blank" href="./paginas/recibo_factura_pago.php?id_factura=<?php echo $id_factura; ?>&id_pago=<?php echo $pago['id'] ?>"><i class="fa-solid fa-receipt"></i></a></td>
-                    </tr>
-                <?php
+                      <td><a target="_blank" href="./paginas/recibo_factura_pago.php?id_factura=<?php echo $id_factura; ?>&id_pago=<?php echo $pago['id'] ?>"><i style="color:#fff;" class="fa-solid fa-receipt"></i></a></td>
+                      </tr>
+                  <?php
                   }
                 }
-                ?>
+                  ?>
               </tbody>
               <tfoot>
                 <tr>
@@ -226,5 +243,5 @@
   };
 </script>
 <script>
-  $('#total_periodo').html('<span class="btn btn-success pull-right"><b>TOTAL: $<?php echo number_format($montoTotal,0,'','.');?></b></span>')
+  $('#total_periodo').html('<span class="btn btn-success pull-right"><b>TOTAL: $<?php echo number_format($montoTotal, 0, '', '.'); ?></b></span>')
 </script>
