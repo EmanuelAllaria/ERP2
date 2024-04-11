@@ -133,14 +133,15 @@
                 }
 
                 // Consulta SQL modificada para incluir la suma de los pagos y el saldo
-                $con_facturas = $link->query("SELECT facturas.*, proveedores.razon_com_proveedor as proveedor, tipo_comprobantes.nombre_comprobantes,
-                                SUM(facturas_pagos.monto) AS total_pagado,
-                                (facturas.monto - SUM(facturas_pagos.monto)) AS saldo
+                $con_facturas = $link->query("SELECT facturas.*, proveedores.razon_com_proveedor AS proveedor, tipo_comprobantes.nombre_comprobantes, 
+                            COALESCE(SUM(facturas_pagos.monto), 0) AS total_pagado,
+                            (facturas.monto - COALESCE(SUM(facturas_pagos.monto), 0)) AS saldo
                             FROM facturas
                             LEFT JOIN proveedores ON facturas.id_proveedor = proveedores.id_proveedor
                             LEFT JOIN tipo_comprobantes ON facturas.tipo = tipo_comprobantes.id_comprobantes
                             LEFT JOIN facturas_pagos ON facturas.id = facturas_pagos.id_factura
-                            WHERE facturas.id > 0 $busqueda
+                            WHERE facturas.id > 0
+                            $busqueda
                             GROUP BY facturas.id
                             $deudas
                             ORDER BY facturas.fecha ASC");
