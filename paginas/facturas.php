@@ -129,8 +129,8 @@
                 if (isset($_GET['s']) && ($_GET['s'] == 1 || $_GET['s'] == 2)) {
                   $deudas = ($_GET['s'] == 1) ? 'HAVING saldo <= 0' : 'HAVING saldo > 0';
                 }
+                $saldo_final = 0;
 
-                // Consulta SQL modificada para incluir la suma de los pagos y el saldo
                 $con_facturas = $link->query("SELECT facturas.*, proveedores.razon_com_proveedor AS proveedor, tipo_comprobantes.nombre_comprobantes, 
                             COALESCE(SUM(facturas_pagos.monto), 0) AS total_pagado,
                             (facturas.monto - COALESCE(SUM(facturas_pagos.monto), 0)) AS saldo
@@ -145,10 +145,11 @@
                             ORDER BY facturas.fecha ASC");
 
                 while ($row = mysqli_fetch_assoc($con_facturas)) {
+                  $saldo_final += $row['monto'];
                   $saldo = $row['monto'];
                   $id_factura = $row['id'];
 
-                  $consulta2 = $link->query("SELECT * from facturas_pagos where id_factura='$id_factura'");
+                  $consulta2 = $link->query("SELECT * from facturas_pagos where id_factura='$id_factura' GROUP BY id ORDER BY id ASC");
                   $factura_pago = array();
                   while ($row2 = mysqli_fetch_assoc($consulta2)) {
                     $factura_pago[] = $row2;
@@ -181,10 +182,11 @@
                       <td style="color:green;"><b>$<?php echo number_format($pago['monto'], 2, ',', '.'); ?></b></td>
                       <?php } ?>
                       <?php
+                      $saldo_final -= intval($pago['monto']);
                       $saldo -= intval($pago['monto']);
                       ?>
                       <td>$<?php echo number_format($saldo, 2, ',', '.'); ?></td>
-                      <td><a target="_blank" href="./paginas/recibo_factura_pago.php?id_factura=<?php echo $id_factura; ?>&id_pago=<?php echo $pago['id'] ?>"><i style="color:#fff;" class="fa-solid fa-receipt"></i></a></td>
+                      <td><a target="_blank" href="./paginas/recibo_factura_pago.php?id_factura=<?php echo $id_factura; ?>&id_pago=<?php echo $pago['id'] ?>"><i class="fa-solid fa-receipt"></i></a></td>
                       </tr>
                   <?php
                   }
@@ -241,5 +243,5 @@
   };
 </script>
 <script>
-  $('#total_periodo').html('<span class="btn btn-success pull-right"><b>TOTAL: $<?php echo number_format($saldo, 0, '', '.'); ?></b></span>')
+  $('#total_periodo').html('<span class="btn btn-success pull-right"><b>TOTAL: $<?php echo number_format($saldo_final, 0, '', '.'); ?></b></span>')
 </script>

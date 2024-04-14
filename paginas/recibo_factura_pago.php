@@ -23,15 +23,19 @@ if (isset($_GET['id_pago'], $_GET['id_factura'])) {
 
     if ($factura !== null) {
         $facturas_anteriores = array_filter($facturas, function ($f) use ($factura) {
-            return intval($f['id']) < intval($factura['id']);
+            if (intval($f['id']) < intval($factura['id'])) {
+                return true;
+            }
+            return false;
         });
-
+    
         if (!empty($facturas_anteriores)) {
             foreach ($facturas_anteriores as $factura_anterior) {
                 $total_factura -= $factura_anterior['monto'];
             }
         }
     }
+    
 } else {
     header('location: ../index.php');
 }
@@ -90,8 +94,8 @@ if (isset($_GET['id_pago'], $_GET['id_factura'])) {
                             <td><?php echo date('d/m/Y', strtotime($factura['fecha_emision'])); ?></td>
                             <td>#<?php echo $factura['id']; ?></td>
                             <td>PAGO</td>
-                            <td>Cheque '<?php echo $factura['numero_cheque']; ?>'</td>
-                            <td>$<?php echo number_format($factura['total'], 2, ',', '.'); ?></td>
+                            <td><?php echo strtoupper($factura['tipo_pago']); ?></td>
+                            <td>$<?php echo number_format($total_factura, 2, ',', '.'); ?></td>
                             <td>$<?php echo number_format($factura['monto'], 2, ',', '.'); ?></td>
                             <td>$<?php echo number_format(intval($total_factura) - intval($factura['monto']), 2, ',', '.'); ?></td>
                             <td>1</td>
