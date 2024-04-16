@@ -55,7 +55,7 @@ if ($_SESSION['usuario'] != "") {
 		$fecha = $_POST['f'];
 		$detalle = $_POST['d'];
 		$observacion = $_POST['d'];
-		if ($observacion == undefined) {
+		if ($observacion == 'undefined') {
 			$observacion = '';
 		}
 		$total = $_POST['t'];
@@ -74,9 +74,10 @@ if ($_SESSION['usuario'] != "") {
 				$mont = $carrito[$i]['precio'];
 
 				$add = $link->query("INSERT INTO stock_depositos SET idcarga_stockd='$ultimoid', idpersona_stockd='$cliente', idcamion_stockd='$cliente', idproducto_stockd='$prod', cantidad_stockd='$cant', fecha_stockd='$fecha', quien_stockd='$quien', estado_stockd='1', tipomov_stockd='carga', cuando_stockd='$cuando' ") or die(mysqli_error());
+				$addLiquidacion = $link->query("INSERT INTO liquidaciones SET id_cargac='$ultimoid', vendedor_liquidacion='$cliente'") or die(mysqli_error());
 			}
 		}
-		if ($add) {
+		if ($add && $addLiquidacion) {
 			echo 'TRUE';
 		} else {
 			echo 'FALSE';

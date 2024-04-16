@@ -70,6 +70,7 @@ if ($_SESSION['usuario'] != "") {
 
 		$cargo = $link->query("INSERT INTO carga_camion SET personal_cargac='$cliente', observacionadm_cargac='$observacion' , fecha_cargac='$fecha', estado_cargac='1' ") or die(mysqli_error());
 		$ultimoid = mysqli_insert_id($link);
+		$addLiquidacion = null;
 		if ($cargo) {
 			for ($i = 0; $i < $cantitems; $i++) {
 				$prod = $carrito[$i]['id'];
@@ -77,6 +78,10 @@ if ($_SESSION['usuario'] != "") {
 				$cant = $carrito[$i]['cantidad'];
 
 				$add = $link->query("INSERT INTO stock_depositos SET idcarga_stockd='$ultimoid', idpersona_stockd='$cliente', idcamion_stockd='$cliente', idproducto_stockd='$prod', cantidad_stockd='$cant', fecha_stockd='$fecha', quien_stockd='$quien', estado_stockd='1', tipomov_stockd='carga', cuando_stockd='$cuando' ") or die(mysqli_error());
+				$hayLiquidacion = $link->query("SELECT id_liquidacion FROM liquidaciones WHERE vendedor_liquidacion='$cliente'") or die(mysqli_error());
+				if (!isset($hayLiquidacion->fetch_assoc()['id_liquidacion'])) {
+					$addLiquidacion = $link->query("INSERT INTO liquidaciones SET id_cargac='$ultimoid', vendedor_liquidacion='$cliente'") or die(mysqli_error());
+				}
 			}
 		}
 		if ($add) {
