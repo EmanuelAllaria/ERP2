@@ -55,6 +55,7 @@ if ($_SESSION['usuario'] != "") {
 
 		$cliente = $_POST['c'];
 		$fecha = $_POST['f'];
+		$fechaHoy = date('Y-m-d');
 		$detalle = $_POST['d'];
 		$observacion = $_POST['d'];
 		if (!isset($observacion)) {
@@ -78,7 +79,7 @@ if ($_SESSION['usuario'] != "") {
 				$cant = $carrito[$i]['cantidad'];
 
 				$add = $link->query("INSERT INTO stock_depositos SET idcarga_stockd='$ultimoid', idpersona_stockd='$cliente', idcamion_stockd='$cliente', idproducto_stockd='$prod', cantidad_stockd='$cant', fecha_stockd='$fecha', quien_stockd='$quien', estado_stockd='1', tipomov_stockd='carga', cuando_stockd='$cuando' ") or die(mysqli_error());
-				$hayLiquidacion = $link->query("SELECT id_liquidacion FROM liquidaciones WHERE vendedor_liquidacion='$cliente'") or die(mysqli_error());
+				$hayLiquidacion = $link->query("SELECT id_liquidacion FROM liquidaciones WHERE vendedor_liquidacion='$cliente' and cuando_liquidacion LIKE '$fechaHoy%'") or die(mysqli_error());
 				if (!isset($hayLiquidacion->fetch_assoc()['id_liquidacion'])) {
 					$addLiquidacion = $link->query("INSERT INTO liquidaciones SET id_cargac='$ultimoid', vendedor_liquidacion='$cliente'") or die(mysqli_error());
 				}

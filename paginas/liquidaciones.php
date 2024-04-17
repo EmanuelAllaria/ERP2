@@ -419,44 +419,87 @@
                         AND estado_stockd='1' ");
                       }
 
+                      $ids_procesados = array();
                       foreach ($buscadevos as $key => $buscadevo) {
                         while ($devo = mysqli_fetch_array($buscadevo)) {
 
                           $id_dev = $devo['idproducto_stockd'];
 
-                          $buscadev = $link->query("SELECT *
-                        FROM stock_depositos
-                        WHERE idpersona_stockd='$personal'
-                        AND idproducto_stockd='$id_dev'
-                        AND DATE(fecha_stockd) like '$periodo_dia'
-                        AND estado_stockd='1'");
-                          $cargad = 0;
-                          $ventad = 0;
-                          $stock_finald = 0;
-                          $cant_item = 0;
-                          while ($calculod = mysqli_fetch_array($buscadev)) {
-                            if ($calculod['tipomov_stockd'] == 'carga') {
-                              $cargad = $cargad + $calculod['cantidad_stockd'];
-                              //    echo 'Cantidad Carga'.$id_dev.': '.$cargad.'<br>';
+                          if (!in_array($id_dev, $ids_procesados)) {
+                            $ids_procesados[] = $id_dev;
+                            $buscadev = $link->query("SELECT id_stockd,
+                              idpersona_stockd,
+                              idcamion_stockd,
+                              idproducto_stockd,
+                              fecha_stockd,
+                              quien_stockd,
+                              estado_stockd,
+                              tipomov_stockd,
+                              cuando_stockd,
+                              idcarga_stockd,
+                              idcompra_stockd,
+                              central_stockd,
+                              vencimiento_stockd,
+                              SUM(CASE WHEN tipomov_stockd = 'carga' THEN cantidad_stockd ELSE 0 END) as cantidad_stockd 
+                              FROM stock_depositos
+                              WHERE idpersona_stockd = '$personal'
+                              AND idproducto_stockd = '$id_dev'
+                              AND DATE(fecha_stockd) = '$periodo_dia'
+                              AND estado_stockd = '1'
+                              AND tipomov_stockd = 'carga'
+                              GROUP BY idproducto_stockd
+    
+                              UNION ALL
+    
+                              SELECT id_stockd,
+                              idpersona_stockd,
+                              idcamion_stockd,
+                              idproducto_stockd,
+                              fecha_stockd,
+                              quien_stockd,
+                              estado_stockd,
+                              tipomov_stockd,
+                              cuando_stockd,
+                              idcarga_stockd,
+                              idcompra_stockd,
+                              central_stockd,
+                              vencimiento_stockd,
+                              cantidad_stockd 
+                              FROM stock_depositos
+                              WHERE idpersona_stockd = '$personal'
+                              AND idproducto_stockd = '$id_dev'
+                              AND DATE(fecha_stockd) = '$periodo_dia'
+                              AND estado_stockd = '1'
+                              AND tipomov_stockd = 'venta'
+                              GROUP BY idproducto_stockd;");
+                            $cargad = 0;
+                            $ventad = 0;
+                            $stock_finald = 0;
+                            $cant_item = 0;
+                            while ($calculod = mysqli_fetch_array($buscadev)) {
+                              if ($calculod['tipomov_stockd'] == 'carga') {
+                                $cargad = $cargad + $calculod['cantidad_stockd'];
+                                //    echo 'Cantidad Carga'.$id_dev.': '.$cargad.'<br>';
+                              }
+                              if ($calculod['tipomov_stockd'] == 'venta' || $calculod['tipomov_stockd'] == 'devolucion') {
+                                $ventad = $ventad + $calculod['cantidad_stockd'];
+                                //  echo 'Cantidad '.$id_dev.': '.$ventad.'<br>';
+                              }
+                              $stock_finald = $cargad >= $ventad ? $cargad - $ventad : $ventad - $cargad;
+                              //  echo '----------------------------------<br>Final: '.$stock_finald.'------------';
                             }
-                            if ($calculod['tipomov_stockd'] == 'venta' || $calculod['tipomov_stockd'] == 'devolucion') {
-                              $ventad = $ventad + $calculod['cantidad_stockd'];
-                              //  echo 'Cantidad '.$id_dev.': '.$ventad.'<br>';
-                            }
-                            $stock_finald = $cargad >= $ventad ? $cargad - $ventad : $ventad - $cargad;
-                            //  echo '----------------------------------<br>Final: '.$stock_finald.'------------';
-                          }
-                          if ($stock_finald > 0) {
+                            if ($stock_finald > 0) {
 
-                            $modal_liqui_deposito .= '
-                              <div class="row">
-                                <div class="col-md-9">' . $devo['detalle_producto'] . ' (' . $devo['presentacion_producto'] . ')</div>
-                                <div class="col-md-3">
-                                  <input value="' . $stock_finald . '" class="form-control cantidades" id="cantdevol_' . $row[0] . '">
-                                </div>
-                                <input type="hidden" value="' . $id_dev . '" id="iddevol_' . $cant_item . '">
-                              </div>';
-                            $cant_item++;
+                              $modal_liqui_deposito .= '
+                                  <div class="row">
+                                    <div class="col-md-9">' . $devo['detalle_producto'] . ' (' . $devo['presentacion_producto'] . ')</div>
+                                    <div class="col-md-3">
+                                      <input value="' . $stock_finald . '" class="form-control cantidades" id="cantdevol_' . $row[0] . '">
+                                    </div>
+                                    <input type="hidden" value="' . $id_dev . '" id="iddevol_' . $cant_item . '">
+                                  </div>';
+                              $cant_item++;
+                            }
                           }
 
                           $modal_liqui_deposito .= '  <input type="hidden" value="' . $stock_final . '" id="cantidadprod_' . $row[0] . '"><input type="hidden" value="0" id="items_' . $row[0] . '">';

@@ -165,11 +165,13 @@
                                         $hasta = date('Y-m-d 23:59:59');
                                     }
                                     $acumula = 0;
-                                    $con_pedidos = $link->query("SELECT *, sum(cantidad_stockd) as suma FROM `stock_depositos`
-                                            INNER JOIN personal on personal.id = stock_depositos.idpersona_stockd
-                                            INNER JOIN carga_camion on carga_camion.id_cargac = stock_depositos.idcarga_stockd
-                                            WHERE `estado_stockd` != 0 AND `tipomov_stockd` LIKE 'carga' GROUP BY idcarga_stockd
-                                            ORDER BY idcarga_stockd DESC");
+                                    $con_pedidos = $link->query("SELECT *, sum(cantidad_stockd) as suma
+                                    FROM `stock_depositos`
+                                    INNER JOIN personal ON personal.id = stock_depositos.idpersona_stockd
+                                    INNER JOIN carga_camion ON carga_camion.id_cargac = stock_depositos.idcarga_stockd
+                                    WHERE `estado_stockd` != 0 AND `tipomov_stockd` LIKE 'carga'
+                                    GROUP BY carga_camion.personal_cargac, stock_depositos.idpersona_stockd
+                                    ORDER BY carga_camion.personal_cargac, stock_depositos.idpersona_stockd DESC;");
                                     while ($row = mysqli_fetch_array($con_pedidos)) {
 
                                     ?>
