@@ -122,7 +122,7 @@
 
 
               </div>
-              <div class="col-md-3" style="align-self: center;"><?php if (isset($_GET['d']) || isset($_GET['h'])) { ?><a href="index.php?pagina=estadocamion">Quitar Filtros</a><?php } ?></div>
+              <div class="col-md-3" style="align-self: center;"><?php if (isset($_GET['d']) || isset($_GET['h'])) { ?><a href="index.php?pagina=liquidaciones">Quitar Filtros</a><?php } ?></div>
               <!-- <div id="total_periodo">Total $</div> -->
             </div>
             <h6 class="card-subtitle"></h6>
@@ -173,29 +173,48 @@
 
                   $fecha = date('Y-m-d');
 
-                  $con_liquida = $link->query("SELECT 
-                                                  liquidaciones.*,
-                                                  personal.*,
-                                                  tipo_estados.*,
-                                                  JSON_ARRAYAGG(
-                                                      JSON_OBJECT(
-                                                            'id_cargac', carga_camion.id_cargac,
-                                                            'personal_cargac', carga_camion.personal_cargac,
-                                                            'fecha_cargac', carga_camion.fecha_cargac,
-                                                            'estado_cargac', carga_camion.estado_cargac,
-                                                            'observacion_cargac', carga_camion.observacion_cargac,
-                                                            'observacionadm_cargac', carga_camion.observacionadm_cargac,
-                                                            'autoriza_cargac', carga_camion.autoriza_cargac
-                                                          )
-                                                  ) AS cargas_camiones
-                                              FROM liquidaciones
-                                              INNER JOIN personal ON personal.id = liquidaciones.vendedor_liquidacion
-                                              LEFT JOIN carga_camion ON liquidaciones.vendedor_liquidacion = carga_camion.personal_cargac
-                                              LEFT JOIN tipo_estados ON tipo_estados.id_estados = liquidaciones.estado_liquidacion
-                                              WHERE carga_camion.fecha_cargac LIKE '$fecha%'
-                                              AND carga_camion.estado_cargac = '1'
-                                              GROUP BY liquidaciones.id_liquidacion
-                                              ORDER BY carga_camion.fecha_cargac DESC");
+                  $sql_liquidacion = "SELECT
+                                          liquidaciones.*,
+                                          personal.*,
+                                          tipo_estados.*,
+                                          JSON_ARRAYAGG(
+                                              JSON_OBJECT(
+                                                  'id_cargac',
+                                                  carga_camion.id_cargac,
+                                                  'personal_cargac',
+                                                  carga_camion.personal_cargac,
+                                                  'fecha_cargac',
+                                                  carga_camion.fecha_cargac,
+                                                  'estado_cargac',
+                                                  carga_camion.estado_cargac,
+                                                  'observacion_cargac',
+                                                  carga_camion.observacion_cargac,
+                                                  'observacionadm_cargac',
+                                                  carga_camion.observacionadm_cargac,
+                                                  'autoriza_cargac',
+                                                  carga_camion.autoriza_cargac
+                                              )
+                                          ) AS cargas_camiones
+                                      FROM liquidaciones
+                                      INNER JOIN personal ON personal.id = liquidaciones.vendedor_liquidacion
+                                      LEFT JOIN carga_camion ON liquidaciones.vendedor_liquidacion = carga_camion.personal_cargac
+                                      LEFT JOIN tipo_estados ON tipo_estados.id_estados = liquidaciones.estado_liquidacion";
+
+                  if (isset($desde, $hasta)) {
+                    if ($desde !== date('Y-m-01')) {
+                      $sql_liquidacion .= " WHERE liquidaciones.cuando_liquidacion BETWEEN '$desde 00:00:00' AND '$hasta 23:59:59' AND carga_camion.fecha_cargac BETWEEN '$desde 00:00:00' AND '$hasta 23:59:59'";
+                    } else {
+                      if ($hasta !== date('Y-m-d 23:59:59')) {
+                        $sql_liquidacion .= " WHERE liquidaciones.cuando_liquidacion BETWEEN '$desde 00:00:00' AND '$hasta 23:59:59' AND carga_camion.fecha_cargac BETWEEN '$desde 00:00:00' AND '$hasta 23:59:59'";
+                      } else {
+                        $sql_liquidacion .= " WHERE liquidaciones.cuando_liquidacion LIKE '$fecha%' AND carga_camion.fecha_cargac LIKE '$fecha%'";
+                      }
+                    }
+                  }
+
+                  $sql_liquidacion .= " AND carga_camion.estado_cargac = '1' GROUP BY liquidaciones.vendedor_liquidacion, carga_camion.personal_cargac ORDER BY liquidaciones.vendedor_liquidacion, carga_camion.personal_cargac DESC";
+
+                  $con_liquida = $link->query($sql_liquidacion);
 
                   while ($row = mysqli_fetch_array($con_liquida)) {
                     // var_dump(json_decode($row['nombres']));
@@ -427,51 +446,57 @@
 
                           if (!in_array($id_dev, $ids_procesados)) {
                             $ids_procesados[] = $id_dev;
-                            $buscadev = $link->query("SELECT id_stockd,
-                              idpersona_stockd,
-                              idcamion_stockd,
-                              idproducto_stockd,
-                              fecha_stockd,
-                              quien_stockd,
-                              estado_stockd,
-                              tipomov_stockd,
-                              cuando_stockd,
-                              idcarga_stockd,
-                              idcompra_stockd,
-                              central_stockd,
-                              vencimiento_stockd,
-                              SUM(CASE WHEN tipomov_stockd = 'carga' THEN cantidad_stockd ELSE 0 END) as cantidad_stockd 
-                              FROM stock_depositos
-                              WHERE idpersona_stockd = '$personal'
-                              AND idproducto_stockd = '$id_dev'
-                              AND DATE(fecha_stockd) = '$periodo_dia'
-                              AND estado_stockd = '1'
-                              AND tipomov_stockd = 'carga'
-                              GROUP BY idproducto_stockd
-    
-                              UNION ALL
-    
-                              SELECT id_stockd,
-                              idpersona_stockd,
-                              idcamion_stockd,
-                              idproducto_stockd,
-                              fecha_stockd,
-                              quien_stockd,
-                              estado_stockd,
-                              tipomov_stockd,
-                              cuando_stockd,
-                              idcarga_stockd,
-                              idcompra_stockd,
-                              central_stockd,
-                              vencimiento_stockd,
-                              cantidad_stockd 
-                              FROM stock_depositos
-                              WHERE idpersona_stockd = '$personal'
-                              AND idproducto_stockd = '$id_dev'
-                              AND DATE(fecha_stockd) = '$periodo_dia'
-                              AND estado_stockd = '1'
-                              AND tipomov_stockd = 'venta'
-                              GROUP BY idproducto_stockd;");
+                            $buscadev = $link->query("SELECT
+                                        id_stockd,
+                                        idpersona_stockd,
+                                        idcamion_stockd,
+                                        idproducto_stockd,
+                                        fecha_stockd,
+                                        quien_stockd,
+                                        estado_stockd,
+                                        tipomov_stockd,
+                                        cuando_stockd,
+                                        idcarga_stockd,
+                                        idcompra_stockd,
+                                        central_stockd,
+                                        vencimiento_stockd,
+                                        SUM(
+                                            CASE WHEN tipomov_stockd = 'carga' THEN cantidad_stockd ELSE 0
+                                            END
+                                        ) AS cantidad_stockd
+                                    FROM stock_depositos
+                                    WHERE idpersona_stockd = '$personal'
+                                    AND idproducto_stockd = '$id_dev'
+                                    AND DATE(fecha_stockd) = '$periodo_dia'
+                                    AND estado_stockd = '1'
+                                    AND tipomov_stockd = 'carga'
+                                    GROUP BY idproducto_stockd
+                                    UNION ALL
+                                    SELECT
+                                        id_stockd,
+                                        idpersona_stockd,
+                                        idcamion_stockd,
+                                        idproducto_stockd,
+                                        fecha_stockd,
+                                        quien_stockd,
+                                        estado_stockd,
+                                        tipomov_stockd,
+                                        cuando_stockd,
+                                        idcarga_stockd,
+                                        idcompra_stockd,
+                                        central_stockd,
+                                        vencimiento_stockd,
+                                        SUM(
+                                            CASE WHEN tipomov_stockd = 'venta' THEN cantidad_stockd ELSE 0
+                                            END
+                                        ) AS cantidad_stockd
+                                    FROM stock_depositos
+                                    WHERE idpersona_stockd = '$personal'
+                                    AND idproducto_stockd = '$id_dev'
+                                    AND DATE(fecha_stockd) = '$periodo_dia'
+                                    AND estado_stockd = '1'
+                                    AND tipomov_stockd = 'venta'
+                                    GROUP BY idproducto_stockd;");
                             $cargad = 0;
                             $ventad = 0;
                             $stock_finald = 0;
@@ -583,7 +608,7 @@
         var datodesde = $('#d').val(); // get selected value
         var datohasta = $('#h').val(); // get selected value
         if (datodesde) { // require a URL
-          window.location = 'index.php?pagina=pedidos&d=' + datodesde + '&h=' + datohasta; // redirect
+          window.location = 'index.php?pagina=liquidaciones&d=' + datodesde + '&h=' + datohasta; // redirect
         }
         return false;
       });
