@@ -111,6 +111,7 @@
                                             $acumula=0;
                                             $con_pedidos = $link->query("SELECT * FROM `transaccion`
                                             left join clientes on transaccion.cliente = clientes.id_clientes
+                                            left join formas_pagos on transaccion.forma_pago = formas_pagos.id_formapago
                                             WHERE transaccion.estado='1' and transaccion.tipo ='pago' and date(transaccion.fecha) >= '$desde' and date(transaccion.fecha) <= '$hasta'  $vendedor $forma order by transaccion.fecha DESC, apellido_clientes ASC ");
                                             while ($row= mysqli_fetch_array($con_pedidos)){
                                               $acumula= $acumula+$row['monto2'];
@@ -123,7 +124,7 @@
                                                       <?php echo mb_strtoupper($row['razon_com_clientes']);?></a>
                                                 </td>
                                             <!--    <td class="font-weight-normal"><?php echo $row['apellido_clientes'].', '.$row['nombre_clientes']?></td> -->
-                                                <td class="font-weight-normal"><?php echo $row['detalle'].' '.$row['observacion'];?></td>
+                                                <td class="font-weight-normal"><?php echo $row['detalle_formapago'];?></td>
                                                 <td class="font-weight-normal">$<?php echo number_format($row['monto2'],0,'','.');?></td>
                                             <!--  <td class="font-weight-normal"><?php if($row['abonada']=='0'){echo '<span class="label label-danger">SIN FACTURAR</span>';}else{echo '<span class="label label-success">FACTURADA</span>';} ?></td> -->
 
