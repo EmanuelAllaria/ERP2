@@ -23,7 +23,7 @@ if ($_SESSION['usuario'] != "") {
 
 	$quien = $_SESSION['id'];
 	$cuando = date("Y-m-d H:i:s");
-
+	$id_carga = $_GET['idev'];
 	$personal = $_GET['u'];
 	$periodo = $_GET['p'];
 	$sql_liqui = "SELECT * FROM `transaccion` INNER JOIN clientes on clientes.id_clientes = transaccion.cliente and transaccion.quien='$personal' INNER JOIN liquidaciones on DATE(fecha_liquidacion) = DATE(fecha) and liquidaciones.vendedor_liquidacion=$personal WHERE DATE(fecha) LIKE '$periodo' AND `estado` = 1 and tipo = 'pedido' ORDER BY `transaccion`.`id` ASC";
@@ -39,9 +39,10 @@ if ($_SESSION['usuario'] != "") {
 	$sql_pagos = "SELECT monto2, razon_com_clientes FROM `transaccion` INNER JOIN clientes on clientes.id_clientes = transaccion.cliente and transaccion.quien='$personal' WHERE DATE(fecha) LIKE '$periodo' AND `estado` = 1 and tipo = 'pago' and observacion not like 'Abono con transaccion:%' ";
 	$pago_gral = $link->query($sql_pagos);
 
-	$idliqui = $link->query("SELECT id_liquidacion, CONCAT(nombre,', ',apellido) as personal, cuando_liquidacion FROM liquidaciones INNER JOIN personal on personal.id = vendedor_liquidacion WHERE DATE(fecha_liquidacion) = '$periodo' AND vendedor_liquidacion = $personal AND estado_liquidacion = 1 ");
+	$idliqui = $link->query("SELECT id_liquidacion, CONCAT(nombre,', ',apellido) as personal, cuando_liquidacion,devoluciones_liquidacion FROM liquidaciones INNER JOIN personal on personal.id = vendedor_liquidacion WHERE DATE(fecha_liquidacion) = '$periodo' AND vendedor_liquidacion = $personal AND estado_liquidacion = 1 AND id_cargac = '$id_carga'");
 	$liquid = mysqli_fetch_array($idliqui);
 	$hora_liqui = $liquid['cuando_liquidacion'];
+	$dev = $liquid['devoluciones_liquidacion'];
 	$comp_int = '0001-' . str_pad($liquid['id_liquidacion'], 8, "0", STR_PAD_LEFT);
 	$comp_fecha = date('d/m/Y', strtotime($periodo));
 	$logo = '../lib/pdf/logo-liqui.png';
@@ -94,8 +95,7 @@ if ($_SESSION['usuario'] != "") {
 					<th style="width:9%;"> CONG </th>
 					<th style="width:9%;"> HUE </th>
 					<th style="width:9%;"> OTROS </th>
-					<th style="width:15%;"> TOTAL. </th>
-					<th style="width:15%;"> CONTADO </th>
+					<th colspan="2" style="width:15%;"> TOTAL. </th>
 				</tr>';
 
 	$par = 0;
@@ -147,6 +147,7 @@ if ($_SESSION['usuario'] != "") {
 
 		$total = $t['monto'];
 		$total_grl = $total_grl + $total;
+		$total_cliente = 0;
 
 		$sql_ft = "SELECT monto2 FROM `transaccion` WHERE DATE(fecha) LIKE '$periodo' AND `estado` = 1 and tipo = 'pago'  and observacion = 'Abono con transaccion: $id_t'";
 		$pagotrans = $link->query($sql_ft);
@@ -158,30 +159,37 @@ if ($_SESSION['usuario'] != "") {
 		while ($can_item = mysqli_fetch_array($cantidades_items)) {
 			if ($can_item['categoria_producto'] == 1) {
 				$pollo = $pollo + $can_item['cantidad_itemsp'];
+				$total_cliente = $total_cliente + $pollo;  
 				$sum_pollo = $sum_pollo + ($can_item['monto_itemsp'] * $can_item['cantidad_itemsp']);
 			}
 			if ($can_item['categoria_producto'] == 2) {
 				$sup = $sup + $can_item['cantidad_itemsp'];
+				$total_cliente = $total_cliente + $sup;  
 				$sum_sup = $sum_sup + ($can_item['monto_itemsp'] * $can_item['cantidad_itemsp']);
 			}
 			if ($can_item['categoria_producto'] == 3) {
 				$pm = $pm + $can_item['cantidad_itemsp'];
+				$total_cliente = $total_cliente + $pm;  
 				$sum_pm = $sum_pm + ($can_item['monto_itemsp'] * $can_item['cantidad_itemsp']);
 			}
 			if ($can_item['categoria_producto'] == 6) {
 				$al = $al + $can_item['cantidad_itemsp'];
+				$total_cliente = $total_cliente + $al;  
 				$sum_al = $sum_al + ($can_item['monto_itemsp'] * $can_item['cantidad_itemsp']);
 			}
 			if ($can_item['categoria_producto'] == 7) {
 				$cong = $cong + $can_item['cantidad_itemsp'];
+				$total_cliente = $total_cliente + $cong;  
 				$sum_cong = $sum_cong + ($can_item['monto_itemsp'] * $can_item['cantidad_itemsp']);
 			}
 			if ($can_item['categoria_producto'] == 9) {
 				$hue = $hue + $can_item['cantidad_itemsp'];
+				$total_cliente = $total_cliente + $hue;  
 				$sum_hue = $sum_hue + ($can_item['monto_itemsp'] * $can_item['cantidad_itemsp']);
 			}
 			if ($can_item['categoria_producto'] == 10) {
 				$otro = $otro + $can_item['cantidad_itemsp'];
+				$total_cliente = $total_cliente + $otro;  
 				$sum_otro = $sum_otro + ($can_item['monto_itemsp'] * $can_item['cantidad_itemsp']);
 			}
 		}
@@ -219,16 +227,15 @@ if ($_SESSION['usuario'] != "") {
 	}
 
 	$plantilla .= '
-		<td rowspan="2" style="width=29%;">' . $razon . '</td>
-					<td style="width:9%;">' . $pollo . '</td>
-					<td style="width:9%;">' . $sup . '</td>
-					<td style="width:9%;">' . $pm . '</td>
-					<td style="width:9%;">' . $al . '</td>
-					<td style="width:9%;">' . $cong . '</td>
-					<td style="width:9%;">' . $hue . '</td>
-					<td style="width:9%;">' . $otro . '</td>
-					<td style="width:15%;">$ ' . number_format($total, 2, ',', '.') . '</td>
-					<td style="width:15%;">$ ' . number_format($entrega, 2, ',', '.') . '</td>
+		<td rowspan="2" style="width=20%;">' . $razon . '</td>
+					<td style="width:10%;">'.$pollo.'</td>
+					<td style="width:10%;">'.$sup.'</td>
+					<td style="width:10%;">'.$pm.'</td>
+					<td style="width:10%;">'.$al.'</td>
+					<td style="width:10%;">'.$cong.'</td>
+					<td style="width:10%;">'.$hue.'</td>
+					<td style="width:10%;">'.$otro.'</td>
+					<td colspan="2" style="width:10%;"> ' . $total_cliente . '</td>
 				</tr>';
 
 	$calculo_pollo = '';
@@ -263,13 +270,13 @@ if ($_SESSION['usuario'] != "") {
 
 	$plantilla .= '
 		<tr >
-					<td style="width:9%;">' . $calculo_pollo . '</td>
-					<td style="width:9%;">' . $calculo_sup . '</td>
-					<td style="width:9%;">' . $calculo_pm . '</td>
-					<td style="width:9%;">' . $calculo_al . '</td>
-					<td style="width:9%;">' . $calculo_cong . '</td>
-					<td style="width:9%;">' . $calculo_hue . '</td>
-					<td style="width:9%;">' . $calculo_otro . '</td>
+					<td style="width:9%;"></td>
+					<td style="width:9%;"></td>
+					<td style="width:9%;"></td>
+					<td style="width:9%;"></td>
+					<td style="width:9%;"></td>
+					<td style="width:9%;"></td>
+					<td style="width:9%;"></td>
 					<td colspan="2" style="width:15%;"></td>
 				</tr>';
 
@@ -285,148 +292,42 @@ if ($_SESSION['usuario'] != "") {
 				</table>
 			</div>
 			<div style="margin-top: 30px;">
-			<table style="width:100%" border="1"  bordercolor="#CCCCCC" cellspacing="0">
-				<tr>
-					<th style="width:29%;"></th>
-					<th style="width:9%;"> POLLO </th>
-					<th style="width:9%;"> SUP </th>
-					<th style="width:9%;"> PM </th>
-					<th style="width:9%;"> AL </th>
-					<th style="width:9%;"> CONG </th>
-					<th style="width:9%;"> HUE </th>
-					<th style="width:9%;"> OTROS </th>
-					<th style="width:15%;"> TOTAL. </th>
-					<th style="width:15%;"> CONTADO </th>
-				</tr>';
+			<table style="width:100%" border="1"  bordercolor="#CCCCCC" cellspacing="0">';
 			$recorre_blucle = 0;
 		} else {
 			$recorre_blucle++;
 		}
 
 	}	
+	$total_totales = $pollo_grl + $sup_grl + $pm_grl + $al_grl + $cong_grl + $hue_grl + $otro_grl;
 
 	$plantilla .= '
-			</table>
-			</div>
-			<div style="margin-top: 30px;">
-			<table style="width:100%" border="1"  bordercolor="#CCCCCC" cellspacing="0">
-				<tr>
-					<th style="width:29%;"></th>
-					<th style="width:9%;"> POLLO </th>
-					<th style="width:9%;"> SUP </th>
-					<th style="width:9%;"> PM </th>
-					<th style="width:9%;"> AL </th>
-					<th style="width:9%;"> CONG </th>
-					<th style="width:9%;"> HUE </th>
-					<th style="width:9%;"> OTROS </th>
-					<th style="width:15%;"> TOTAL. </th>
-					<th style="width:15%;"> CONTADO </th>
-				</tr>
 				<tr>
 					<th style="width:29%;">TOTALES</th>
-					<th style="width:9%;">' . $pollo_grl . '</th>
-					<th style="width:9%;">' . $sup_grl . '</th>
-					<th style="width:9%;">' . $pm_grl . '</th>
-					<th style="width:9%;">' . $al_grl . '</th>
-					<th style="width:9%;">' . $cong_grl . '</th>
-					<th style="width:9%;">' . $hue_grl . '</th>
-					<th style="width:9%;">' . $otro_grl . '</th>
-					<th style="width:15%;">$ <span style="right:0px">' . number_format($entrega_grl, 2, ',', '.') . '</span></th>
-					<th style="width:15%;">$ ' . number_format($total_grl, 2, ',', '.') . '</th>
+					<th style="width:9%;">'.$pollo_grl.'</th>
+					<th style="width:9%;">'.$sup_grl.'</th>
+					<th style="width:9%;">'.$pm_grl.'</th>
+					<th style="width:9%;">'.$al_grl.'</th>
+					<th style="width:9%;">'.$cong_grl.'</th>
+					<th style="width:9%;">'.$hue_grl.'</th>
+					<th style="width:9%;">'.$otro_grl.'</th>
+					<th style="width:15%;">' . $total_totales . '</th>
+				</tr>
+
+				<tr>
+					<th style="width:29%;">DEVOLUCIONES</th>
+					<th style="width:9%;"></th>
+					<th style="width:9%;"></th>
+					<th style="width:9%;"></th>
+					<th style="width:9%;"></th>
+					<th style="width:9%;"></th>
+					<th style="width:9%;"></th>
+					<th style="width:9%;"></th>
+					<th colspan="2" style="width:15%;">'.$dev.'</th>
 				</tr>
 			</table>
-		</div>';
+			</div>';
 
-		$plantilla .= '
-			<div style="margin-top: 30px;">
-			<table border="1" style="width: 40%;">
-				<tr>
-					<th colspan="2" style="width: 50%;">Gastos</th>
-				</tr>
-				<tr>
-					<td style="width:50%;">TIPO</td>
-					<td style="width:50%;">IMPORTE</td>
-				</tr>';
-
-		$total_gasto = 0;
-		while ($g = mysqli_fetch_array($gast)) {
-			$total_gasto = $total_gasto + $g['monto_gasto'];
-			$plantilla .= '
-				<tr>
-					<td>' . $g['nombre_tipogasto'] . '</td>
-					<td>$' . $g['monto_gasto'] . '</td>
-				</tr>';
-		}
-
-		$plantilla .= '
-			<tr>
-					<td>Total: $</td>
-					<td>' . $total_gasto . '</td>
-			</tr>
-		</table>
-		<div style="margin-top:30px;">
-		<table border="1" style="width: 40%;" margin-top:30px;>
-				<tr>
-					<th colspan="2">Cobros Cuentas Corrientes</th>
-				</tr>
-				<tr>
-					<td>CLIENTE</td>
-					<td>IMPORTE</td>
-				</tr>';
-	$acumula_acuenta = 0;
-	//for ($i=0; $i < count($acuenta) ; $i++) {
-
-
-	while ($pgral = mysqli_fetch_array($pago_gral)) {
-		//	$acumula_acuenta=$acumula_acuenta+$acuenta[$i]['importe'];
-		$acumula_acuenta = $acumula_acuenta + $pgral['monto2'];
-
-		$plantilla .= '
-			<tr>
-				<td>' . $pgral['razon_com_clientes'] . '</td>
-				<td>$' . number_format($pgral['monto2'], 2, ',', '.') . '</td>
-			</tr>';
-	}
-
-	$plantilla .= '
-		<tr>
-			<td>Total: $</td>
-			<td>' . number_format($acumula_acuenta, 2, ',', '.') . '</td>
-		</tr>
-	</table>
-	</div>
-		</div>
-	<div style="margin-top:30px;">
-			<table border="1" style="width: 40%;">
-				<tr>
-					<td style="width: 50%;">Subtotal Pagos</td>
-					<td style="width: 50%;">$' . number_format($entrega_grl, 2, ',', '.') . '</td>
-				</tr>
-				<tr>
-					<td style="width: 50%;">Subtotal Cobros</td>
-					<td style="width: 50%;">$' . number_format($acumula_acuenta, 2, ',', '.') . '</td>
-				</tr>
-				<tr>
-					<td style="width: 50%;">Subtotal Gastos</td>
-					<td style="width: 50%;">-$' . number_format($total_gasto, 2, ',', '.') . '</td>
-				</tr>
-				<tr>
-					<td style="width: 50%;">TOTAL</td>
-					<td style="width: 50%;">$' . number_format((($acumula_acuenta + $entrega_grl) - $total_gasto), 2, ',', '.').'</td>
-				</tr>
-			</table>
-			<br>-----------------------<br>
-			<table border="1" style="width: 40%;">
-				<tr>
-					<td>Liquidacion</td>
-					<td>-$' . number_format($total_entrega['total'], 2, ',', '.') . '</td>
-				</tr>
-				<tr>
-					<td>Diferencia</td>
-					<td>$' . number_format($total_entrega['total'] - (($acumula_acuenta + $entrega_grl) - $total_gasto), 2, ',', '.') . '</td>
-				</tr>
-			</table>
-		</div>';
 
 	$plantilla .= '</body>
 </html>';
