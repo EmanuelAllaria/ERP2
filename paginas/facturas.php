@@ -34,24 +34,25 @@
 
           <h6 class="card-subtitle"></h6>
           <div class="table-responsive">
-            <table id="facturas_lista" class="table m-t-30 table-hover contact-list footable-loaded footable" data-page-size="10">
+            <table id="facturas_lista" class="table m-t-30 table-hover contact-list footable-loaded footable"
+              data-page-size="10">
               <thead>
                 <tr>
                   <td colspan="12">
                     <div class="row">
                       <div class="col-md-2"><small class="form-control-feedback"> Desde </small>
                         <input class="form-control filtro" type="date" id="d" name="d" value="<?php if (isset($_GET['d'])) {
-                                                                                                echo $_GET['d'];
-                                                                                              } else {
-                                                                                                echo date('Y-m-01');
-                                                                                              } ?>">
+                          echo $_GET['d'];
+                        } else {
+                          echo date('Y-m-01');
+                        } ?>">
                       </div>
                       <div class="col-md-2"><small class="form-control-feedback"> Hasta </small>
                         <input class="form-control filtro" type="date" id="h" name="h" value="<?php if (isset($_GET['h'])) {
-                                                                                                echo $_GET['h'];
-                                                                                              } else {
-                                                                                                echo date('Y-m-d');
-                                                                                              } ?>">
+                          echo $_GET['h'];
+                        } else {
+                          echo date('Y-m-d');
+                        } ?>">
                       </div>
                       <div class="col-md-2"><small class="form-control-feedback"> Proveedor </small><br>
                         <select class="form-control" id="proveedorsel">
@@ -80,7 +81,9 @@
                       <div class="col-md-2" style="align-self: center;">
                         <a href="#" onclick="filtrar_prov()" class="btn btn-info btn-lg" role="button">Filtrar</a>
                       </div>
-                      <?php if (isset($_GET['d']) || isset($_GET['h']) || isset($_GET['p']) || isset($_GET['s'])) { ?><div class="col-md-2" style="align-self: center;"><a href="index.php?pagina=facturas">Quitar Filtros</a></div><?php } ?>
+                      <?php if (isset($_GET['d']) || isset($_GET['h']) || isset($_GET['p']) || isset($_GET['s'])) { ?>
+                        <div class="col-md-2" style="align-self: center;"><a href="index.php?pagina=facturas">Quitar
+                            Filtros</a></div><?php } ?>
 
                       <div class="col-md-2" style="align-self: center;">
                         <div id="total_periodo">Total $</div>
@@ -114,7 +117,8 @@
                   $desde = date('Y-m-01');
                 }
                 if (isset($_GET['h']) && $_GET['h'] != '') {
-                  $hasta = date('Y-m-d', strtotime($_GET['h'] . ' +1 day'));;
+                  $hasta = date('Y-m-d', strtotime($_GET['h'] . ' +1 day'));
+                  ;
                   $busqueda = $busqueda . ' and facturas.fecha <= "' . $hasta . '"';
                 } else {
                   $hasta = date('Y-m-d 23:59:59');
@@ -155,13 +159,17 @@
                     $factura_pago[] = $row2;
                   }
 
-                ?>
+                  ?>
                   <tr>
                     <td><?php echo $row['nro_factura'] ?></td>
                     <td><?php echo $row['proveedor'] ?></td>
                     <td><?php echo $row['fecha'] ?></td>
                     <td><?php echo $row['nombre_comprobantes'] ?></td>
-                    <td style="color:red;"><b>$<?php echo number_format($row['monto'], 2, ',', '.'); ?></b></td>
+                    <?php if (intval($row['monto']) > 0) { ?>
+                      <td style="color:red;"><b>$<?php echo number_format($row['monto'], 2, ',', '.'); ?></b></td>
+                    <?php } else { ?>
+                      <td style="color:green;"><b>$<?php echo number_format($row['monto'], 2, ',', '.'); ?></b></td>
+                    <?php } ?>
                     <td></td>
                     <td>$<?php echo number_format($saldo, 2, ',', '.'); ?></td>
                     <td><?php echo $row['observaciones'] ?></td>
@@ -169,29 +177,31 @@
                   <?php
 
                   foreach ($factura_pago as $pago) {
-                  ?>
-                      <tr>
+                    ?>
+                    <tr>
                       <td><?php echo $row['nro_factura'] ?></td>
                       <td></td>
                       <td><?php echo $pago['fecha_emision'] ?></td>
                       <td>PAGO</td>
                       <td></td>
                       <?php if (strpos($pago['observaciones'], 'Sobró del pago a la factura') !== false) { ?>
-                      <td style="color:blue;"><b>$<?php echo number_format($pago['monto'], 2, ',', '.'); ?></b></td>
+                        <td style="color:blue;"><b>$<?php echo number_format($pago['monto'], 2, ',', '.'); ?></b></td>
                       <?php } else { ?>
-                      <td style="color:green;"><b>$<?php echo number_format($pago['monto'], 2, ',', '.'); ?></b></td>
+                        <td style="color:green;"><b>$<?php echo number_format($pago['monto'], 2, ',', '.'); ?></b></td>
                       <?php } ?>
                       <?php
                       $saldo_final -= intval($pago['monto']);
                       $saldo -= intval($pago['monto']);
                       ?>
                       <td>$<?php echo number_format($saldo, 2, ',', '.'); ?></td>
-                      <td><a target="_blank" href="./paginas/recibo_factura_pago.php?id_factura=<?php echo $id_factura; ?>&id_pago=<?php echo $pago['id'] ?>"><i class="fa-solid fa-receipt"></i></a></td>
-                      </tr>
-                  <?php
+                      <td><a target="_blank"
+                          href="./paginas/recibo_factura_pago.php?id_factura=<?php echo $id_factura; ?>&id_pago=<?php echo $pago['id'] ?>"><i
+                            class="fa-solid fa-receipt"></i></a></td>
+                    </tr>
+                    <?php
                   }
                 }
-                  ?>
+                ?>
               </tbody>
               <tfoot>
                 <tr>
@@ -220,12 +230,12 @@
 </div>
 
 <script>
-  $(function() {
+  $(function () {
     var availableTags = [<?php
-                          mysqli_data_seek($con_facturas, 0);
-                          while ($com_sul = mysqli_fetch_array($con_facturas)) {
-                            echo '"' . $com_sul['nro_factura'] . '",';
-                          } ?>]
+    mysqli_data_seek($con_facturas, 0);
+    while ($com_sul = mysqli_fetch_array($con_facturas)) {
+      echo '"' . $com_sul['nro_factura'] . '",';
+    } ?>]
     $("#buscador").autocomplete({
       source: availableTags
     });

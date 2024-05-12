@@ -55,6 +55,7 @@ if ($_SESSION['usuario'] != "") {
 
 		$cliente = $_POST['c'];
 		$fecha = $_POST['f'];
+		$fechaHoy = date('Y-m-d');
 		$detalle = $_POST['d'];
 		$observacion = $_POST['d'];
 		if (!isset($observacion)) {
@@ -70,6 +71,7 @@ if ($_SESSION['usuario'] != "") {
 
 		$cargo = $link->query("INSERT INTO carga_camion SET personal_cargac='$cliente', observacionadm_cargac='$observacion' , fecha_cargac='$fecha', estado_cargac='1' ") or die(mysqli_error());
 		$ultimoid = mysqli_insert_id($link);
+		$addLiquidacion = null;
 		if ($cargo) {
 			for ($i = 0; $i < $cantitems; $i++) {
 				$prod = $carrito[$i]['id'];
@@ -77,6 +79,10 @@ if ($_SESSION['usuario'] != "") {
 				$cant = $carrito[$i]['cantidad'];
 
 				$add = $link->query("INSERT INTO stock_depositos SET idcarga_stockd='$ultimoid', idpersona_stockd='$cliente', idcamion_stockd='$cliente', idproducto_stockd='$prod', cantidad_stockd='$cant', fecha_stockd='$fecha', quien_stockd='$quien', estado_stockd='1', tipomov_stockd='carga', cuando_stockd='$cuando' ") or die(mysqli_error());
+				$hayLiquidacion = $link->query("SELECT id_liquidacion FROM liquidaciones WHERE vendedor_liquidacion='$cliente' and cuando_liquidacion LIKE '$fechaHoy%'") or die(mysqli_error());
+				if (!isset($hayLiquidacion->fetch_assoc()['id_liquidacion'])) {
+					$addLiquidacion = $link->query("INSERT INTO liquidaciones SET id_cargac='$ultimoid', vendedor_liquidacion='$cliente'") or die(mysqli_error());
+				}
 			}
 		}
 		if ($add) {
@@ -149,23 +155,23 @@ if ($_SESSION['usuario'] != "") {
 		$add_it = $link->query($sql_item);
 		$sql_add = null;
 		if ($tipo) {
-			$get_liquidacion_result = $link->query("SELECT id_liquidacion FROM liquidaciones WHERE id_cargac='$idcarga'");
+			$get_liquidacion_result = $link->query("SELECT id_liquidacion FROM liquidaciones WHERE id_liquidacion='$idcarga'");
 			$get_liquidacion = $get_liquidacion_result->fetch_assoc();
 			if ($tipo === 'deposito') {
 				if ($get_liquidacion) {
-					$sql_add = "UPDATE liquidaciones SET deposito=1, devoluciones_liquidacion='$devoluciones' WHERE id_cargac='$idcarga'";
+					$sql_add = "UPDATE liquidaciones SET deposito=1, devoluciones_liquidacion='$devoluciones' WHERE id_liquidacion='$idcarga'";
 				} else {
-					$sql_add = "INSERT INTO liquidaciones SET id_cargac='$idcarga', devoluciones_liquidacion='$devoluciones', entrega_liquidacion='$entrega', observaciones_liquidacion='$observaciones', vendedor_liquidacion='$vendedor', cuando_liquidacion='$cuando', fecha_liquidacion='$periodo', quien_liquidacion='$quien', json_liquidacion='$json_completo', estado_liquidacion='1', deposito=1";
+					$sql_add = "INSERT INTO liquidaciones SET id_liquidacion='$idcarga', devoluciones_liquidacion='$devoluciones', entrega_liquidacion='$entrega', observaciones_liquidacion='$observaciones', vendedor_liquidacion='$vendedor', cuando_liquidacion='$cuando', fecha_liquidacion='$periodo', quien_liquidacion='$quien', json_liquidacion='$json_completo', estado_liquidacion='1', deposito=1";
 				}
 			} else if ($tipo === 'venta') {
 				if ($get_liquidacion) {
-					$sql_add = "UPDATE liquidaciones SET venta=1, montototal_liquidacion='$montototal', entrega_liquidacion='$entrega' WHERE id_cargac='$idcarga'";
+					$sql_add = "UPDATE liquidaciones SET venta=1, montototal_liquidacion='$montototal', entrega_liquidacion='$entrega' WHERE id_liquidacion='$idcarga'";
 				} else {
-					$sql_add = "INSERT INTO liquidaciones SET id_cargac='$idcarga', montototal_liquidacion='$montototal', entrega_liquidacion='$entrega', observaciones_liquidacion='$observaciones', vendedor_liquidacion='$vendedor', cuando_liquidacion='$cuando', fecha_liquidacion='$periodo', quien_liquidacion='$quien', json_liquidacion='$json_completo', estado_liquidacion='1', venta=1";
+					$sql_add = "INSERT INTO liquidaciones SET id_liquidacion='$idcarga', montototal_liquidacion='$montototal', entrega_liquidacion='$entrega', observaciones_liquidacion='$observaciones', vendedor_liquidacion='$vendedor', cuando_liquidacion='$cuando', fecha_liquidacion='$periodo', quien_liquidacion='$quien', json_liquidacion='$json_completo', estado_liquidacion='1', venta=1";
 				}
 			}
 		} else {
-			$sql_add = "INSERT INTO liquidaciones SET id_cargac='" . $idcarga . "', devoluciones_liquidacion='" . $devoluciones . "',	montototal_liquidacion='" . $montototal . "',	entrega_liquidacion='" . $entrega . "',	observaciones_liquidacion='" . $observaciones . "',	vendedor_liquidacion='" . $vendedor . "',	cuando_liquidacion='$cuando',	fecha_liquidacion='$periodo',quien_liquidacion='$quien',	json_liquidacion='$json_completo',	estado_liquidacion='1'";
+			$sql_add = "INSERT INTO liquidaciones SET devoluciones_liquidacion='" . $devoluciones . "',	montototal_liquidacion='" . $montototal . "',	entrega_liquidacion='" . $entrega . "',	observaciones_liquidacion='" . $observaciones . "',	vendedor_liquidacion='" . $vendedor . "',	cuando_liquidacion='$cuando',	fecha_liquidacion='$periodo',quien_liquidacion='$quien',	json_liquidacion='$json_completo',	estado_liquidacion='1'";
 		}
 		if ($add_it > 0) {
 			$add = $link->query($sql_add);

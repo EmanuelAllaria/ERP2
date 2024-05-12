@@ -881,20 +881,28 @@ function add_factura(){
   var monto = $('#monto_factura').val();
   var obs = $('#detalle_factura').val();
 
-  console.log(proveedor);
+  const tipoNumero = parseInt(tipo, 10);
+  if (tipoNumero === 7 || tipoNumero === 8 || tipoNumero === 9 || tipoNumero === 10) {
+    monto = -Math.abs(monto);
+  }
   var string2 = "accion=add_facturas&proveedor="+proveedor+"&nro_factura="+nro_factura+"&tipo="+tipo+"&monto="+monto+"&obs="+obs;
-          $.ajax({
-              type: "POST",
-              url: "procesos/crud.php?",
-              data: string2,
-              success: function(data){
-                console.log(data)
-                if(data!='FALSE'){
-                  window.location.href = "index.php?pagina=facturas&msg="+data;
-                }
-                else {alert('Error al insertar factura')}
-              }
-          });
+  $.ajax({
+      type: "POST",
+      url: "procesos/crud.php?",
+      data: string2,
+      success: function(data){
+        console.log(data)
+        if(data === 'ERROR NO EXISTE FACTURA'){
+          alert('Error: No existe tal factura erronea que quiere cancelar')
+        } else if (data === 'ERROR EL MONTO NO COINCIDE') {
+          alert('Error: El monto de tal factura erronea que quiere cancelar no coincide, ponga el monto real')
+        } else if (data!='FALSE') {
+          window.location.href = "index.php?pagina=facturas&msg="+data;
+        } else {
+          alert('Error al insertar factura')
+        }
+      }
+  });
 }
 function add_factura_pago(){
   var factura = $('#nro_factura_pago').val();
@@ -912,9 +920,7 @@ function add_factura_pago(){
   var origen = $('#origen_factura_pago').val();
   var obs = $('#detalle_factura_pago').val();
   var string2 = "accion=add_facturas_pago&factura="+factura+"&fecha="+fecha+"&banco="+banco+"&numero_cheque="+numero_cheque+"&fecha_emision="+fecha_emision+"&fecha_cobro="+fecha_cobro+"&titular="+titular+"&cuit="+cuit+"&monto="+monto+"&total="+total+"&facturas="+facturas+"&origen="+origen+"&obs="+obs+"&tipo_pago="+tipo_pago;
-  if(!factura || factura==''){
-    alert('Seleccionar numero factura')
-  }else if(!monto || monto==''){
+  if(!monto || monto==''){
     alert('Ingresar monto')
   }else{
     $.ajax({
