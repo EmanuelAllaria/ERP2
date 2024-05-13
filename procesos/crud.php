@@ -12,7 +12,7 @@ if ($_SESSION['usuario'] != '') {
   //notificaciones
   $email_from = "dario.velaco@gmail.com";
   $fromname = "Notificaciones BIG POLLO";
-  $headers = "MIME-Version: 1.0\n";
+  $headers  = "MIME-Version: 1.0\n";
   $headers .= "Content-type: text/html; charset=utf8\n";
   $headers .= "X-Priority: 3\n";
   $headers .= "X-MSMail-Priority: Normal\n";
@@ -438,8 +438,7 @@ if ($_SESSION['usuario'] != '') {
     $provincia = $_POST['provincia'];
     $ciudad = $_POST['ciudad'];
     $notas = '';
-    if (isset($_POST['notas']))
-      $notas = $_POST['notas'];
+    if (isset($_POST['notas'])) $notas = $_POST['notas'];
     $razon = addslashes(htmlentities($_POST['razon']));
     $cuitcuil = $_POST['dni'];
     $condicioniva = $_POST['condicioniva'];
@@ -457,8 +456,7 @@ if ($_SESSION['usuario'] != '') {
       $asignado = '0';
     }
     $upload = '';
-    if (isset($_POST['upload']))
-      $upload = $_POST['upload'];
+    if (isset($_POST['upload'])) $upload = $_POST['upload'];
     $dias_financia = $_POST['dias_financia'];
     $listap = $_POST['listap'];
     // inicio geoencode
@@ -649,6 +647,9 @@ if ($_SESSION['usuario'] != '') {
     $banco = $_POST['banco'];
     $nroCuenta = $_POST['nroCuenta'];
     $cbu = $_POST['cbu'];
+    $alias = $_POST['alias'];
+    $nombref = $_POST['nombref'];
+
 
 
     $telfijo_com = $_POST['telfijo_com'];
@@ -704,7 +705,10 @@ if ($_SESSION['usuario'] != '') {
       nroCuenta = '$nroCuenta',
       cbu = '$cbu',
       quien_proveedor='$quien',
-      cuando_proveedor='$cuando' WHERE id_proveedor = '$id' ");
+      cuando_proveedor='$cuando',
+      nombre_fantasia = '$nombref',
+      alias='$alias'
+       WHERE id_proveedor = '$id' ");
 
 
     if ($inserta) {
@@ -746,6 +750,8 @@ if ($_SESSION['usuario'] != '') {
     $banco = $_POST['banco'];
     $nroCuenta = $_POST['nroCuenta'];
     $cbu = $_POST['cbu'];
+    $alias = $_POST['alias'];
+    $nombref = $_POST['nombref'];
 
 
     $telfijo_com = $_POST['telfijo_com'];
@@ -807,7 +813,10 @@ if ($_SESSION['usuario'] != '') {
       nroCuenta = '$nroCuenta',
       cbu = '$cbu',
       quien_proveedor='$quien',
-      cuando_proveedor='$cuando'");
+      cuando_proveedor='$cuando',
+      nombre_fantasia = '$nombref',
+      alias='$alias'
+      ");
     $id_clie_ulti = mysqli_insert_id($link);
 
     if ($inserta) {
@@ -846,31 +855,11 @@ if ($_SESSION['usuario'] != '') {
     $tipo = $_POST['tipo'];
     $monto = $_POST['monto'];
     $obs = $_POST['obs'];
-    $sqlHayPagosAFavor = $link->query("SELECT * FROM facturas_pagos WHERE id_factura='-1' ORDER BY monto DESC LIMIT 1");
-    $pagoAFavor = array();
-    if ($sqlHayPagosAFavor->num_rows > 0) {
-      $pagoAFavor = $sqlHayPagosAFavor->fetch_assoc();
-    }
 
-    $parseTipo = intval($tipo);
-    if ($parseTipo === 7 || $parseTipo === 8 || $parseTipo === 9 || $parseTipo === 10) {
-      $sqlHayFacturaErronea = $link->query("SELECT * FROM facturas WHERE id_proveedor='$proveedor' AND nro_factura='$nro_factura' OR monto='$monto'");
-      if (mysqli_num_rows($sqlHayFacturaErronea) === 0) {
-        echo 'ERROR NO EXISTE FACTURA';
-        exit;
-      }
-      if (intval(mysqli_fetch_ASSOC($sqlHayFacturaErronea)['monto']) !== abs(intval($monto))) {
-        echo 'ERROR EL MONTO NO COINCIDE';
-        exit;
-      }
-    }
+
 
     $inserta = $link->query("INSERT INTO facturas SET nro_factura='$nro_factura', id_proveedor='$proveedor',  tipo='$tipo', monto='$monto', observaciones='$obs'");
     $id = mysqli_insert_id($link);
-    if ($pagoAFavor) {
-      $idPagoAFavor = $pagoAFavor['id'];
-      $link->query("UPDATE facturas_pagos SET id_factura='$id' WHERE id=$idPagoAFavor;");
-    }
 
     if ($inserta) {
       echo $id . '@' . $nro_factura . ', ' . $tipo . '@' . $monto;
@@ -882,14 +871,7 @@ if ($_SESSION['usuario'] != '') {
   if (isset($_POST['accion']) && $_POST['accion'] == 'get_facturas') {
     $proveedor = $_POST['proveedor'];
 
-    $consulta = $link->query("SELECT * FROM facturas f 
-                              WHERE f.id_proveedor='$proveedor' 
-                              AND f.tipo NOT IN (7, 8, 9, 10)
-                              AND NOT EXISTS (
-                                  SELECT 1 FROM facturas f2 
-                                  WHERE f2.nro_factura = f.nro_factura 
-                                  AND f2.tipo IN (7, 8, 9, 10)
-                              )");
+    $consulta = $link->query("SELECT * from facturas where id_proveedor='$proveedor'");
     $rows = array(); // Inicializa un array para almacenar todas las filas
 
     while ($fila = mysqli_fetch_assoc($consulta)) {
@@ -945,39 +927,7 @@ if ($_SESSION['usuario'] != '') {
     }
   }
 
-  /*comienza insercion adelantos*/
-  if (isset($_POST['accion']) && $_POST['accion'] == 'add_ade') {
-    $movimiento = $_POST['mov'];
-    $nroComp = $_POST['nroComp'];
-    $monto = $_POST['monto'];
-    $observaciones = $_POST['observaciones'];
-    $fecha_actual = date('Y-m-d');
-    $usuario = $_SESSION['usuario'];
-    $quien_select = $link->query("SELECT id FROM usuarios  WHERE usuario='$usuario'");
-    $row = mysqli_fetch_array($quien_select);
-    $id_user = $row['id'];
-
-
-
-    $insert = $link->query("INSERT INTO adelantos SET 
-      personal_adelanto ='1',
-      fecha_adelanto = '$fecha_actual',
-      tipo_adelanto = '$movimiento',
-      observacion_ad = '$observaciones',
-      monto_adelanto = '$monto',
-      relacion_adelanto = '',
-      liquidado_ad = '',
-      quien_ad = '$id_user',
-      estado_ad = '1'");
-
-
-    if ($insert) {
-      echo 'TRUE';
-    } else {
-      echo 'FALSE';
-    }
-  }
-  /*termina insercion adelanto*/
+  
 
   if (isset($_POST['accion']) && $_POST['accion'] == 'add_facturas_pago') {
     $id_factura = $_POST['factura'];
@@ -1003,25 +953,17 @@ if ($_SESSION['usuario'] != '') {
 
     if (intval($total) >= intval($monto)) {
       $inserta = $link->query("INSERT INTO facturas_pagos SET id_factura='$id_factura', tipo_pago='$tipo_pago', fecha='$fecha', banco='$banco', numero_cheque='$numero_cheque', fecha_emision='$fecha_emision', fecha_cobro='$fecha_cobro', titular='$titular', cuit='$cuit', monto='$monto', origen='$origen', observaciones='$obs'");
-    } else if ($facturas) {
-      $monto = intval($monto) - intval($total);
-      $facturasMayores = array();
-      $montoTotal = intval($monto);
+    } else {
+      $facturaMayor = null;
       foreach ($facturas as $factura) {
         if (intval($factura['id']) > intval($id_factura)) {
-          if ($montoTotal >= intval($factura['monto'])) {
-            $montoTotal -= intval($factura['monto']);
-            $facturasMayores[] = array(
-              'id' => intval($factura['id']),
-              'monto' => intval($factura['monto'])
-            );
-          }
+          $facturaMayor = intval($factura['id']);
+          break;
         }
       }
+      $monto = intval($monto) - intval($total);
 
-      $cuantasFacturasMayoresPagar = count($facturasMayores);
-
-      if ($cuantasFacturasMayoresPagar > 0) {
+      if ($facturaMayor) {
         $consulta_nro_factura = $link->query("SELECT nro_factura FROM facturas WHERE id='$id_factura'");
         if (!$consulta_nro_factura) {
           echo "MySQL Error: " . $link->error;
@@ -1033,22 +975,13 @@ if ($_SESSION['usuario'] != '') {
           echo "MySQL Error: " . $link->error;
         }
 
-        for ($i = 0; $i < $cuantasFacturasMayoresPagar; $i++) {
-          $id_factura = $facturasMayores[$i]['id'];
-          $montoFactura = $facturasMayores[$i]['monto'];
-          $insertaDemas = $link->query("INSERT INTO facturas_pagos SET id_factura='$id_factura', tipo_pago='$tipo_pago', fecha='$fecha', banco='$banco', numero_cheque='$numero_cheque', fecha_emision='$fecha_emision', fecha_cobro='$fecha_cobro', titular='$titular', cuit='$cuit', monto='$montoFactura', origen='$origen', observaciones='Sobró del pago a la factura: " . $get_nro_factura['nro_factura'] . "'");
-          if (!$insertaDemas) {
-            echo "MySQL Error: " . $link->error;
-          }
+        $inserta2 = $link->query("INSERT INTO facturas_pagos SET id_factura='$facturaMayor', tipo_pago='$tipo_pago', fecha='$fecha', banco='$banco', numero_cheque='$numero_cheque', fecha_emision='$fecha_emision', fecha_cobro='$fecha_cobro', titular='$titular', cuit='$cuit', monto='$monto', origen='$origen', observaciones='Sobró del pago a la factura: " . $get_nro_factura['nro_factura'] . "'");
+        if (!$inserta2) {
+          echo "MySQL Error: " . $link->error;
         }
-        if (intval($montoTotal) > 0) {
-          $id_proveedor = $link->query("SELECT id_proveedor FROM facturas WHERE id = '$id_factura'")->fetch_assoc()['id_proveedor'];
-          $nro_factura = $link->query("SELECT nro_factura FROM facturas WHERE id = '$id_factura'")->fetch_assoc()['nro_factura'];
-          $link->query("INSERT INTO facturas (nro_factura, id_proveedor, tipo, monto, observaciones) VALUES (UUID(), '$id_proveedor', '7', '-$montoTotal', 'Sobró del pago a la factura: $nro_factura')");
-        }
+      } else {
+        echo 'Monto elevado a la factura y no quedan facturas con este proovedor que saldar, suba manualmente el monto de esta factura y el resto en otro proovedor ? ';
       }
-    } else {
-      $link->query("INSERT INTO facturas_pagos SET id_factura='-1', tipo_pago='$tipo_pago', fecha='$fecha', banco='$banco', numero_cheque='$numero_cheque', fecha_emision='$fecha_emision', fecha_cobro='$fecha_cobro', titular='$titular', cuit='$cuit', monto='$montoFactura', origen='$origen', observaciones='Pago a favor a proveedor'");
     }
 
     $id = mysqli_insert_id($link);
@@ -1080,7 +1013,7 @@ if ($_SESSION['usuario'] != '') {
       $data['estado'] = 'false';
     }
 
-    $arreglo = json_encode($data);
+    $arreglo =  json_encode($data);
     if ($arreglo) {
       echo $arreglo;
     } else {
@@ -1308,7 +1241,7 @@ if ($_SESSION['usuario'] != '') {
       $num++;
     }
 
-    $modal .= '</tbody>
+    $modal .=      '</tbody>
                             </table>
                         </div>
                     </div>

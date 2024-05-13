@@ -44,10 +44,13 @@ $prov = $row['provincia_id'];
               </div>
 
               <div class="row">
-                <div class="col-md-6 m-b-20">
+                <div class="col-md-4 m-b-20">
                   <input placeholder="Razon Social" type="text" name="razon" class="form-control razon" required="" value="<?php echo $row['razon_com_proveedor']; ?>">
                 </div>
-                <div class="col-md-6 m-b-20">
+                <div class="col-md-4 m-b-20">
+                  <input placeholder="Nombre de fantasía" type="text" name="nombref" class="form-control nombref" required="" value="<?php echo $row['nombre_fantasia']; ?>">
+                </div>
+                <div class="col-md-4 m-b-20">
                   <select class="form-control rubro" name="rubro">
                     <option value="" disabled selected>Seleccione un rubro comercial</option>
                     <?php
@@ -146,7 +149,7 @@ $prov = $row['provincia_id'];
                   <input type="text" placeholder="Depto" class="form-control depto" name="depto" value="<?php echo $row['depto_com_proveedor']; ?>">
                 </div>
                 <div class="col-md-12 m-b-20">
-                  <textarea class="form-control notas" name="notas" placeholder="Ingrese una nota" value="<?php echo $row['notas_proveedor']; ?>"></textarea>
+                  <textarea class="form-control notas" name="notas" placeholder="Ingrese una nota" value="<?php echo $row['notas_proveedor']; ?>"><?php echo $row['notas_proveedor']; ?></textarea>
                 </div>
 
               </div>
@@ -156,14 +159,18 @@ $prov = $row['provincia_id'];
                   <h3>Datos Bancarios</h3>
                 </div>
               <div class="row col-md-12">
-                <div class="col-md-4 m-b-20">
+                <div class="col-md-3 m-b-20">
                   <input type="text" placeholder="Banco" class="form-control banco" name="banco" value="<?php echo $row['banco']; ?>">
                 </div>
-                <div class="col-md-4 m-b-20">
+                <div class="col-md-3 m-b-20">
                   <input type="number" placeholder="Número de cuenta" class="form-control nroCuenta" name="nroCuenta" value="<?php echo $row['nroCuenta']; ?>">
                 </div>
-                <div class="col-md-4 m-b-20">
+                <div class="col-md-3 m-b-20">
                   <input type="number" placeholder="CBU" class="form-control cbu" name="cbu" value="<?php echo $row['cbu']; ?>">
+                </div>
+
+                <div class="col-md-3 m-b-20">
+                  <input type="text" placeholder="Alias" class="form-control alias" name="alias" value="<?php echo $row['alias']; ?>">
                 </div>
 
                 <div class="form-group">
