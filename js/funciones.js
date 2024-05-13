@@ -29,6 +29,8 @@ window.location.href = "login.html";
           });
   }
 
+  
+
 function llena_canasta_compra_stock(){
   var producto = $('#producto_card').val();
   var detalle = $('#producto_card option:selected').text();
@@ -307,6 +309,7 @@ $("#agregarAdelanto").click(function(){
         else {alert('Error al insertar adelanto')}
       }
   });
+  console.log(string2);
 });
 
 /*fin agregar adelanto*/
@@ -381,13 +384,15 @@ $('#agregar_proveedor').click(function(){
   var banco = $('.banco').val();
   var nroCuenta = $('.nroCuenta').val();
   var cbu = $('.cbu').val();
+  var nombre_fantasia = $('.nombref').val();
+  var alias = $('.alias').val();
   var upload = $('.upload').val();
-  var string2 = "accion=add_proveedores&nombre="+nombre+"&tipodni="+tipodni+"&dni="+dni+"&cumple="+cumple+"&email="+email+"&email2="+email2+"&telfijo="+telfijo+"&celular="+celular+"&provincia="+provincia+"&ciudad="+ciudad+"&direccion="+direccion+"&numero="+numero+"&piso="+piso+"&depto="+depto+"&upload="+upload+"&razon="+razon+"&cuit="+cuit+"&condicioniva="+condicioniva+"&rubro="+rubro+"&telfijo_com="+telfijo_com+"&celular_com="+celular_com+"&direccion_com="+direccion_com+"&numero_com="+numero_com+"&piso_com="+piso_com+"&depto_com="+depto_com+"&notas="+notas+"&celular2="+celular2+"&banco="+banco+"&nroCuenta="+nroCuenta+"&cbu="+cbu;
+  var string2 = "accion=add_proveedores&nombre="+nombre+"&tipodni="+tipodni+"&dni="+dni+"&cumple="+cumple+"&email="+email+"&email2="+email2+"&telfijo="+telfijo+"&celular="+celular+"&provincia="+provincia+"&ciudad="+ciudad+"&direccion="+direccion+"&numero="+numero+"&piso="+piso+"&depto="+depto+"&upload="+upload+"&razon="+razon+"&cuit="+cuit+"&condicioniva="+condicioniva+"&rubro="+rubro+"&telfijo_com="+telfijo_com+"&celular_com="+celular_com+"&direccion_com="+direccion_com+"&numero_com="+numero_com+"&piso_com="+piso_com+"&depto_com="+depto_com+"&notas="+notas+"&celular2="+celular2+"&banco="+banco+"&nroCuenta="+nroCuenta+"&cbu="+cbu+"&nombref="+nombre_fantasia+"&alias="+alias;
   tomociudad = ciudad;
   // console.log('datos string2: '+string2);
   if(provincia.trim() !== '' && ciudad.trim() !== '' && direccion.trim() !== '' && numero.trim() !== ''
     && razon.trim() !== '' && rubro.trim() !== '' && condicioniva.trim() !== '' && cuit.trim() !== '' && email.trim() !== '' && email2.trim() !== '' && celular.trim() !== '' && celular2.trim() !== '' && telfijo.trim() !== '' && notas.trim() !== ''
-    && banco.trim() !== '' && nroCuenta.trim() !== '' && cbu.trim() !== ''){
+    && banco.trim() !== '' && nroCuenta.trim() !== '' && cbu.trim() !== '' && nombre_fantasia.trim() !== '' && alias.trim() !== ''){
           $.ajax({
               type: "POST",
               url: "procesos/crud.php?",
@@ -648,14 +653,16 @@ function elimina_c(id){
   var banco = $('.banco').val();
   var nroCuenta = $('.nroCuenta').val();
   var cbu = $('.cbu').val();
+  var nombre_fantasia = $('.nombref').val();
+  var alias = $('.alias').val();
   var upload = $('.upload').val();
   
-  var string2 = "accion=editar_proveedor&id="+id+"&nombre="+nombre+"&tipodni="+tipodni+"&dni="+dni+"&cumple="+cumple+"&email="+email+"&email2="+email2+"&telfijo="+telfijo+"&celular="+celular+"&provincia="+provincia+"&ciudad="+ciudad+"&direccion="+direccion+"&numero="+numero+"&piso="+piso+"&depto="+depto+"&upload="+upload+"&razon="+razon+"&cuit="+cuit+"&condicioniva="+condicioniva+"&rubro="+rubro+"&telfijo_com="+telfijo_com+"&celular_com="+celular_com+"&direccion_com="+direccion_com+"&numero_com="+numero_com+"&piso_com="+piso_com+"&depto_com="+depto_com+"&notas="+notas+"&celular2="+celular2+"&banco="+banco+"&nroCuenta="+nroCuenta+"&cbu="+cbu;
+  var string2 = "accion=editar_proveedor&id="+id+"&nombre="+nombre+"&tipodni="+tipodni+"&dni="+dni+"&cumple="+cumple+"&email="+email+"&email2="+email2+"&telfijo="+telfijo+"&celular="+celular+"&provincia="+provincia+"&ciudad="+ciudad+"&direccion="+direccion+"&numero="+numero+"&piso="+piso+"&depto="+depto+"&upload="+upload+"&razon="+razon+"&cuit="+cuit+"&condicioniva="+condicioniva+"&rubro="+rubro+"&telfijo_com="+telfijo_com+"&celular_com="+celular_com+"&direccion_com="+direccion_com+"&numero_com="+numero_com+"&piso_com="+piso_com+"&depto_com="+depto_com+"&notas="+notas+"&celular2="+celular2+"&banco="+banco+"&nroCuenta="+nroCuenta+"&cbu="+cbu+"&nombref="+nombre_fantasia+"&alias="+alias;
       tomociudad = ciudad;
   /*console.log('datos string2: '+string2);*/
   if(provincia.trim() !== '' && ciudad.trim() !== '' && direccion.trim() !== '' && numero.trim() !== ''
     && razon.trim() !== '' && rubro.trim() !== '' && condicioniva.trim() !== '' && cuit.trim() !== '' && email.trim() !== '' && email2.trim() !== '' && celular.trim() !== '' && celular2.trim() !== '' && telfijo.trim() !== '' && notas.trim() !== ''
-    && banco.trim() !== '' && nroCuenta.trim() !== '' && cbu.trim() !== ''){
+    && banco.trim() !== '' && nroCuenta.trim() !== '' && cbu.trim() !== '' && nombre_fantasia.trim() !== ''){
               $.ajax({
                   type: "POST",
                   url: "procesos/crud.php?",
@@ -881,28 +888,20 @@ function add_factura(){
   var monto = $('#monto_factura').val();
   var obs = $('#detalle_factura').val();
 
-  const tipoNumero = parseInt(tipo, 10);
-  if (tipoNumero === 7 || tipoNumero === 8 || tipoNumero === 9 || tipoNumero === 10) {
-    monto = -Math.abs(monto);
-  }
+  console.log(proveedor);
   var string2 = "accion=add_facturas&proveedor="+proveedor+"&nro_factura="+nro_factura+"&tipo="+tipo+"&monto="+monto+"&obs="+obs;
-  $.ajax({
-      type: "POST",
-      url: "procesos/crud.php?",
-      data: string2,
-      success: function(data){
-        console.log(data)
-        if(data === 'ERROR NO EXISTE FACTURA'){
-          alert('Error: No existe tal factura erronea que quiere cancelar')
-        } else if (data === 'ERROR EL MONTO NO COINCIDE') {
-          alert('Error: El monto de tal factura erronea que quiere cancelar no coincide, ponga el monto real')
-        } else if (data!='FALSE') {
-          window.location.href = "index.php?pagina=facturas&msg="+data;
-        } else {
-          alert('Error al insertar factura')
-        }
-      }
-  });
+          $.ajax({
+              type: "POST",
+              url: "procesos/crud.php?",
+              data: string2,
+              success: function(data){
+                console.log(data)
+                if(data!='FALSE'){
+                  window.location.href = "index.php?pagina=facturas&msg="+data;
+                }
+                else {alert('Error al insertar factura')}
+              }
+          });
 }
 function add_factura_pago(){
   var factura = $('#nro_factura_pago').val();
@@ -920,7 +919,9 @@ function add_factura_pago(){
   var origen = $('#origen_factura_pago').val();
   var obs = $('#detalle_factura_pago').val();
   var string2 = "accion=add_facturas_pago&factura="+factura+"&fecha="+fecha+"&banco="+banco+"&numero_cheque="+numero_cheque+"&fecha_emision="+fecha_emision+"&fecha_cobro="+fecha_cobro+"&titular="+titular+"&cuit="+cuit+"&monto="+monto+"&total="+total+"&facturas="+facturas+"&origen="+origen+"&obs="+obs+"&tipo_pago="+tipo_pago;
-  if(!monto || monto==''){
+  if(!factura || factura==''){
+    alert('Seleccionar numero factura')
+  }else if(!monto || monto==''){
     alert('Ingresar monto')
   }else{
     $.ajax({
@@ -961,30 +962,7 @@ $("#agregarGasto").click(function(){
           });
 });
 
-/*inicio agrega adelanto*/
-$("#agregarAdelanto").click(function(){
-  var mov = $('#movimiento').val();
-  var nroComp = $('#comprobante').val();
-  var monto = $('#monto').val();
-  var observaciones = $('#detalle-alqui').val();
 
-  var string2 = "accion=add_ade&mov="+mov+"&nroComp="+nroComp+"&monto="+monto+"&observaciones="+observaciones;
-  $.ajax({
-      type: "POST",
-      url: "procesos/crud.php?",
-      data: string2,
-      success: function(data){
-        console.log(data);
-        if(data!='FALSE'){
-          alert('adelanto creado');
-          window.location.href = "index.php?pagina=adelanto";
-        }
-        else {alert('Error al insertar adelanto')}
-      }
-  });
-});
-
-/*fin agregar adelanto*/
 
 
 

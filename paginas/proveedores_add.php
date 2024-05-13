@@ -81,17 +81,7 @@
               <input placeholder="Razon Social" type="text" name="razon" class="form-control razon" required="">
             </div>
             <div class="col-md-6 m-b-20">
-              <select class="form-control rubro" name="rubro">
-                    <option value="" disabled selected>Seleccione un rubro comercial</option>
-                    <?php
-                    $con_rubro = $link->query("SELECT * FROM rubros where estado_rubros ='1' order by nombre_rubros asc");
-                    while ($rubro  = mysqli_fetch_array($con_rubro)) {
-                      echo '
-                                <option value="' . $rubro['id_rubros'] . '">' . $rubro['nombre_rubros'] . '</option>';
-                    }
-                    ?>
-                <option value='2545'>Otros</option>
-              </select>
+              <input placeholder="Nombre de fantasía" type="text" name="nombref" class="form-control nombref" required="">
             </div>
         </div>
 
@@ -108,8 +98,18 @@
           </div>
 
           <div class="col-md-6 m-b-20">
-            <input type="number" placeholder="CUIT/CUIL (sin guion)" maxlength="11" class="form-control cuit" name="cuit" />
-          </div>
+              <select class="form-control rubro" name="rubro">
+                    <option value="" disabled selected>Seleccione un rubro comercial</option>
+                    <?php
+                    $con_rubro = $link->query("SELECT * FROM rubros where estado_rubros ='1' order by nombre_rubros asc");
+                    while ($rubro  = mysqli_fetch_array($con_rubro)) {
+                      echo '
+                                <option value="' . $rubro['id_rubros'] . '">' . $rubro['nombre_rubros'] . '</option>';
+                    }
+                    ?>
+                <option value='2545'>Otros</option>
+              </select>
+            </div>
         </div>
 
         <div class="row">
@@ -131,6 +131,9 @@
         </div>
 
         <div class="row">
+          <div class="col-md-6 m-b-20">
+            <input type="number" placeholder="CUIT/CUIL (sin guion)" maxlength="11" class="form-control cuit" name="cuit" />
+          </div>
           <div class="col-md-6 m-b-20">
             <input type="phone" placeholder="Telefono Fijo" class="form-control telfijo" name="telfijo">
           </div>
@@ -158,8 +161,11 @@
             </div>
         </div>
         <div class="row">
-            <div class="col-md-12 m-b-20">
+            <div class="col-md-6 m-b-20">
               <input type="number" placeholder="CBU" class="form-control cbu" name="cbu">
+            </div>
+            <div class="col-md-6 m-b-20">
+              <input type="text" placeholder="Alias" class="form-control alias" name="alias">
             </div>
         </div>
       </div>

@@ -3,19 +3,19 @@
 /**
  * Table Of Content
  *
- * 	1. Color system
- *	2. Options
- *	3. Body
- *	4. Typography
- *	5. Breadcrumbs
- *	6. Cards
- *	7. Dropdowns
- *	8. Buttons
- *	9. Typography
- *	10. Progress bars
- *	11. Tables
- *	12. Forms
- *	14. Component
+ *  1. Color system
+ *  2. Options
+ *  3. Body
+ *  4. Typography
+ *  5. Breadcrumbs
+ *  6. Cards
+ *  7. Dropdowns
+ *  8. Buttons
+ *  9. Typography
+ *  10. Progress bars
+ *  11. Tables
+ *  12. Forms
+ *  14. Component
  */
 /*******************
  Our income
@@ -75,4 +75,72 @@ background-color: #2196F3;
 
 .switch.on::before {
 transform: translateX(26px);
+}
+
+.button-menu-burguer{
+  display: none;
+}
+
+.contenedor-menu{
+  position: relative;
+}
+
+@media (max-width: 767px) {
+  /* Estilo del botón del menú desplegable */
+  .topbar .top-navbar .navbar-collapse{
+    display: none;
+  }
+  .topbar .top-navbar .navbar-collapse.active {
+    position: absolute;
+    top: 100%;
+    left: 30%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    background: #4F5467;
+    width: 70%;
+  }
+
+  .primer-lista{
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    flex-direction: column;
+    flex-wrap: wrap;
+    width: 100%;
+  }
+
+  .btn-group{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 5px 0 !important;
+  }
+
+  .btn-group .boton-nombre{
+    width: 80% !important;
+    height: 100% !important;
+    margin:0 !important;
+  }
+
+  .btn-group .boton-icono{
+    font-size: 18px !important;
+    width: 20% !important;
+  }
+
+
+
+  .button-menu-burguer{
+    display: block;    
+  }
+
+  .button-menu-burguer button{
+    background: transparent;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    font-size: 1.3em;
+    color: gold;
+  }
 }
