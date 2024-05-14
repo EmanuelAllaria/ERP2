@@ -869,7 +869,20 @@ if ($_SESSION['usuario'] != '') {
     $id = mysqli_insert_id($link);
     if ($pagoAFavor) {
       $idPagoAFavor = $pagoAFavor['id'];
-      $link->query("UPDATE facturas_pagos SET id_factura='$id' WHERE id=$idPagoAFavor;");
+      $tipo_pago = $pagoAFavor['tipo_pago'];
+      $fecha = $pagoAFavor['fecha'];
+      $banco = $pagoAFavor['banco'];
+      $numero_cheque = $pagoAFavor['numero_cheque'];
+      $fecha_emision = $pagoAFavor['fecha_emision'];
+      $fecha_cobro = $pagoAFavor['fecha_cobro'];
+      $cuit = $pagoAFavor['cuit'];
+      $titular = $pagoAFavor['titular'];
+      $montoFactura = intval($pagoAFavor['monto']) - intval($monto);
+      $origen = $pagoAFavor['origen'];
+      $link->query("UPDATE facturas_pagos SET id_factura='$id', monto='$monto' WHERE id=$idPagoAFavor;");
+      if (intval($pagoAFavor['monto']) > intval($monto)) {
+        $link->query("INSERT INTO facturas_pagos SET id_factura='-1', tipo_pago='$tipo_pago', fecha='$fecha', banco='$banco', numero_cheque='$numero_cheque', fecha_emision='$fecha_emision', fecha_cobro='$fecha_cobro', titular='$titular', cuit='$cuit', monto='$montoFactura', origen='$origen', observaciones='Sobró del pago a la factura: $nro_factura'");
+      }
     }
 
     if ($inserta) {
@@ -1042,9 +1055,7 @@ if ($_SESSION['usuario'] != '') {
           }
         }
         if (intval($montoTotal) > 0) {
-          $id_proveedor = $link->query("SELECT id_proveedor FROM facturas WHERE id = '$id_factura'")->fetch_assoc()['id_proveedor'];
-          $nro_factura = $link->query("SELECT nro_factura FROM facturas WHERE id = '$id_factura'")->fetch_assoc()['nro_factura'];
-          $link->query("INSERT INTO facturas (nro_factura, id_proveedor, tipo, monto, observaciones) VALUES (UUID(), '$id_proveedor', '7', '-$montoTotal', 'Sobró del pago a la factura: $nro_factura')");
+          $link->query("INSERT INTO facturas_pagos SET id_factura='-1', tipo_pago='$tipo_pago', fecha='$fecha', banco='$banco', numero_cheque='$numero_cheque', fecha_emision='$fecha_emision', fecha_cobro='$fecha_cobro', titular='$titular', cuit='$cuit', monto='$montoTotal', origen='$origen', observaciones='Pago a favor a proveedor'");
         }
       }
     } else {
