@@ -1011,6 +1011,7 @@ if ($_SESSION['usuario'] != '') {
     $origen = $_POST['origen'];
     $obs = $_POST['obs'];
     $data = array();
+    $id_proveedor = null;
 
     $inserta = null;
     $inserta2 = null;
@@ -1025,13 +1026,17 @@ if ($_SESSION['usuario'] != '') {
       $montoTotal = intval($monto);
       foreach ($facturas as $factura) {
         if (intval($factura['id']) > intval($id_factura)) {
-          if ($montoTotal >= intval($factura['saldo'])) {
-            $montoTotal -= intval($factura['saldo']);
-            $facturasMayores[] = array(
-              'id' => intval($factura['id']),
-              'monto' => intval($factura['saldo'])
-            );
+          if ($montoTotal > intval($factura['saldo'])) {
+            $montoRestante = intval($factura['saldo']);
+            $montoTotal -= $montoRestante;
+          } else {
+            $montoRestante = $montoTotal;
+            $montoTotal = 0;
           }
+          $facturasMayores[] = array(
+            'id' => intval($factura['id']),
+            'monto' => $montoRestante
+          );
         }
       }
 
@@ -1058,10 +1063,14 @@ if ($_SESSION['usuario'] != '') {
         }
       }
       if (intval($montoTotal) > 0) {
-        $link->query("INSERT INTO facturas_pagos SET id_factura='-1', tipo_pago='$tipo_pago', fecha='$fecha', banco='$banco', numero_cheque='$numero_cheque', fecha_emision='$fecha_emision', fecha_cobro='$fecha_cobro', titular='$titular', cuit='$cuit', monto='$montoTotal', origen='$origen', observaciones='Pago a favor a proveedor'");
+        $id_proveedor = $link->query("SELECT id_proveedor FROM facturas WHERE id='$id_factura'")->fetch_assoc()['id_proveedor'];
+        $razon_com_proveedor = $link->query("SELECT razon_com_proveedor FROM proveedores WHERE id_proveedor='$id_proveedor'")->fetch_assoc()['razon_com_proveedor'];
+        $link->query("INSERT INTO facturas_pagos SET id_factura='-1', tipo_pago='$tipo_pago', fecha='$fecha', banco='$banco', numero_cheque='$numero_cheque', fecha_emision='$fecha_emision', fecha_cobro='$fecha_cobro', titular='$titular', cuit='$cuit', monto='$montoFactura', origen='$origen', observaciones='Pago a favor a $razon_com_proveedor'");
       }
     } else {
-      $link->query("INSERT INTO facturas_pagos SET id_factura='-1', tipo_pago='$tipo_pago', fecha='$fecha', banco='$banco', numero_cheque='$numero_cheque', fecha_emision='$fecha_emision', fecha_cobro='$fecha_cobro', titular='$titular', cuit='$cuit', monto='$montoFactura', origen='$origen', observaciones='Pago a favor a proveedor'");
+      $id_proveedor = $link->query("SELECT id_proveedor FROM facturas WHERE id='$id_factura'")->fetch_assoc()['id_proveedor'];
+      $razon_com_proveedor = $link->query("SELECT razon_com_proveedor FROM proveedores WHERE id_proveedor='$id_proveedor'")->fetch_assoc()['razon_com_proveedor'];
+      $link->query("INSERT INTO facturas_pagos SET id_factura='-1', tipo_pago='$tipo_pago', fecha='$fecha', banco='$banco', numero_cheque='$numero_cheque', fecha_emision='$fecha_emision', fecha_cobro='$fecha_cobro', titular='$titular', cuit='$cuit', monto='$monto', origen='$origen', observaciones='Pago a favor a $razon_com_proveedor'");
     }
 
     $id = mysqli_insert_id($link);

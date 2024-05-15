@@ -73,8 +73,8 @@
                       <div class="col-md-2"><small class="form-control-feedback"> Saldo pendiente? </small><br>
                         <select class="form-control" id="saldosel">
                           <option value=''>Todos</option>
-                          <option <?php echo $_GET['s'] == 1 ? 'selected' : null ?> value="1">Pagadas por completo</option>
-                          <option <?php echo $_GET['s'] == 2 ? 'selected' : null ?> value="2">Pendientes</option>
+                          <option <?php echo isset($_GET['s']) && $_GET['s'] == 1 ? 'selected' : null ?> value="1">Pagadas por completo</option>
+                          <option <?php echo isset($_GET['s']) && $_GET['s'] == 2 ? 'selected' : null ?> value="2">Pendientes</option>
                         </select>
                       </div>
                       <div class="col-md-2" style="align-self: center;">
