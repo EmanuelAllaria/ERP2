@@ -904,6 +904,7 @@ if ($_SESSION['usuario'] != '') {
                                   SELECT 1 FROM facturas f2 
                                   WHERE f2.nro_factura = f.nro_factura 
                                   AND f2.tipo IN (7, 8, 9, 10)
+                                  AND f2.id_proveedor='$proveedor'
                               )");
     $rows = array(); // Inicializa un array para almacenar todas las filas
 

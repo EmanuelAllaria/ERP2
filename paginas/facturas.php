@@ -72,9 +72,9 @@
                       </div>
                       <div class="col-md-2"><small class="form-control-feedback"> Saldo pendiente? </small><br>
                         <select class="form-control" id="saldosel">
-                          <option value='' selected>Todos</option>
-                          <option value="1">Pagadas por completo</option>
-                          <option value="2">Pendientes</option>
+                          <option value=''>Todos</option>
+                          <option <?php echo $_GET['s'] == 1 ? 'selected' : null ?> value="1">Pagadas por completo</option>
+                          <option <?php echo $_GET['s'] == 2 ? 'selected' : null ?> value="2">Pendientes</option>
                         </select>
                       </div>
                       <div class="col-md-2" style="align-self: center;">
@@ -139,18 +139,18 @@
                 if (isset($_GET['s']) && ($_GET['s'] == 1 || $_GET['s'] == 2)) {
                   $sqlDeuda = ($_GET['s'] == 1) ? "SELECT * FROM (
                     SELECT facturas.*, proveedores.razon_com_proveedor AS proveedor, tipo_comprobantes.nombre_comprobantes, 
-                      ABS(facturas.monto) AS total_pagado,
-                      GREATEST(0, CASE WHEN facturas.monto < 0 THEN 0 ELSE facturas.monto - COALESCE(SUM(facturas_pagos.monto), 0) END) AS saldo
+                        ABS(facturas.monto) AS total_pagado,
+                        GREATEST(0, CASE WHEN facturas.monto < 0 THEN 0 ELSE facturas.monto - COALESCE(SUM(facturas_pagos.monto), 0) END) AS saldo
                     FROM facturas
                     LEFT JOIN proveedores ON facturas.id_proveedor = proveedores.id_proveedor
                     LEFT JOIN tipo_comprobantes ON facturas.tipo = tipo_comprobantes.id_comprobantes
                     LEFT JOIN facturas_pagos ON facturas.id = facturas_pagos.id_factura
                     WHERE facturas.id > 0 AND (facturas.monto < 0 OR facturas.nro_factura IN (
-                              SELECT nro_factura
-                              FROM facturas
-                              WHERE monto < 0
-                            )
-                        )
+                        SELECT nro_factura
+                        FROM facturas as f
+                        WHERE monto < 0
+                        and f.id_proveedor = facturas.id_proveedor
+                    ))
                     $busqueda
                     GROUP BY facturas.id
                     HAVING saldo <= 0 OR saldo IS NULL
@@ -163,42 +163,41 @@
                     LEFT JOIN tipo_comprobantes ON facturas.tipo = tipo_comprobantes.id_comprobantes
                     LEFT JOIN facturas_pagos ON facturas.id = facturas_pagos.id_factura
                     WHERE facturas.id > 0 AND facturas.nro_factura IN (
-                          SELECT nro_factura
-                          FROM facturas
-                          WHERE monto < 0
-                        )
+                        SELECT nro_factura
+                        FROM facturas as f
+                        WHERE monto < 0
+                        and f.id_proveedor = facturas.id_proveedor
+                    )
                     $busqueda
                     GROUP BY facturas.id
                     HAVING saldo > 0
                 ) AS subquery
-                ORDER BY subquery.fecha ASC" : "
-                            SELECT facturas.*, proveedores.razon_com_proveedor AS proveedor, tipo_comprobantes.nombre_comprobantes, 
+                ORDER BY subquery.fecha ASC" : "SELECT facturas.*, proveedores.razon_com_proveedor AS proveedor, tipo_comprobantes.nombre_comprobantes, 
                             CASE 
-                               WHEN facturas.nro_factura < 0 THEN
-                                   0 -- Si el número de factura es negativo, el saldo es 0
-                               ELSE 
-                                   CASE 
-                                       WHEN EXISTS (
+                               WHEN facturas.monto < 0 THEN 0
+                               ELSE CASE WHEN EXISTS (
                                            SELECT 1 
                                            FROM facturas AS f 
                                            WHERE f.nro_factura = facturas.nro_factura
+                                           AND f.id_proveedor = facturas.id_proveedor
                                            AND f.id != facturas.id
-                                       ) THEN 0 -- Si hay otras facturas con el mismo número de factura, el saldo es 0
-                                       ELSE (facturas.monto - COALESCE(SUM(facturas_pagos.monto), 0)) -- Si no, calcula el saldo normalmente
+                                       ) THEN 0
+                                       ELSE (facturas.monto - COALESCE(SUM(facturas_pagos.monto), 0))
                                    END
                            END AS saldo,
                            CASE 
-                               WHEN facturas.nro_factura < 0 THEN
-                                   facturas.monto * -1 -- Si el número de factura es negativo, ajusta el total pagado
+                               WHEN facturas.monto < 0 THEN
+                                   facturas.monto * -1
                                ELSE 
                                    CASE 
                                        WHEN EXISTS (
                                            SELECT 1 
                                            FROM facturas AS f 
                                            WHERE f.nro_factura = facturas.nro_factura
+                                           AND f.id_proveedor = facturas.id_proveedor
                                            AND f.id != facturas.id
-                                       ) THEN facturas.monto -- Si hay otras facturas con el mismo número de factura, el total pagado es el monto de la factura
-                                       ELSE COALESCE(SUM(facturas_pagos.monto), 0) -- Si no, calcula el total pagado normalmente
+                                       ) THEN facturas.monto
+                                       ELSE COALESCE(SUM(facturas_pagos.monto), 0)
                                    END
                            END AS total_pagado
                            FROM facturas
