@@ -879,9 +879,11 @@ if ($_SESSION['usuario'] != '') {
       $titular = $pagoAFavor['titular'];
       $montoFactura = intval($pagoAFavor['monto']) - intval($monto);
       $origen = $pagoAFavor['origen'];
-      $link->query("UPDATE facturas_pagos SET id_factura='$id', monto='$monto' WHERE id=$idPagoAFavor;");
       if (intval($pagoAFavor['monto']) > intval($monto)) {
+        $link->query("UPDATE facturas_pagos SET id_factura='$id', monto='$monto' WHERE id=$idPagoAFavor;");
         $link->query("INSERT INTO facturas_pagos SET id_factura='-1', tipo_pago='$tipo_pago', fecha='$fecha', banco='$banco', numero_cheque='$numero_cheque', fecha_emision='$fecha_emision', fecha_cobro='$fecha_cobro', titular='$titular', cuit='$cuit', monto='$montoFactura', origen='$origen', observaciones='Sobró del pago a la factura: $nro_factura'");
+      } else {
+        $link->query("UPDATE facturas_pagos SET id_factura='$id' WHERE id=$idPagoAFavor;");
       }
     }
 
@@ -1022,11 +1024,11 @@ if ($_SESSION['usuario'] != '') {
       $montoTotal = intval($monto);
       foreach ($facturas as $factura) {
         if (intval($factura['id']) > intval($id_factura)) {
-          if ($montoTotal >= intval($factura['monto'])) {
-            $montoTotal -= intval($factura['monto']);
+          if ($montoTotal >= intval($factura['saldo'])) {
+            $montoTotal -= intval($factura['saldo']);
             $facturasMayores[] = array(
               'id' => intval($factura['id']),
-              'monto' => intval($factura['monto'])
+              'monto' => intval($factura['saldo'])
             );
           }
         }
@@ -1034,17 +1036,16 @@ if ($_SESSION['usuario'] != '') {
 
       $cuantasFacturasMayoresPagar = count($facturasMayores);
 
+      $inserta = $link->query("INSERT INTO facturas_pagos SET id_factura='$id_factura', tipo_pago='$tipo_pago', fecha='$fecha', banco='$banco', numero_cheque='$numero_cheque', fecha_emision='$fecha_emision', fecha_cobro='$fecha_cobro', titular='$titular', cuit='$cuit', monto='$total', origen='$origen', observaciones='$obs'");
+      if (!$inserta) {
+        echo "MySQL Error: " . $link->error;
+      }
       if ($cuantasFacturasMayoresPagar > 0) {
         $consulta_nro_factura = $link->query("SELECT nro_factura FROM facturas WHERE id='$id_factura'");
         if (!$consulta_nro_factura) {
           echo "MySQL Error: " . $link->error;
         }
         $get_nro_factura = $consulta_nro_factura->fetch_assoc();
-
-        $inserta = $link->query("INSERT INTO facturas_pagos SET id_factura='$id_factura', tipo_pago='$tipo_pago', fecha='$fecha', banco='$banco', numero_cheque='$numero_cheque', fecha_emision='$fecha_emision', fecha_cobro='$fecha_cobro', titular='$titular', cuit='$cuit', monto='$total', origen='$origen', observaciones='$obs'");
-        if (!$inserta) {
-          echo "MySQL Error: " . $link->error;
-        }
 
         for ($i = 0; $i < $cuantasFacturasMayoresPagar; $i++) {
           $id_factura = $facturasMayores[$i]['id'];
@@ -1054,9 +1055,9 @@ if ($_SESSION['usuario'] != '') {
             echo "MySQL Error: " . $link->error;
           }
         }
-        if (intval($montoTotal) > 0) {
-          $link->query("INSERT INTO facturas_pagos SET id_factura='-1', tipo_pago='$tipo_pago', fecha='$fecha', banco='$banco', numero_cheque='$numero_cheque', fecha_emision='$fecha_emision', fecha_cobro='$fecha_cobro', titular='$titular', cuit='$cuit', monto='$montoTotal', origen='$origen', observaciones='Pago a favor a proveedor'");
-        }
+      }
+      if (intval($montoTotal) > 0) {
+        $link->query("INSERT INTO facturas_pagos SET id_factura='-1', tipo_pago='$tipo_pago', fecha='$fecha', banco='$banco', numero_cheque='$numero_cheque', fecha_emision='$fecha_emision', fecha_cobro='$fecha_cobro', titular='$titular', cuit='$cuit', monto='$montoTotal', origen='$origen', observaciones='Pago a favor a proveedor'");
       }
     } else {
       $link->query("INSERT INTO facturas_pagos SET id_factura='-1', tipo_pago='$tipo_pago', fecha='$fecha', banco='$banco', numero_cheque='$numero_cheque', fecha_emision='$fecha_emision', fecha_cobro='$fecha_cobro', titular='$titular', cuit='$cuit', monto='$montoFactura', origen='$origen', observaciones='Pago a favor a proveedor'");
