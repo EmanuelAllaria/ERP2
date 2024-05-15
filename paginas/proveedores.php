@@ -26,7 +26,7 @@
       <div class="card">
         <div class="card-body">
           <?php if (isset($_GET['buscar'])) {
-            echo '<h4 class="card-title">Resulados de [' . $_GET['buscar'] . ']...</h4>';
+            echo '<h4 class="card-title">Resultados de [' . $_GET['buscar'] . ']...</h4>';
           } else {
             echo '<h4 class="card-title">Listado</h4>';
           } ?>
