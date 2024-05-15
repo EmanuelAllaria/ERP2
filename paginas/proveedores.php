@@ -7,7 +7,7 @@
     <div class="col-md-6">
       <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="index.php">Inicio</a></li>
-        <li class="breadcrumb-item"><a href="index.php?pagina=clientes">Proveedores</a></li>
+        <li class="breadcrumb-item"><a href="index.php?pagina=proveedores">Proveedores</a></li>
         <?php if (isset($_GET['buscar'])) {
           echo '<li class="breadcrumb-item"><a href="#">Buscar: [' . $_GET['buscar'] . ']</a></li>';
         } ?>
@@ -15,7 +15,7 @@
     </div>
     <div class="col-md-6 text-right">
       <form class="app-search d-none d-md-block d-lg-block" method="get">
-        <input type="hidden" name="pagina" value="clientes">
+        <input type="hidden" name="pagina" value="proveedores">
         <input type="text" id="buscador" name="buscar" class="form-control" placeholder="Buscar...">
       </form>
     </div>
@@ -56,7 +56,7 @@
                 $busqueda = '';
                 if (isset($_GET['buscar'])) {
                   $palabra = $_GET['buscar'];
-                  $busqueda = "and (apellido_clientes like '%$palabra%' or nombre_clientes like '%$palabra%' or dni_clientes like '%$palabra%' or razon_comclientes like '%$palabra%' )";
+                  $busqueda = "and razon_com_proveedor like '%$palabra%'";
                 }
                 //$con_clientes = $link->query("SELECT * FROM clientes inner join clientes_comercios on clientes_comercios.cliente_comclientes = clientes.id_clientes INNER join ciudad on ciudad.id_ciudad = clientes.ciudad_clientes where clientes_comercios.estado_comclientes ='1' order by clientes.apellido_clientes, clientes.nombre_clientes ASC ");
                 $con_proveedores = $link->query("SELECT * FROM proveedores left join ciudad on ciudad.id_ciudad = proveedores.ciudad_proveedor where proveedores.estado_proveedor ='1' $busqueda order by proveedores.razon_com_proveedor ASC ");
