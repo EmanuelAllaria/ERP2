@@ -267,6 +267,7 @@ if (isset($_GET['e']) && $_GET['e'] == 'crcok') {
                                     <label for="comprobante">Ingrese fecha</label>
                                     <div class="input-group mb-3">
                                         <input id="fecha_factura_pago" name="fecha" placeholder="Ingrese fecha" class="form-control" step="any" type="date" value="<?php echo date('Y-m-d') ?>">
+                                        <input id="proveedor" name="proveedor" type="text" hidden>
                                     </div>
                                 </div>
                             </div>

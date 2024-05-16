@@ -904,6 +904,7 @@ function add_factura(){
           });
 }
 function add_factura_pago(){
+  var proveedor = $('#proveedor').val();
   var factura = $('#nro_factura_pago').val();
   var fecha = $('#fecha_factura_pago').val();
   var banco = $('#banco_factura_pago').val();
@@ -918,10 +919,8 @@ function add_factura_pago(){
   var facturas = $('#facturas_factura_pago').val();
   var origen = $('#origen_factura_pago').val();
   var obs = $('#detalle_factura_pago').val();
-  var string2 = "accion=add_facturas_pago&factura="+factura+"&fecha="+fecha+"&banco="+banco+"&numero_cheque="+numero_cheque+"&fecha_emision="+fecha_emision+"&fecha_cobro="+fecha_cobro+"&titular="+titular+"&cuit="+cuit+"&monto="+monto+"&total="+total+"&facturas="+facturas+"&origen="+origen+"&obs="+obs+"&tipo_pago="+tipo_pago;
-  if(!factura || factura==''){
-    alert('Seleccionar numero factura')
-  }else if(!monto || monto==''){
+  var string2 = "accion=add_facturas_pago&proveedor="+proveedor+"&factura="+factura+"&fecha="+fecha+"&banco="+banco+"&numero_cheque="+numero_cheque+"&fecha_emision="+fecha_emision+"&fecha_cobro="+fecha_cobro+"&titular="+titular+"&cuit="+cuit+"&monto="+monto+"&total="+total+"&facturas="+facturas+"&origen="+origen+"&obs="+obs+"&tipo_pago="+tipo_pago;
+  if(!monto || monto==''){
     alert('Ingresar monto')
   }else{
     $.ajax({
@@ -975,7 +974,8 @@ function cambiafacturasprove(){
       url: "procesos/crud.php?",
       data: string2,
       success: function(data){
-          console.log(data)
+        console.log(data)
+        $('#proveedor').val(proveedor);
         if(data!='FALSE'){
           data = JSON.parse(data);
           console.log(data);
