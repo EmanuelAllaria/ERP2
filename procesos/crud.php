@@ -865,9 +865,13 @@ if ($_SESSION['usuario'] != '') {
       }
     }
 
-    $inserta = $link->query("INSERT INTO facturas SET nro_factura='$nro_factura', id_proveedor='$proveedor',  tipo='$tipo', monto='$monto', observaciones='$obs'");
+    if ($parseTipo === 7 || $parseTipo === 8 || $parseTipo === 9 || $parseTipo === 10) {
+      $inserta = $link->query("INSERT INTO facturas SET nro_factura='$nro_factura', id_proveedor='$proveedor',  tipo='$tipo', monto='-$monto', observaciones='$obs'");
+    } else {
+      $inserta = $link->query("INSERT INTO facturas SET nro_factura='$nro_factura', id_proveedor='$proveedor',  tipo='$tipo', monto='$monto', observaciones='$obs'");
+    }
     $id = mysqli_insert_id($link);
-    if ($pagoAFavor) {
+    if ($pagoAFavor && ($parseTipo !== 7 || $parseTipo !== 8 || $parseTipo !== 9 || $parseTipo !== 10)) {
       $idPagoAFavor = $pagoAFavor['id'];
       $tipo_pago = $pagoAFavor['tipo_pago'];
       $fecha = $pagoAFavor['fecha'];
@@ -882,7 +886,8 @@ if ($_SESSION['usuario'] != '') {
       if (intval($pagoAFavor['monto']) > intval($monto)) {
         $link->query("UPDATE facturas_pagos SET id_factura='$id', monto='$monto' WHERE id=$idPagoAFavor and id_proveedor='$proveedor';");
         if ($link->affected_rows > 0) {
-          $link->query("INSERT INTO facturas_pagos SET id_factura='-1', id_proveedor='$proveedor', tipo_pago='$tipo_pago', fecha='$fecha', banco='$banco', numero_cheque='$numero_cheque', fecha_emision='$fecha_emision', fecha_cobro='$fecha_cobro', titular='$titular', cuit='$cuit', monto='$montoFactura', origen='$origen', observaciones='Sobró del pago a la factura: $nro_factura'");
+          $razon_com_proveedor = $link->query("SELECT razon_com_proveedor FROM proveedores WHERE id_proveedor='$proveedor'")->fetch_assoc()['razon_com_proveedor'];
+          $link->query("INSERT INTO facturas_pagos SET id_factura='-1', id_proveedor='$proveedor', tipo_pago='$tipo_pago', fecha='$fecha', banco='$banco', numero_cheque='$numero_cheque', fecha_emision='$fecha_emision', fecha_cobro='$fecha_cobro', titular='$titular', cuit='$cuit', monto='$montoFactura', origen='$origen', observaciones='Pago a favor a $razon_com_proveedor'");
         }
       } else {
         $link->query("UPDATE facturas_pagos SET id_factura='$id' WHERE id=$idPagoAFavor and id_proveedor='$proveedor';");
@@ -1036,10 +1041,12 @@ if ($_SESSION['usuario'] != '') {
             $montoRestante = $montoTotal;
             $montoTotal = 0;
           }
-          $facturasMayores[] = array(
-            'id' => intval($factura['id']),
-            'monto' => $montoRestante
-          );
+          if ($montoRestante > 0) {
+            $facturasMayores[] = array(
+              'id' => intval($factura['id']),
+              'monto' => $montoRestante
+            );
+          }
         }
       }
 

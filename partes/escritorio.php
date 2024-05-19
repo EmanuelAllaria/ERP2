@@ -102,7 +102,7 @@ if (isset($_GET['e']) && $_GET['e'] == 'crcok') {
                 </div>
             </div>
         </div>
-         <!-- Column -->
+        <!-- Column -->
         <!-- Column -->
         <div class="card">
             <div class="card-body">
@@ -111,16 +111,16 @@ if (isset($_GET['e']) && $_GET['e'] == 'crcok') {
                         <div class="d-flex no-block align-items-center">
                             <a href="index.php?pagina=pagos">
                                 <?php
-                                    $hoy = date("Y-m-d");
-                                    $total_gasto = 0;
-                                      $gastosHoy = $link->query("SELECT * FROM gastos WHERE fecha_gasto='$hoy'");
-                                      while ($gasto = mysqli_fetch_array($gastosHoy)) {
-                                        if ($gasto['monto_gasto'] !== null) {
-                                          $total_gasto = $total_gasto + intval($gasto['monto_gasto']);
-                                        }
-                                      }
+                                $hoy = date("Y-m-d");
+                                $total_gasto = 0;
+                                $gastosHoy = $link->query("SELECT * FROM gastos WHERE fecha_gasto='$hoy'");
+                                while ($gasto = mysqli_fetch_array($gastosHoy)) {
+                                    if ($gasto['monto_gasto'] !== null) {
+                                        $total_gasto = $total_gasto + intval($gasto['monto_gasto']);
+                                    }
+                                }
 
-                                        $total_formateado = number_format($total_gasto, 0, ',', '.');
+                                $total_formateado = number_format($total_gasto, 0, ',', '.');
                                 ?>
                                 <div>
                                     <h3><i class="icon-bag"></i></h3>
@@ -128,7 +128,7 @@ if (isset($_GET['e']) && $_GET['e'] == 'crcok') {
                                 </div>
                             </a>
                             <div class="ml-auto">
-                                <h2 class="counter text-success">$<?=$total_formateado?></h2>
+                                <h2 class="counter text-success">$<?= $total_formateado ?></h2>
                             </div>
                         </div>
                     </div>
@@ -281,7 +281,9 @@ if (isset($_GET['e']) && $_GET['e'] == 'crcok') {
                                             <option selected value="cheque">Cheque</option>
                                             <option value="mp">Mercado Pago</option>
                                             <option value="efectivo">Efectivo</option>
+                                            <option value="tarjeta de credito">Tarjeta de Crédito</option>
                                             <option value="transferencia">Transferencia</option>
+
                                         </select>
                                     </div>
                                 </div>
@@ -540,37 +542,37 @@ if (isset($_GET['e']) && $_GET['e'] == 'crcok') {
                             <!--/span-->
                         </div>
                         <div class="modal" id="myModal">
-                          <div class="modal-dialog">
-                            <div class="modal-content">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
 
-                              <!-- Encabezado del modal -->
-                              <div class="modal-header">
-                                <h4 class="modal-title" id="tituloModal">Editar Producto - </h4>
-                                <h4 class="modal-title" id="idCanasta"></h4>
-                                <button type="button" class="close" data-dismiss="modal">&times;</button>
-                              </div>
+                                    <!-- Encabezado del modal -->
+                                    <div class="modal-header">
+                                        <h4 class="modal-title" id="tituloModal">Editar Producto - </h4>
+                                        <h4 class="modal-title" id="idCanasta"></h4>
+                                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                    </div>
 
-                              <!-- Contenido del modal -->
-                              <div class="modal-body">
-                                <div class="row">
-                                    <h4 class="col-md-12">Producto: </h4>
-                                    <h4 class="col-md-12" id="producto"></h4>
+                                    <!-- Contenido del modal -->
+                                    <div class="modal-body">
+                                        <div class="row">
+                                            <h4 class="col-md-12">Producto: </h4>
+                                            <h4 class="col-md-12" id="producto"></h4>
+                                        </div>
+                                        <div class="row">
+                                            <h4 class="col-md-12">Cantidad: </h4>
+                                            <input type="number" id="ncantproducto_card" class="form-control" min="1">
+                                        </div>
+
+                                    </div>
+
+                                    <!-- Pie del modal -->
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                                        <button type="button" class="btn btn-primary" onclick="edita_canasta_compra_stock();">Guardar cambios</button>
+                                    </div>
+
                                 </div>
-                                <div class="row">
-                                    <h4 class="col-md-12">Cantidad: </h4>
-                                    <input type="number" id="ncantproducto_card" class="form-control" min="1">
-                                </div>
-                                
-                              </div>
-
-                              <!-- Pie del modal -->
-                              <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
-                                <button type="button" class="btn btn-primary" onclick="edita_canasta_compra_stock();">Guardar cambios</button>
-                              </div>
-
                             </div>
-                          </div>
                         </div>
                         <!--/row-->
                         <hr>
