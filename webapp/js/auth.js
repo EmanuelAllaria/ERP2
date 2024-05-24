@@ -1,5 +1,5 @@
 $(document).ready(function(){
-  var url ='https://sistemabigpollo.mayoristasbahia.com/procesos/functions-online.php?';
+  var url ='https://sistemabigpollo.mayoristasbahia.com//procesos/functions-online.php?';
   
     //Login Function
     $("#login").click(function(){
