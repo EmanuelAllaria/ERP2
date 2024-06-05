@@ -170,16 +170,16 @@
 
                   foreach ($factura_pago as $pago) {
                   ?>
-                      <tr>
+                    <tr>
                       <td><?php echo $row['nro_factura'] ?></td>
                       <td></td>
                       <td><?php echo $pago['fecha_emision'] ?></td>
                       <td>PAGO</td>
                       <td></td>
                       <?php if (strpos($pago['observaciones'], 'Sobró del pago a la factura') !== false) { ?>
-                      <td style="color:blue;"><b>$<?php echo number_format($pago['monto'], 2, ',', '.'); ?></b></td>
+                        <td style="color:blue;"><b>$<?php echo number_format($pago['monto'], 2, ',', '.'); ?></b></td>
                       <?php } else { ?>
-                      <td style="color:green;"><b>$<?php echo number_format($pago['monto'], 2, ',', '.'); ?></b></td>
+                        <td style="color:green;"><b>$<?php echo number_format($pago['monto'], 2, ',', '.'); ?></b></td>
                       <?php } ?>
                       <?php
                       $saldo_final -= $pago['monto'];
@@ -188,11 +188,11 @@
                       ?>
                       <td>$<?php echo number_format($saldo, 2, ',', '.'); ?></td>
                       <td><a target="_blank" href="./paginas/recibo_factura_pago.php?id_factura=<?php echo $id_factura; ?>&id_pago=<?php echo $pago['id'] ?>"><i class="fa-solid fa-receipt"></i></a></td>
-                      </tr>
-                  <?php
+                    </tr>
+                <?php
                   }
                 }
-                  ?>
+                ?>
               </tbody>
               <tfoot>
                 <tr>
@@ -235,14 +235,16 @@
   function filtrar_prov() {
     var datodesde = $('#d').val(); // get selected value
     var datohasta = $('#h').val(); // get selected value
-    var datoproveedor = $('#proveedorsel option:selected').val(); // get selected value
-    var datosaldo = $('#saldosel').val()
+    var datoproveedor = $('#proveedorsel').val(); // get selected value
+    console.log(datodesde);
+    console.log(datohasta);
+    console.log(datoproveedor);
     if (datodesde) { // require a URL
-      window.location = 'index.php?pagina=facturas&d=' + datodesde + '&h=' + datohasta + '&p=' + datoproveedor + '&s=' + datosaldo; // redirect
+      window.location = 'index.php?pagina=facturas&d=' + datodesde + '&h=' + datohasta + '&p=' + datoproveedor; // redirect
     }
     return false;
   };
 </script>
 <script>
- $('#total_periodo').html('<span class="btn btn-success pull-right"><b>TOTAL: $<?php echo number_format($saldo_final, 2, ',', '.'); ?></b></span>');
+  $('#total_periodo').html('<span class="btn btn-success pull-right"><b>TOTAL: $<?php echo number_format($saldo_final, 2, ',', '.'); ?></b></span>');
 </script>

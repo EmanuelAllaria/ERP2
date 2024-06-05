@@ -23,6 +23,19 @@ if ($_SESSION['usuario'] != '') { ?>
         bottom: 20px;
         right: 20px;
       }
+
+      #modal_agregar_pago_factura {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 999999;
+        background: #fff;
+        width: 75%;
+        height: 70%;
+        border-radius: 20px;
+        box-shadow: #000 5px 5px 20px 0;
+      }
     </style>
   </head>
 
@@ -132,31 +145,75 @@ if ($_SESSION['usuario'] != '') { ?>
         $('.row.nro_cheque').hide();
         $('.row.fecha_emision').hide();
         $('.row.fecha_cobro').hide();
-        if (tipo_pago === 'cheque' || tipo_pago === 'mp' || tipo_pago === 'transferencia') {
+        $('.row.titular').hide();
+        $('.row.cuit').hide();
+        $('.row.monto').hide();
+        $('.row.origen').hide();
+        $('.row.detalle').hide();
+        $('.row.agregar_cheque').hide();
+        if (tipo_pago === 'mp') {
+          $('.row.fecha_emision').show();
+          $('.row.fecha_cobro').show();
+          $('.row.titular').show();
+          $('.row.cuit').show();
+          $('.row.monto').show();
+          $('.row.origen').show();
+          $('.row.detalle').show();
+        } else if (tipo_pago === 'cheque' || tipo_pago === 'transferencia') {
+          $('.row.agregar_cheque').show();
+        } else if (tipo_pago === 'efectivo') {
+          $('.row.fecha_emision').show();
+          $('.row.fecha_cobro').show();
+          $('.row.cuit').show();
+          $('.row.monto').show();
+          $('.row.detalle').show();
+        } else if (tipo_pago === 'tarjeta de credito') {
           $('.row.banco').show();
           $('.row.fecha_emision').show();
           $('.row.fecha_cobro').show();
-        }
-        if (tipo_pago === 'cheque') {
-          $('.row.nro_cheque').show();
+          $('.row.titular').show();
+          $('.row.cuit').show();
+          $('.row.monto').show();
+          $('.row.origen').show();
+          $('.row.detalle').show();
         }
         $('#tipo_pago_factura_pago').on('change', function() {
           let tipo_pago = $(this).val();
-
-          // Oculta todas las filas
           $('.row.banco').hide();
           $('.row.nro_cheque').hide();
           $('.row.fecha_emision').hide();
           $('.row.fecha_cobro').hide();
-
-          // Muestra las filas según el tipo de pago seleccionado
-          if (tipo_pago === 'cheque' || tipo_pago === 'mp' || tipo_pago === 'transferencia') {
+          $('.row.titular').hide();
+          $('.row.cuit').hide();
+          $('.row.monto').hide();
+          $('.row.origen').hide();
+          $('.row.detalle').hide();
+          $('.row.agregar_cheque').hide();
+          if (tipo_pago === 'mp') {
+            $('.row.fecha_emision').show();
+            $('.row.fecha_cobro').show();
+            $('.row.titular').show();
+            $('.row.cuit').show();
+            $('.row.monto').show();
+            $('.row.origen').show();
+            $('.row.detalle').show();
+          } else if (tipo_pago === 'cheque' || tipo_pago === 'transferencia') {
+            $('.row.agregar_cheque').show();
+          } else if (tipo_pago === 'efectivo') {
+            $('.row.fecha_emision').show();
+            $('.row.fecha_cobro').show();
+            $('.row.cuit').show();
+            $('.row.monto').show();
+            $('.row.detalle').show();
+          } else if (tipo_pago === 'tarjeta de credito') {
             $('.row.banco').show();
             $('.row.fecha_emision').show();
             $('.row.fecha_cobro').show();
-          }
-          if (tipo_pago === 'cheque') {
-            $('.row.nro_cheque').show();
+            $('.row.titular').show();
+            $('.row.cuit').show();
+            $('.row.monto').show();
+            $('.row.origen').show();
+            $('.row.detalle').show();
           }
         });
       });

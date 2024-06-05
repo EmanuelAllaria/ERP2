@@ -1,5 +1,6 @@
 /* inicio variables generales*/
 var canasta = [];
+var facturas = [];
 
 /* fin variables generales*/
 $("#avatar").html(
@@ -54,6 +55,83 @@ function llena_canasta_compra_stock() {
     dibuja_canasta();
     $("#producto_card").val("");
     $("#cantproducto_card").val("1");
+  }
+}
+
+function add_factura_pago_cheque() {
+  var proveedor = $("#proveedor").val();
+  var total = $("#nro_factura_pago").val();
+  var fecha = $("#fecha_factura_pago").val();
+  var banco = $("#banco_factura_pago2").val();
+  var tipo_pago = $("#tipo_pago_factura_pago").val();
+  var numero_cheque = $("#numero_cheque_factura_pago2").val();
+  var fecha_emision = $("#fecha_emision_factura_pago2").val();
+  var fecha_cobro = $("#fecha_cobro_factura_pago2").val();
+  var titular = $("#titular_factura_pago2").val();
+  var cuit = $("#cuit_factura_pago2").val();
+  var monto = $("#monto_factura_pago2").val();
+  var origen = $("#origen_factura_pago2").val();
+  var string2 =
+    "accion=add_facturas_pago&esMasDeUno=TRUE&proveedor=" +
+    proveedor +
+    "&total=" +
+    total +
+    "&fecha=" +
+    fecha +
+    "&banco=" +
+    banco +
+    "&numero_cheque=" +
+    numero_cheque +
+    "&fecha_emision=" +
+    fecha_emision +
+    "&fecha_cobro=" +
+    fecha_cobro +
+    "&titular=" +
+    titular +
+    "&cuit=" +
+    cuit +
+    "&monto=" +
+    monto +
+    "&origen=" +
+    origen +
+    "&tipo_pago=" +
+    tipo_pago;
+
+  if (!monto || monto == "") {
+    alert("Ingresar monto");
+  } else {
+    $.ajax({
+      type: "POST",
+      url: "procesos/crud.php?",
+      data: string2,
+      success: function (data) {
+        console.log(data);
+        data = data.split(" ? ");
+        if (data[1] != "FALSE") {
+          facturas.push(JSON.parse(data));
+          dibuja_factura();
+          $("#modal_agregar_pago_factura").hide();
+          $("#banco_factura_pago2").val("");
+          $("#numero_cheque_factura_pago2").val("");
+          $("#fecha_emision_factura_pago2").val("");
+          $("#fecha_cobro_factura_pago2").val("");
+          $("#titular_factura_pago2").val("");
+          $("#cuit_factura_pago2").val("");
+          $("#monto_factura_pago2").val("");
+          $("#origen_factura_pago2").val("");
+        } else {
+          alert(data[0] || "Error al insertar pago factura");
+        }
+      },
+    });
+  }
+}
+
+function abrirModalAddFacturaPagoCheque() {
+  if ($("#provee_pago").val()) {
+    $("#modal_agregar_pago_factura").show();
+  } else {
+    alert("Tienes que seleccionar un proveedor");
   }
 }
 
@@ -165,6 +243,23 @@ function del_item_canasta(id) {
   dibuja_canasta();
 }
 
+function del_item_factura(id) {
+  var string = "accion=remove_pago&id_pago=" + facturas[id].id;
+  $.ajax({
+    type: "POST",
+    url: "procesos/crud.php?",
+    data: string,
+    success: function (data) {
+      if (data !== "FALSE") {
+        facturas.splice(id, 1);
+        dibuja_factura();
+      } else {
+        alert("Error al eliminar el pago");
+      }
+    },
+  });
+}
+
 function editar_item_canasta(id) {
   var cantidadActual = canasta.items[id].cant;
   $("#ncantproducto_card").val(cantidadActual);
@@ -226,6 +321,30 @@ function dibuja_canasta() {
   }
   esqueleto += "</table>";
   $("#list_prod_card").html(esqueleto);
+}
+
+function dibuja_factura() {
+  var can = facturas.length;
+  console.log(facturas);
+  console.log(can);
+  var esqueleto =
+    '<table style="width:100%"><th>Proveedor</th><th>Monto</th><th>Tipo de Pago</th><th>Numero de Cheque</th><th>Acciones</th>';
+  for (var i = 0; i < can; i++) {
+    esqueleto +=
+      "<tr><td>" +
+      facturas[i].nombre_proveedor +
+      "</td><td>" +
+      facturas[i].monto +
+      "</td><td>" +
+      facturas[i].tipo_pago +
+      "</td><td>" +
+      facturas[i].numero_cheque +
+      '</td><td><i class="ti-close" onclick="del_item_factura(' +
+      i +
+      ')" aria-hidden="true"></i></td></tr>';
+  }
+  esqueleto += "</table>";
+  $("#list_cheque_card").html(esqueleto);
 }
 
 $("#agregar_cliente").click(function () {
@@ -1259,7 +1378,6 @@ function add_factura() {
   var monto = $("#monto_factura").val();
   var obs = $("#detalle_factura").val();
 
-  console.log(proveedor);
   var string2 =
     "accion=add_facturas&proveedor=" +
     proveedor +
@@ -1285,9 +1403,12 @@ function add_factura() {
     },
   });
 }
+function cancel_add_facturas_pago() {
+  $("$modal_agregar_pago_factura").hide();
+}
 function add_factura_pago() {
   var proveedor = $("#proveedor").val();
-  var factura = $("#nro_factura_pago").val();
+  var total = $("#nro_factura_pago").val();
   var fecha = $("#fecha_factura_pago").val();
   var banco = $("#banco_factura_pago").val();
   var tipo_pago = $("#tipo_pago_factura_pago").val();
@@ -1297,15 +1418,13 @@ function add_factura_pago() {
   var titular = $("#titular_factura_pago").val();
   var cuit = $("#cuit_factura_pago").val();
   var monto = $("#monto_factura_pago").val();
-  var total = $("#total_factura_pago").val();
-  var facturas = $("#facturas_factura_pago").val();
   var origen = $("#origen_factura_pago").val();
   var obs = $("#detalle_factura_pago").val();
   var string2 =
     "accion=add_facturas_pago&proveedor=" +
     proveedor +
-    "&factura=" +
-    factura +
+    "&total=" +
+    total +
     "&fecha=" +
     fecha +
     "&banco=" +
@@ -1322,18 +1441,20 @@ function add_factura_pago() {
     cuit +
     "&monto=" +
     monto +
-    "&total=" +
-    total +
-    "&facturas=" +
-    facturas +
     "&origen=" +
     origen +
     "&obs=" +
     obs +
     "&tipo_pago=" +
     tipo_pago;
-  if (!monto || monto == "") {
+  if (
+    tipo_pago !== "cheque" &&
+    tipo_pago !== "transferencia" &&
+    (!monto || monto == "")
+  ) {
     alert("Ingresar monto");
+  } else if (tipo_pago !== "cheque" || tipo_pago !== "transferencia") {
+    window.location.href = "index.php?pagina=facturas";
   } else {
     $.ajax({
       type: "POST",
@@ -1398,17 +1519,18 @@ function cambiafacturasprove() {
         console.log(data);
         data.sort((a, b) => a.id - b.id);
         $("#nro_factura_pago").html("");
-        var opciones = "";
+        var total = 0;
         data.forEach((e) => {
-          opciones += `<option saldo="${e.saldo}" value="${e.id}">${e.nro_factura} (SALDO: $${e.saldo})</option>`;
+          total += parseInt(e.saldo);
         });
-        $("#nro_factura_pago").html(opciones);
+        $("#nro_factura_pago").val(total);
         $("#total_factura_pago").val(
           data.filter((saldo) => saldo.id === $("#nro_factura_pago").val())[0]
             .saldo
         );
         $("#facturas_factura_pago").val(JSON.stringify(data));
       } else {
+        $("#nro_factura_pago").val(0);
         alert("Error al cargar facturas");
       }
     },
