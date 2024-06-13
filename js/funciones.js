@@ -63,7 +63,6 @@ function add_factura_pago_cheque() {
   var total = $("#nro_factura_pago").val();
   var fecha = $("#fecha_factura_pago").val();
   var banco = $("#banco_factura_pago2").val();
-  var tipo_pago = $("#tipo_pago_factura_pago").val();
   var numero_cheque = $("#numero_cheque_factura_pago2").val();
   var fecha_emision = $("#fecha_emision_factura_pago2").val();
   var fecha_cobro = $("#fecha_cobro_factura_pago2").val();
@@ -72,7 +71,7 @@ function add_factura_pago_cheque() {
   var monto = $("#monto_factura_pago2").val();
   var origen = $("#origen_factura_pago2").val();
   var string2 =
-    "accion=add_facturas_pago&esMasDeUno=TRUE&proveedor=" +
+    "accion=add_facturas_cheque&proveedor=" +
     proveedor +
     "&total=" +
     total +
@@ -93,9 +92,7 @@ function add_factura_pago_cheque() {
     "&monto=" +
     monto +
     "&origen=" +
-    origen +
-    "&tipo_pago=" +
-    tipo_pago;
+    origen;
 
   if (!monto || monto == "") {
     alert("Ingresar monto");
@@ -120,7 +117,7 @@ function add_factura_pago_cheque() {
           $("#monto_factura_pago2").val("");
           $("#origen_factura_pago2").val("");
         } else {
-          alert(data[0] || "Error al insertar pago factura");
+          alert(data[0] || "Error al insertar el cheque");
         }
       },
     });
@@ -244,7 +241,7 @@ function del_item_canasta(id) {
 }
 
 function del_item_factura(id) {
-  var string = "accion=remove_pago&id_pago=" + facturas[id].id;
+  var string = "accion=remove_cheque&id_pago=" + facturas[id].id;
   $.ajax({
     type: "POST",
     url: "procesos/crud.php?",
@@ -1396,7 +1393,7 @@ function add_factura() {
     success: function (data) {
       console.log(data);
       if (data != "FALSE") {
-        window.location.href = "index.php?pagina=facturas&msg=" + data;
+        window.location.href = "index.php?pagina=facturas";
       } else {
         alert("Error al insertar factura");
       }
@@ -1420,41 +1417,81 @@ function add_factura_pago() {
   var monto = $("#monto_factura_pago").val();
   var origen = $("#origen_factura_pago").val();
   var obs = $("#detalle_factura_pago").val();
-  var string2 =
-    "accion=add_facturas_pago&proveedor=" +
-    proveedor +
-    "&total=" +
-    total +
-    "&fecha=" +
-    fecha +
-    "&banco=" +
-    banco +
-    "&numero_cheque=" +
-    numero_cheque +
-    "&fecha_emision=" +
-    fecha_emision +
-    "&fecha_cobro=" +
-    fecha_cobro +
-    "&titular=" +
-    titular +
-    "&cuit=" +
-    cuit +
-    "&monto=" +
-    monto +
-    "&origen=" +
-    origen +
-    "&obs=" +
-    obs +
-    "&tipo_pago=" +
-    tipo_pago;
+  var string2 = "";
+  if (tipo_pago === "cheque") {
+    monto = 0;
+    var ids_cheques = "";
+    facturas.forEach((factura) => {
+      monto += parseInt(factura.monto);
+      if (ids_cheques !== "") {
+        ids_cheques += ", ";
+      }
+      ids_cheques += factura.id;
+    });
+    string2 =
+      "accion=add_facturas_pago&proveedor=" +
+      proveedor +
+      "&total=" +
+      total +
+      "&fecha=" +
+      fecha +
+      "&banco=" +
+      banco +
+      "&numero_cheque=" +
+      numero_cheque +
+      "&fecha_emision=" +
+      fecha_emision +
+      "&fecha_cobro=" +
+      fecha_cobro +
+      "&titular=" +
+      titular +
+      "&cuit=" +
+      cuit +
+      "&monto=" +
+      monto +
+      "&origen=" +
+      origen +
+      "&obs=" +
+      obs +
+      "&tipo_pago=" +
+      tipo_pago +
+      "&ids_cheques=" +
+      ids_cheques;
+  } else {
+    string2 =
+      "accion=add_facturas_pago&proveedor=" +
+      proveedor +
+      "&total=" +
+      total +
+      "&fecha=" +
+      fecha +
+      "&banco=" +
+      banco +
+      "&numero_cheque=" +
+      numero_cheque +
+      "&fecha_emision=" +
+      fecha_emision +
+      "&fecha_cobro=" +
+      fecha_cobro +
+      "&titular=" +
+      titular +
+      "&cuit=" +
+      cuit +
+      "&monto=" +
+      monto +
+      "&origen=" +
+      origen +
+      "&obs=" +
+      obs +
+      "&tipo_pago=" +
+      tipo_pago;
+  }
   if (
     tipo_pago !== "cheque" &&
     tipo_pago !== "transferencia" &&
     (!monto || monto == "")
   ) {
     alert("Ingresar monto");
-  } else if (tipo_pago !== "cheque" || tipo_pago !== "transferencia") {
-    window.location.href = "index.php?pagina=facturas";
   } else {
     $.ajax({
       type: "POST",
@@ -1464,7 +1501,7 @@ function add_factura_pago() {
         console.log(data);
         data = data.split(" ? ");
         if (data[1] != "FALSE") {
-          window.location.href = "index.php?pagina=facturas&msg=" + data;
+          window.location.href = "index.php?pagina=deudas";
         } else {
           alert(data[0] || "Error al insertar pago factura");
         }

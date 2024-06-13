@@ -1,43 +1,58 @@
 <?php
 require_once '../procesos/functions-online.php';
 
-if (isset($_GET['id_pago'], $_GET['id_factura'])) {
-    $id_factura = $_GET['id_factura'];
+if (isset($_GET['proveedor'], $_GET['id_pago'])) {
+    $proveedor = $_GET['proveedor'];
     $id_pago = $_GET['id_pago'];
-    $factura_pago = $link->query("SELECT facturas_pagos.*, facturas.id_proveedor, facturas.monto AS total, proveedores.razon_com_proveedor
-                                    FROM facturas_pagos 
-                                    INNER JOIN facturas ON facturas.id = facturas_pagos.id_factura 
-                                    INNER JOIN proveedores ON proveedores.id_proveedor = facturas.id_proveedor
-                                    WHERE facturas_pagos.id_factura='$id_factura' ORDER BY id ASC");
-    $factura = null;
-    $facturas = array();
+    $tipo_pago = isset($_GET['tipo_pago']) ? $_GET['tipo_pago'] : null;
+
+
+    if ($tipo_pago !== 'cheque') {
+        $all_pagos_query = $link->query("SELECT facturas_pagos.*, facturas_pagos.monto AS monto_factura, proveedores.razon_com_proveedor as proveedor
+                                        FROM facturas_pagos
+                                        INNER JOIN proveedores ON proveedores.id_proveedor = facturas_pagos.id_proveedor
+                                        WHERE facturas_pagos.id_proveedor='$proveedor'
+                                        AND facturas_pagos.id <= '$id_pago'
+                                        ORDER BY facturas_pagos.id ASC");
+    } else {
+        $all_pagos_query = $link->query("SELECT facturas_cheques.*, facturas_cheques.monto AS monto_factura, facturas_pagos.*, proveedores.razon_com_proveedor as proveedor
+                            FROM facturas_cheques
+                            INNER JOIN facturas_pagos ON facturas_pagos.id = facturas_cheques.id_pago
+                            INNER JOIN proveedores ON proveedores.id_proveedor = facturas_pagos.id_proveedor
+                            WHERE facturas_pagos.id_proveedor='$proveedor'
+                            AND facturas_cheques.id_pago='$id_pago'
+                            ORDER BY facturas_cheques.id ASC");
+    }
+
+    $facturas_query = $link->query("SELECT facturas.*, proveedores.razon_com_proveedor as proveedor
+    FROM facturas
+    INNER JOIN proveedores ON proveedores.id_proveedor = facturas.id_proveedor
+    WHERE facturas.id_proveedor='$proveedor'
+    ORDER BY fecha ASC");
+
+    $facturas_pagos = array();
+    $nombre_proveedor = '';
     $total_factura = 0;
+    $total_pago = 0;
 
-    while ($row = mysqli_fetch_assoc($factura_pago)) {
-        $facturas[] = $row;
-        if (intval($row['id']) === intval($id_pago)) {
-            $factura = $row;
-            $total_factura += $row['total'];
+    while ($row = mysqli_fetch_assoc($facturas_query)) {
+        $total_factura += $row['monto'];
+        $nombre_proveedor = $row['proveedor'];
+    }
+
+    while ($row2 = mysqli_fetch_assoc($all_pagos_query)) {
+        if (intval($row2['id']) === intval($id_pago)) {
+            $facturas_pagos[] = $row2;
+            $total_pago += $row2['monto_factura'];
+        } else {
+            $total_factura -= $row2['monto_factura'];
         }
     }
 
-    if ($factura !== null) {
-        $facturas_anteriores = array_filter($facturas, function ($f) use ($factura) {
-            if (intval($f['id']) < intval($factura['id'])) {
-                return true;
-            }
-            return false;
-        });
-    
-        if (!empty($facturas_anteriores)) {
-            foreach ($facturas_anteriores as $factura_anterior) {
-                $total_factura -= $factura_anterior['monto'];
-            }
-        }
-    }
-    
-} else {
-    header('location: ../index.php');
+    $fecha_de_pago = array_reduce($facturas_pagos, function ($max, $current) {
+        return $current['id'] > $max['id'] ? $current : $max;
+    }, $facturas_pagos[0]);
+    $fecha_de_pago = $fecha_de_pago['fecha_emision'] ?: $fecha_de_pago['fecha'];
 }
 ?>
 
@@ -58,7 +73,7 @@ if (isset($_GET['id_pago'], $_GET['id_factura'])) {
                 <h2>Recibo de Pago</h2>
             </div>
             <div class="col-md">
-                <h2 style="text-align: end;">#<?php echo $id_factura ?></h2>
+                <h2 style="text-align: end;">#<?php echo $id_pago ?></h2>
             </div>
         </div>
         <hr>
@@ -69,52 +84,59 @@ if (isset($_GET['id_pago'], $_GET['id_factura'])) {
                     PADSA BAHIA SA</p>
             </div>
             <div class="col-md-6 d-flex flex-column align-items-end">
-                <h3><strong>Proveedor <?php echo $factura['razon_com_proveedor']; ?></strong></h3>
+                <p><strong>Fecha de pago:</strong> <?php echo date('d/m/Y', strtotime($fecha_de_pago)); ?></p>
                 <br>
-                <p><strong>Fecha de pago:</strong> <?php echo date('d/m/Y', strtotime($factura['fecha_emision'])); ?></p>
+                <h3>Total debe a proveedor: $<?php echo number_format($total_factura, 2, ',', '.'); ?></h3>
             </div>
         </div>
         <div class="row mt-4">
             <div class="col-md-12">
                 <table class="table table-bordered">
                     <thead>
-                        <tr>
-                            <th>Fecha</th>
-                            <th>Numero de Factura</th>
-                            <th>Tipo</th>
-                            <th>Detalle</th>
-                            <th>Total</th>
-                            <th>Pago</th>
-                            <th>Saldo</th>
-                            <th>Observaciónes</th>
+                        <tr style="width: 100%;">
+                            <th style="width: 12.5%;">Fecha</th>
+                            <th style="width: 12.5%;">Numero de Pago</th>
+                            <th style="width: 12.5%;">Tipo</th>
+                            <th style="width: 12.5%;">Detalle</th>
+                            <th style="width: 12.5%;">Total</th>
+                            <th style="width: 12.5%;">Pago</th>
+                            <th style="width: 12.5%;">Saldo</th>
+                            <th style="width: 12.5%;">Observaciónes</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td><?php echo date('d/m/Y', strtotime($factura['fecha_emision'])); ?></td>
-                            <td>#<?php echo $factura['id']; ?></td>
-                            <td>PAGO</td>
-                            <td><?php echo strtoupper($factura['tipo_pago']); ?></td>
-                            <td>$<?php echo number_format($total_factura, 2, ',', '.'); ?></td>
-                            <td>$<?php echo number_format($factura['monto'], 2, ',', '.'); ?></td>
-                            <td>$<?php echo number_format(intval($total_factura) - intval($factura['monto']), 2, ',', '.'); ?></td>
-                            <td>1</td>
-                        </tr>
+                        <?php
+                        $saldo = $total_factura;
+                        $pagos_previos = 0;
+
+                        foreach ($facturas_pagos as $key => $factura_pago) {
+                            if ($factura_pago['id'] < $id_pago) {
+                                $pagos_previos += $factura_pago['monto_factura'];
+                            }
+
+                            $total = ($key == 0) ? $total_factura : $saldo;
+                            $saldo = $total_factura - $pagos_previos - $factura_pago['monto_factura'];
+
+                        ?>
+                            <tr style="width: 100%;">
+                                <td style="width: 12.5%;word-break: break-all;"><?php echo date('d/m/Y', strtotime($factura_pago['fecha'])); ?></td>
+                                <td style="width: 12.5%;word-break: break-all;">#<?php echo $factura_pago['id']; ?></td>
+                                <td style="width: 12.5%;word-break: break-all;">PAGO</td>
+                                <td style="width: 12.5%;word-break: break-all;"><?php echo strtoupper($factura_pago['tipo_pago']); ?></td>
+                                <td style="width: 12.5%;word-break: break-all;">$<?php echo number_format($total, 2, ',', '.'); ?></td>
+                                <td style="width: 12.5%;word-break: break-all;">$<?php echo number_format($factura_pago['monto_factura'], 2, ',', '.'); ?></td>
+                                <td style="width: 12.5%;word-break: break-all;">$<?php echo number_format($saldo, 2, ',', '.'); ?></td>
+                                <td style="width: 12.5%;word-break: break-all;"><?php echo $factura_pago['observaciones']; ?></td>
+                            </tr>
+                        <?php } ?>
                     </tbody>
                 </table>
             </div>
         </div>
         <div class="row mt-4">
             <div class="col-md-12 d-flex justify-content-end">
-                <h3 class="border-top py-2"><strong>Total:</strong> $<?php echo number_format(intval($total_factura) - intval($factura['monto']), 2, ',', '.'); ?></h3>
+                <h3 class="border-top py-2"><strong>Total:</strong> $<?php echo number_format($total_factura - $total_pago, 2, ',', '.'); ?></h3>
             </div>
-        </div>
-        <hr>
-        <div class="col-md-12">
-            <h3>Observaciónes</h3>
-            <p>
-                <?php echo $factura['observaciones'] ?: '-'; ?>
-            </p>
         </div>
     </div>
 </body>

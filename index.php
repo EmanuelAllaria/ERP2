@@ -159,7 +159,7 @@ if ($_SESSION['usuario'] != '') { ?>
           $('.row.monto').show();
           $('.row.origen').show();
           $('.row.detalle').show();
-        } else if (tipo_pago === 'cheque' || tipo_pago === 'transferencia') {
+        } else if (tipo_pago === 'cheque') {
           $('.row.agregar_cheque').show();
         } else if (tipo_pago === 'efectivo') {
           $('.row.fecha_emision').show();
@@ -167,7 +167,7 @@ if ($_SESSION['usuario'] != '') { ?>
           $('.row.cuit').show();
           $('.row.monto').show();
           $('.row.detalle').show();
-        } else if (tipo_pago === 'tarjeta de credito') {
+        } else if (tipo_pago === 'tarjeta de credito' || tipo_pago === 'transferencia') {
           $('.row.banco').show();
           $('.row.fecha_emision').show();
           $('.row.fecha_cobro').show();
@@ -197,7 +197,7 @@ if ($_SESSION['usuario'] != '') { ?>
             $('.row.monto').show();
             $('.row.origen').show();
             $('.row.detalle').show();
-          } else if (tipo_pago === 'cheque' || tipo_pago === 'transferencia') {
+          } else if (tipo_pago === 'cheque') {
             $('.row.agregar_cheque').show();
           } else if (tipo_pago === 'efectivo') {
             $('.row.fecha_emision').show();
@@ -205,7 +205,7 @@ if ($_SESSION['usuario'] != '') { ?>
             $('.row.cuit').show();
             $('.row.monto').show();
             $('.row.detalle').show();
-          } else if (tipo_pago === 'tarjeta de credito') {
+          } else if (tipo_pago === 'tarjeta de credito' || tipo_pago === 'transferencia') {
             $('.row.banco').show();
             $('.row.fecha_emision').show();
             $('.row.fecha_cobro').show();

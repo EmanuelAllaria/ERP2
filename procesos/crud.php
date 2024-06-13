@@ -1002,11 +1002,11 @@ if ($_SESSION['usuario'] != '') {
   }
   /*termina insercion adelanto*/
 
-  if (isset($_POST['accion']) && $_POST['accion'] == 'remove_pago') {
+  if (isset($_POST['accion']) && $_POST['accion'] == 'remove_cheque') {
     $id_pago = $_POST['id_pago'];
-    $remove_pago = $link->query("DELETE FROM facturas_pagos WHERE id='$id_pago'");
+    $remove_cheque = $link->query("DELETE FROM facturas_cheques WHERE id='$id_pago'");
 
-    if ($remove_pago) {
+    if ($remove_cheque) {
       echo $id_pago;
     } else {
       echo 'FALSE';
@@ -1026,34 +1026,51 @@ if ($_SESSION['usuario'] != '') {
     $cuit = $_POST['cuit'];
     $monto = $_POST['monto'];
     $origen = $_POST['origen'];
-    $esMasDeUno = isset($_POST['esMasDeUno']) ? $_POST['esMasDeUno'] : 'FALSE';
-    $data = array();
+    $ids_cheques = $_POST['tipo_pago'] === 'cheque' ? explode(', ', $_POST['ids_cheques']) : null;
     $inserta = null;
-    $inserta2 = null;
 
-    if (intval($total) >= intval($monto)) {
-      $inserta = $link->query("INSERT INTO facturas_pagos SET id_proveedor='$proveedor', tipo_pago='$tipo_pago', fecha='$fecha', banco='$banco', numero_cheque='$numero_cheque', fecha_emision='$fecha_emision', fecha_cobro='$fecha_cobro', titular='$titular', cuit='$cuit', monto='$monto', origen='$origen'");
-    } else if (intval($monto) > intval($total)) {
-      $nombreProveedor = $link->query("select razon_com_proveedor from proveedores where id_proveedor = '$proveedor'")->fetch_assoc()['razon_com_proveedor'];
-      $saldo = intval($monto) - intval($total);
-      $inserta = $link->query("INSERT INTO facturas_pagos SET id_proveedor='$proveedor', tipo_pago='$tipo_pago', fecha='$fecha', banco='$banco', numero_cheque='$numero_cheque', fecha_emision='$fecha_emision', fecha_cobro='$fecha_cobro', titular='$titular', cuit='$cuit', monto='$total', origen='$origen'");
-      $inserta2 = $link->query("INSERT INTO facturas_pagos SET id_proveedor='$proveedor', tipo_pago='$tipo_pago', fecha='$fecha', banco='$banco', numero_cheque='$numero_cheque', fecha_emision='$fecha_emision', fecha_cobro='$fecha_cobro', titular='$titular', cuit='$cuit', monto='$saldo', origen='$origen', observaciones='Sobró del pago a el Proveedor: $nombreProveedor'");
+    if ($_POST['tipo_pago'] !== 'cheque') {
+      $inserta = $link->query("INSERT INTO facturas_pagos SET id_proveedor='$proveedor', tipo_pago='$tipo_pago', fecha='$fecha', banco='$banco', fecha_emision='$fecha_emision', fecha_cobro='$fecha_cobro', titular='$titular', cuit='$cuit', monto='$monto', origen='$origen'");
+      $id = mysqli_insert_id($link);
+    } else {
+      $inserta = $link->query("INSERT INTO facturas_pagos SET id_proveedor='$proveedor', tipo_pago='$tipo_pago', fecha='$fecha', monto='$monto'");
+      $id = mysqli_insert_id($link);
+      foreach ($ids_cheques as $key => $id_cheque) {
+        $link->query("UPDATE facturas_cheques SET id_pago='$id' WHERE id='$id_cheque'");
+      }
     }
+
+    if ($inserta) {
+      echo $id . '@' . $monto;
+    } else {
+      echo 'FALSE';
+    }
+  }
+
+  if (isset($_POST['accion']) && $_POST['accion'] == 'add_facturas_cheque') {
+    $proveedor = $_POST['proveedor'];
+    $total = $_POST['total'];
+    $banco = $_POST['banco'];
+    $numero_cheque = $_POST['numero_cheque'];
+    $fecha_emision = $_POST['fecha_emision'];
+    $fecha_cobro = $_POST['fecha_cobro'];
+    $titular = $_POST['titular'];
+    $cuit = $_POST['cuit'];
+    $monto = $_POST['monto'];
+    $origen = $_POST['origen'];
+    $inserta = null;
+
+    $inserta = $link->query("INSERT INTO facturas_cheques SET banco='$banco', numero_cheque='$numero_cheque', fecha_emision='$fecha_emision', fecha_cobro='$fecha_cobro', titular='$titular', cuit='$cuit', monto='$monto', origen='$origen'");
 
     $id = mysqli_insert_id($link);
 
     if ($inserta) {
-      if ($esMasDeUno === 'TRUE') {
-        $nombreProveedor = $link->query("select razon_com_proveedor from proveedores where id_proveedor = '$proveedor'")->fetch_assoc()['razon_com_proveedor'];
-        $selectPagoGuardado = $link->query("SELECT * FROM facturas_pagos WHERE id='$id'")->fetch_assoc();
-        $selectPagoGuardado['nombre_proveedor'] = $nombreProveedor;
-        if ($selectPagoGuardado) {
-          echo json_encode($selectPagoGuardado, JSON_PRETTY_PRINT);
-        } else {
-          echo $id . '@' . $monto;
-        }
-      } else {
-        echo $id . '@' . $monto;
+      $nombreProveedor = $link->query("select razon_com_proveedor from proveedores where id_proveedor = '$proveedor'")->fetch_assoc()['razon_com_proveedor'];
+      $selectPagoGuardado = $link->query("SELECT * FROM facturas_cheques WHERE id='$id'")->fetch_assoc();
+      $selectPagoGuardado['nombre_proveedor'] = $nombreProveedor;
+      $selectPagoGuardado['tipo_pago'] = 'cheque';
+      if ($selectPagoGuardado) {
+        echo json_encode($selectPagoGuardado, JSON_PRETTY_PRINT);
       }
     } else {
       echo 'FALSE';

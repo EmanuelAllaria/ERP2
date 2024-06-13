@@ -295,6 +295,7 @@ if (isset($_GET['e']) && $_GET['e'] == 'crcok') {
                                 </div>
                             </div>
                             <div id="list_cheque_card" style="width:100%"></div>
+                            <br>
                         </div>
                         <div class="row banco">
                             <div class="col-md-12">
@@ -529,7 +530,6 @@ if (isset($_GET['e']) && $_GET['e'] == 'crcok') {
                                     </select>
                                 </div>
                             </div>
-                            <!--/span-->
                             <div class="col-md-3">
                                 <div class="form-group">
                                     <label class="control-label">Cantidad</label>
@@ -544,7 +544,7 @@ if (isset($_GET['e']) && $_GET['e'] == 'crcok') {
                                 </div>
                             </div>
                             <div id="list_prod_card" style="width:100%"></div>
-                            <!--/span-->
+                            <br>
                         </div>
                         <div class="modal" id="myModal">
                             <div class="modal-dialog">
