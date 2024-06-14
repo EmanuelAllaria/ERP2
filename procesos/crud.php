@@ -1058,9 +1058,10 @@ if ($_SESSION['usuario'] != '') {
     $cuit = $_POST['cuit'];
     $monto = $_POST['monto'];
     $origen = $_POST['origen'];
+    $cheque_rechazado = $_POST['cheque_rechazado'];
     $inserta = null;
 
-    $inserta = $link->query("INSERT INTO facturas_cheques SET banco='$banco', numero_cheque='$numero_cheque', fecha_emision='$fecha_emision', fecha_cobro='$fecha_cobro', titular='$titular', cuit='$cuit', monto='$monto', origen='$origen'");
+    $inserta = $link->query("INSERT INTO facturas_cheques SET banco='$banco', numero_cheque='$numero_cheque', fecha_emision='$fecha_emision', fecha_cobro='$fecha_cobro', titular='$titular', cuit='$cuit', monto='$monto', origen='$origen', cheque_rechazado='$cheque_rechazado'");
 
     $id = mysqli_insert_id($link);
 

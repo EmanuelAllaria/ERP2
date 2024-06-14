@@ -172,7 +172,11 @@
                         echo "<td style='width: 12.5%;word-break: break-all;'>{$row_cheque['fecha_emision']}</td>";
                         echo "<td style='width: 12.5%;word-break: break-all;'>$" . number_format($row_cheque['monto'], 2, ',', '.') . "</td>";
                         echo "<td style='width: 12.5%;word-break: break-all;'>{$row_cheque['observaciones']}</td>";
-                        echo "<td style='width: 12.5%; word-break: break-all;'></td>";
+                        echo "<td style='width: 12.5%; word-break: break-all;'>" .
+                          ($row_cheque['cheque_rechazado'] == 1
+                            ? '<i title="Rechazado" class="fa-solid fa-circle" style="color:red;"></i>'
+                            : '<i title="Aceptado" class="fa-solid fa-circle" style="color:green;"></i>') .
+                          "</td>";
                         echo "</tr>";
                       }
                     }

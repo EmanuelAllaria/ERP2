@@ -778,6 +778,17 @@ if (isset($_GET['e']) && $_GET['e'] == 'crcok') {
                 <button class="btn btn-success" type="button" onclick="add_factura_pago_cheque()">Guardar</button>
                 <button class="btn btn-cancel" type="button" onclick="$('#modal_agregar_pago_factura').hide()">Cancelar</button>
             </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="comprobante">El cheque esta rechazado?</label>
+                    <div class="input-group mb-3">
+                        <select class="form-control" name="cheque_rechazado" id="cheque_rechazado_factura_pago2">
+                            <option selected value="1">Si</option>
+                            <option value="0">No</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
         </div>
         </form>
     </div>

@@ -70,6 +70,7 @@ function add_factura_pago_cheque() {
   var cuit = $("#cuit_factura_pago2").val();
   var monto = $("#monto_factura_pago2").val();
   var origen = $("#origen_factura_pago2").val();
+  var cheque_rechazado = $("#cheque_rechazado_factura_pago2").val();
   var string2 =
     "accion=add_facturas_cheque&proveedor=" +
     proveedor +
@@ -92,7 +93,9 @@ function add_factura_pago_cheque() {
     "&monto=" +
     monto +
     "&origen=" +
-    origen;
+    origen +
+    "&cheque_rechazado=" +
+    cheque_rechazado;
 
   if (!monto || monto == "") {
     alert("Ingresar monto");
@@ -116,6 +119,7 @@ function add_factura_pago_cheque() {
           $("#cuit_factura_pago2").val("");
           $("#monto_factura_pago2").val("");
           $("#origen_factura_pago2").val("");
+          $("#cheque_rechazado_factura_pago2").val("");
         } else {
           alert(data[0] || "Error al insertar el cheque");
         }
