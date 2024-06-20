@@ -147,6 +147,7 @@ $hasta = date("Y-m-d", strtotime('next Sunday '));
               <li><a href="index.php?pagina=deudas" class="dropdown-item">Listado de Deudas a Proveedores</a></li>
               <li><a href="index.php?pagina=facturas" class="dropdown-item">Listado de Facturas</a></li>
               <li><a href="index.php?pagina=pagos" class="dropdown-item">Listado de Pagos</a></li>
+              <li><a href="index.php?pagina=cheques_rechazados" class="dropdown-item">Listado de Cheques Rechazados</a></li>
             </div>
           </div>
           <div class="btn-group" style="margin-left: 10px;">

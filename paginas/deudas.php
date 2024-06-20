@@ -154,7 +154,7 @@
                                         echo "<td style='width: 14.2857142857142%;word-break: break-all;'>{$row['proveedor']}</td>";
                                         echo "<td style='width: 14.2857142857142%;word-break: break-all;'>{$pago['fecha_emision']}</td>";
                                         echo "<td style='width: 14.2857142857142%;word-break: break-all;'></td>";
-                                        echo "<td style='color: green;width: 14.2857142857142%;word-break: break-all;'>$" . number_format($pago['monto'], 2, ',', '.') . "</td>";
+                                        echo "<td style='color: green;width: 14.2857142857142%;word-break: break-all;'>$" . number_format($haber_total, 2, ',', '.') . "</td>";
                                         echo "<td style='width: 14.2857142857142%;word-break: break-all;'>$" . number_format($saldo_factura, 2, ',', '.') . "</td>";
                                         echo "<td style='width: 14.2857142857142%;word-break: break-all;'>{$pago['observaciones']}</td>";
                                         echo "<td style='width: 14.2857142857142%;word-break: break-all;'><a href='index.php?pagina=pagos&proveedor=3' onclick='filtrar_prov()' class='btn btn-info btn-lg' role='button'>Ver Pagos</a></td>";
@@ -197,5 +197,5 @@
         window.location.search = urlParams.toString();
     }
 
-$('#total_periodo').html('<span class="btn <?php echo $saldo_final > 0 ? 'btn-danger' : 'btn-success' ?> pull-right"><b>TOTAL: $<?php echo number_format($saldo_final, 0, '', '.'); ?></b></span>')
+    $('#total_periodo').html('<span class="btn <?php echo $saldo_final > 0 ? 'btn-danger' : 'btn-success' ?> pull-right"><b>TOTAL: $<?php echo number_format($saldo_final, 0, '', '.'); ?></b></span>')
 </script>

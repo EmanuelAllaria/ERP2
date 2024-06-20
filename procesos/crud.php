@@ -1005,8 +1005,9 @@ if ($_SESSION['usuario'] != '') {
   if (isset($_POST['accion']) && $_POST['accion'] == 'remove_cheque') {
     $id_pago = $_POST['id_pago'];
     $remove_cheque = $link->query("DELETE FROM facturas_cheques WHERE id='$id_pago'");
+    $remove_cheque2 = $link->query("DELETE FROM facturas_cheques_rechazados WHERE id_cheque='$id_pago'");
 
-    if ($remove_cheque) {
+    if ($remove_cheque && $remove_cheque2) {
       echo $id_pago;
     } else {
       echo 'FALSE';
@@ -1056,14 +1057,17 @@ if ($_SESSION['usuario'] != '') {
     $fecha_cobro = $_POST['fecha_cobro'];
     $titular = $_POST['titular'];
     $cuit = $_POST['cuit'];
-    $monto = $_POST['monto'];
+    $monto = $_POST['cheque_rechazado'] == 1 ? -$_POST['monto'] : $_POST['monto'];
     $origen = $_POST['origen'];
     $cheque_rechazado = $_POST['cheque_rechazado'];
     $inserta = null;
+    $inserta2 = null;
 
     $inserta = $link->query("INSERT INTO facturas_cheques SET banco='$banco', numero_cheque='$numero_cheque', fecha_emision='$fecha_emision', fecha_cobro='$fecha_cobro', titular='$titular', cuit='$cuit', monto='$monto', origen='$origen', cheque_rechazado='$cheque_rechazado'");
-
     $id = mysqli_insert_id($link);
+    if ($_POST['cheque_rechazado'] == 1) {
+      $inserta2 = $link->query("INSERT INTO facturas_cheques_rechazados SET id_cheque='$id', id_proveedor='$proveedor', banco='$banco', numero_cheque='$numero_cheque', fecha_emision='$fecha_emision', fecha_cobro='$fecha_cobro', titular='$titular', cuit='$cuit', monto='$monto', origen='$origen', rechazado='1'");
+    }
 
     if ($inserta) {
       $nombreProveedor = $link->query("select razon_com_proveedor from proveedores where id_proveedor = '$proveedor'")->fetch_assoc()['razon_com_proveedor'];

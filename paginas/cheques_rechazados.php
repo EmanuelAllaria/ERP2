@@ -1,15 +1,31 @@
+<?php
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['rechazado']) && isset($_POST['id'])) {
+  $rechazado = intval($_POST['rechazado']);
+  $id = intval($_POST['id']);
+
+  var_dump($rechazado, $id);
+
+  $updateQuery = "UPDATE facturas_cheques_rechazados SET rechazado = $rechazado WHERE id = $id";
+  if ($link->query($updateQuery) === TRUE) {
+    echo "Estado actualizado correctamente.";
+  } else {
+    echo "Error actualizando el estado: " . $link->error;
+  }
+}
+?>
+
 <?php if (isset($_GET['add']) && $_GET['add'] == '1') {
   include('clientes_add.php');
 } else { ?><div class="container-fluid">
 
     <div class="row page-titles">
       <div class="col-md-12">
-        <h4 class="text-white">Listado de Pagos</h4>
+        <h4 class="text-white">Listado de Cheques Rechazados</h4>
       </div>
       <div class="col-md-6">
         <ol class="breadcrumb">
           <li class="breadcrumb-item"><a href="index.php">Inicio</a></li>
-          <li class="breadcrumb-item"><a href="#">Pagos</a></li>
+          <li class="breadcrumb-item"><a href="#">Cheques Rechazados</a></li>
         </ol>
       </div>
       <div class="col-md-6 text-right">
@@ -118,69 +134,50 @@
               <table id="clientes_lista" class="table m-t-30 table-hover contact-list footable-loaded footable" data-page-size="10">
                 <thead>
                   <tr style="width: 100%;">
-                    <th style="width: 12.5%;">Número de Pago</th>
-                    <th style="width: 12.5%;">Número de Cheque</th>
-                    <th style="width: 12.5%;">Proveedor</th>
-                    <th style="width: 12.5%;">Tipo de Pago</th>
-                    <th style="width: 12.5%;">Fecha</th>
-                    <th style="width: 12.5%;">Monto</th>
-                    <th style="width: 12.5%;">Observaciones</th>
-                    <th style="width: 12.5%;">Acciones</th>
+                    <th style="width: 16,66666666666667%;">Número de Cheque</th>
+                    <th style="width: 16,66666666666667%;">Proveedor</th>
+                    <th style="width: 16,66666666666667%;">Fecha</th>
+                    <th style="width: 16,66666666666667%;">Monto</th>
+                    <th style="width: 16,66666666666667%;">Observaciones</th>
+                    <th style="width: 16,66666666666667%;">Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
                   <?php
 
-                  $sqlDeuda = "SELECT facturas_pagos.*, proveedores.razon_com_proveedor AS proveedor, facturas_cheques.monto AS monto_rechazado
-                              FROM facturas_pagos
-                              LEFT JOIN proveedores ON facturas_pagos.id_proveedor = proveedores.id_proveedor
-                              LEFT JOIN facturas_cheques ON facturas_pagos.id = facturas_cheques.id_pago and facturas_cheques.cheque_rechazado = 1
-                              WHERE facturas_pagos.id > 0
+                  $sqlChequesRechazados = "SELECT facturas_cheques_rechazados.*, proveedores.razon_com_proveedor AS proveedor
+                              FROM facturas_cheques_rechazados
+                              LEFT JOIN proveedores ON facturas_cheques_rechazados.id_proveedor = proveedores.id_proveedor
+                              WHERE facturas_cheques_rechazados.id > 0
                               $busqueda
-                              ORDER BY facturas_pagos.fecha ASC";
+                              ORDER BY facturas_cheques_rechazados.id ASC";
 
                   $saldo_final = 0;
 
-                  $con_facturas = $link->query($sqlDeuda);
+                  $con_facturas = $link->query($sqlChequesRechazados);
 
                   while ($row = mysqli_fetch_assoc($con_facturas)) {
                     $saldo_final += $row['monto'];
                     $id_pago = $row['id'];
-                    echo "<tr style='width: 100%;'>";
-                    echo "<td style='width: 12.5%;word-break: break-all;'>{$id_pago}</td>";
-                    echo "<td style='width: 12.5%;word-break: break-all;'></td>";
-                    echo "<td style='width: 12.5%;word-break: break-all;'>{$row['proveedor']}</td>";
-                    echo "<td style='width: 12.5%;word-break: break-all;'>" . strtoupper($row['tipo_pago']) . "</td>";
-                    echo "<td style='width: 12.5%;word-break: break-all;'>{$row['fecha']}</td>";
-                    echo "<td style='width: 12.5%;word-break: break-all;'>$" . number_format($saldo_final, 2, ',', '.') . "</td>";
-                    echo "<td style='width: 12.5%;word-break: break-all;'>{$row['observaciones']}</td>";
-                    echo "<td class='d-flex align-items-center' style='width: 12.5%; word-break: break-all;gap: 1em;'>" . ($row['tipo_pago'] === 'cheque' ? '<button onclick="mostrar_tr_cheques(`tr_cheques_' . $row['id'] . '`)" class="btn btn-info btn-lg">Ver Cheques</button>' : '') . " <a target='_blank' href='paginas/recibo_factura_pago.php?id_pago={$id_pago}&proveedor={$row['id_proveedor']}&tipo_pago={$row['tipo_pago']}'><i class='fa-solid fa-receipt'></i></a></td>";
-                    echo "</tr>";
-
-                    if ($row['tipo_pago'] === 'cheque') {
-                      $con_cheque = $link->query("SELECT *
-                                                  FROM facturas_cheques
-                                                  WHERE id > 0
-                                                  AND id_pago = '$id_pago'
-                                                  ORDER BY id ASC");
-
-                      while ($row_cheque = mysqli_fetch_assoc($con_cheque)) {
-                        echo "<tr style='width:100%;display:none;' class='tr_cheques_$id_pago'>";
-                        echo "<td style='width: 12.5%;word-break: break-all;'>{$row_cheque['id_pago']}</td>";
-                        echo "<td style='width: 12.5%;word-break: break-all;'>{$row_cheque['numero_cheque']}</td>";
-                        echo "<td style='width: 12.5%;word-break: break-all;'>{$row['proveedor']}</td>";
-                        echo "<td style='width: 12.5%;word-break: break-all;'>" . strtoupper($row['tipo_pago']) . "</td>";
-                        echo "<td style='width: 12.5%;word-break: break-all;'>{$row_cheque['fecha_emision']}</td>";
-                        echo "<td style='width: 12.5%;word-break: break-all;'>$" . number_format($row_cheque['monto'], 2, ',', '.') . "</td>";
-                        echo "<td style='width: 12.5%;word-break: break-all;'>{$row_cheque['observaciones']}</td>";
-                        echo "<td style='width: 12.5%; word-break: break-all;'>" .
-                          (intval($row_cheque['cheque_rechazado']) === 1
-                            ? '<i title="Rechazado" class="fa-solid fa-circle" style="color:red;"></i>'
-                            : '<i title="Aceptado" class="fa-solid fa-circle" style="color:green;"></i>') .
-                          "</td>";
-                        echo "</tr>";
-                      }
-                    }
+                    $rechazado = intval($row['rechazado']) === 1 ? 0 : 1;
+                  ?>
+                    <tr style='width: 100%;'>
+                      <td style='width: 16,66666666666667%;word-break: break-all;'><?php echo $row['numero_cheque'] ?></td>
+                      <td style='width: 16,66666666666667%;word-break: break-all;'><?php echo $row['proveedor'] ?></td>
+                      <td style='width: 16,66666666666667%;word-break: break-all;'><?php echo $row['fecha_emision'] ?></td>
+                      <td style='width: 16,66666666666667%;word-break: break-all;'><?php echo number_format($row['monto'], 2, ',', '.') ?></td>
+                      <td style='width: 16,66666666666667%;word-break: break-all;'><?php echo $row['observaciones'] ?></td>
+                      <td style='width: 16,66666666666667%;word-break: break-all;'>
+                        <form method='post'>
+                          <input type='hidden' name='id' id="id-<?php echo $row['id'] ?>" value='<?php echo $row['id'] ?>'>
+                          <label class='switch'>
+                            <input name='rechazado' onchange="submitForm(<?php echo $row['id'] ?>, <?php echo $rechazado ?>)" type='checkbox' id='check-cheques-cancelados' <?php echo intval($row['rechazado']) === 1 ? '' : 'checked' ?> />
+                            <span class='slider round-sweetch'></span>
+                          </label>
+                        </form>
+                      </td>
+                    </tr>
+                  <?php
                   }
                   ?>
                 </tbody>
@@ -196,7 +193,7 @@
   </div>
 
   <script>
-    $('#total_periodo').html('<span class="btn <?php echo $saldo_final < 0 ? 'btn-danger' : 'btn-success' ?> pull-right"><b>TOTAL: $<?php echo number_format($saldo_final, 0, '', '.'); ?></b></span>')
+    $('#total_periodo').html('<span class="btn btn-success pull-right"><b>TOTAL: $<?php echo number_format($saldo_final, 0, '', '.'); ?></b></span>')
 
     function filtrar_vende() {
       var datodesde = $('#d').val(); // get selected value
@@ -219,6 +216,22 @@
       } else {
         $('.' + id_tr).hide();
       }
+    }
+  </script>
+  <script>
+    function submitForm(id, rechazado) {
+      var formData = new FormData();
+      formData.append('id', id);
+      formData.append('rechazado', rechazado);
+
+      fetch('', {
+          method: 'POST',
+          body: formData
+        })
+        .then(() => window.location.reload())
+        .catch(error => {
+          console.error('Error:', error);
+        });
     }
   </script>
 <?php } ?>

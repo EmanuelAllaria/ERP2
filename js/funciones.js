@@ -326,8 +326,6 @@ function dibuja_canasta() {
 
 function dibuja_factura() {
   var can = facturas.length;
-  console.log(facturas);
-  console.log(can);
   var esqueleto =
     '<table style="width:100%"><th>Proveedor</th><th>Monto</th><th>Tipo de Pago</th><th>Numero de Cheque</th><th>Acciones</th>';
   for (var i = 0; i < can; i++) {
