@@ -13,10 +13,11 @@
         </ol>
       </div>
       <div class="col-md-6 text-right">
-        <form class="app-search d-none d-md-block d-lg-block">
-          <input type="text" class="form-control" placeholder="Buscar...">
+        <form class="app-search d-none d-md-block d-lg-block" method="get">
+          <input type="hidden" name="pagina" value="pagos">
+          <input type="text" id="buscador" name="buscar" class="form-control" placeholder="Buscar...">
         </form>
-      </div>
+    </div>
     </div>
 
     <div class="row">
@@ -73,16 +74,17 @@
               </div>
               <div class="col-md-2" style="margin-top:17px">
                 <a href="#" onclick="filtrar_vende()" class="btn btn-info btn-lg" role="button">Filtrar</a>
-                <?php if (isset($_GET['d']) || isset($_GET['h'])) { ?><a href="index.php?pagina=pagos">Quitar Filtros</a><?php } ?>
+                <?php if (isset($_GET['d']) || isset($_GET['h']) || isset($_GET['buscar'])) { ?><a href="index.php?pagina=pagos">Quitar Filtros</a><?php } ?>
               </div>
 
               <div class="col-md-2" style="align-self: center;">
                 <div id="totales_formas">
                   <?php
                   $busqueda = '';
+                  $busquedaProveedor = '';
                   if (isset($_GET['buscar'])) {
                     $palabra = $_GET['buscar'];
-                    $busqueda = "and (nro_factura like '%$palabra%' or tipo like '%$palabra%' )";
+                    $busqueda = " and facturas_cheques.numero_cheque = '$palabra'";
                   }
                   if (isset($_GET['d']) && $_GET['d'] != '') {
                     $desde = $_GET['d'];
@@ -97,9 +99,14 @@
                     $hasta = date('Y-m-d 23:59:59');
                   }
                   if (isset($_GET['p']) && $_GET['p'] != '') {
-                    $busqueda = $busqueda . ' and facturas_pagos.id_proveedor = ' . $_GET['p'];
+                      $busqueda = $busqueda . " and facturas_pagos.id_proveedor = '" . $_GET['p'] . "'";
                   } else {
-                    $vendedor = '';
+                      $vendedor = '';
+                  }
+                  if (isset($_GET['proveedor']) && $_GET['proveedor'] != '') {
+                      $busquedaProveedor = " and facturas_pagos.id_proveedor = '" . $_GET['proveedor'] . "'";
+                  } else {
+                      $vendedor = '';
                   }
                   if (isset($_GET['f']) && $_GET['f'] != '') {
                     $busqueda = ' and facturas_pagos.tipo_pago = ' . $_GET['f'];
@@ -134,8 +141,9 @@
                   $sqlDeuda = "SELECT facturas_pagos.*, proveedores.razon_com_proveedor AS proveedor, facturas_cheques.monto AS monto_rechazado
                               FROM facturas_pagos
                               LEFT JOIN proveedores ON facturas_pagos.id_proveedor = proveedores.id_proveedor
-                              LEFT JOIN facturas_cheques ON facturas_pagos.id = facturas_cheques.id_pago and facturas_cheques.cheque_rechazado = 1
+                              LEFT JOIN facturas_cheques ON facturas_pagos.id = facturas_cheques.id_pago
                               WHERE facturas_pagos.id > 0
+                              $busquedaProveedor
                               $busqueda
                               ORDER BY facturas_pagos.fecha ASC";
 

@@ -89,7 +89,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['rechazado']) && isset
               </div>
               <div class="col-md-2" style="margin-top:17px">
                 <a href="#" onclick="filtrar_vende()" class="btn btn-info btn-lg" role="button">Filtrar</a>
-                <?php if (isset($_GET['d']) || isset($_GET['h'])) { ?><a href="index.php?pagina=pagos">Quitar Filtros</a><?php } ?>
+                <?php if (isset($_GET['d']) || isset($_GET['h'])) { ?><a href="index.php?pagina=cheques_rechazados">Quitar Filtros</a><?php } ?>
               </div>
 
               <div class="col-md-2" style="align-self: center;">

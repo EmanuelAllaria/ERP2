@@ -69,7 +69,7 @@
                                                 <a href="#" onclick="filtrar_prov()" class="btn btn-info btn-lg" role="button">Filtrar</a>
                                             </div>
                                             <?php if (isset($_GET['d']) || isset($_GET['h']) || isset($_GET['p'])) { ?>
-                                                <div class="col-md-2" style="align-self: center;"><a href="index.php?pagina=facturas">Quitar Filtros</a></div>
+                                                <div class="col-md-2" style="align-self: center;"><a href="index.php?pagina=deudas">Quitar Filtros</a></div>
                                             <?php } ?>
 
                                             <div id="total_periodo">Total $</div>
@@ -105,8 +105,8 @@
                                 } else {
                                     $hasta = date('Y-m-d 23:59:59');
                                 }
-                                if (isset($_GET['p']) && $_GET['p'] != '') {
-                                    $busqueda = $busqueda . ' and facturas.id_proveedor = ' . $_GET['p'];
+                                if (isset($_GET['p'], $_GET['proveedor']) && ($_GET['p'] != '' || $_GET['proveedor'] != '')) {
+                                    $busqueda = $busqueda . ' and facturas.id_proveedor = ' . $_GET['p'] ?: $_GET['proveedor'];
                                 } else {
                                     $vendedor = '';
                                 }
@@ -144,7 +144,7 @@
                                     echo "<td style='color: green;width: 14.2857142857142%;word-break: break-all;'>$" . number_format(($row['total_factura'] < 0) ? abs($row['total_factura']) : 0, 2, ',', '.') . "</td>";
                                     echo "<td style='width: 14.2857142857142%;word-break: break-all;'>$" . number_format($saldo_factura, 2, ',', '.') . "</td>";
                                     echo "<td style='width: 14.2857142857142%;word-break: break-all;'>{$row['observaciones']}</td>";
-                                    echo "<td style='width: 14.2857142857142%;word-break: break-all;'><a href='index.php?pagina=facturas&proveedor=3' onclick='filtrar_prov()' class='btn btn-info btn-lg' role='button'>Ver Facturas</a></td>";
+                                    echo "<td style='width: 14.2857142857142%;word-break: break-all;'><a href='index.php?pagina=facturas&proveedor={$row['id_proveedor']}' class='btn btn-info btn-lg' role='button'>Ver Facturas</a></td>";
                                     echo "</tr>";
 
                                     while ($pago = mysqli_fetch_assoc($consulta_pagos)) {
@@ -157,7 +157,7 @@
                                         echo "<td style='color: green;width: 14.2857142857142%;word-break: break-all;'>$" . number_format($haber_total, 2, ',', '.') . "</td>";
                                         echo "<td style='width: 14.2857142857142%;word-break: break-all;'>$" . number_format($saldo_factura, 2, ',', '.') . "</td>";
                                         echo "<td style='width: 14.2857142857142%;word-break: break-all;'>{$pago['observaciones']}</td>";
-                                        echo "<td style='width: 14.2857142857142%;word-break: break-all;'><a href='index.php?pagina=pagos&proveedor=3' onclick='filtrar_prov()' class='btn btn-info btn-lg' role='button'>Ver Pagos</a></td>";
+                                        echo "<td style='width: 14.2857142857142%;word-break: break-all;'><a href='index.php?pagina=pagos&proveedor={$row['id_proveedor']}' class='btn btn-info btn-lg' role='button'>Ver Pagos</a></td>";
                                         // echo "<td><a href='paginas/recibo_factura_pago.php?proveedor={$pago['id_proveedor']}'><i class='fa-solid fa-receipt'></i></a></td>";
                                         echo "</tr>";
                                     }

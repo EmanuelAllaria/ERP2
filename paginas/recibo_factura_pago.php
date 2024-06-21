@@ -107,16 +107,10 @@ if (isset($_GET['proveedor'], $_GET['id_pago'])) {
                     <tbody>
                         <?php
                         $saldo = $total_factura;
-                        $pagos_previos = 0;
 
                         foreach ($facturas_pagos as $key => $factura_pago) {
-                            if ($factura_pago['id'] < $id_pago) {
-                                $pagos_previos += $factura_pago['monto_factura'];
-                            }
-
-                            $total = ($key == 0) ? $total_factura : $saldo;
-                            $saldo = $total_factura - $pagos_previos - $factura_pago['monto_factura'];
-
+                            $total = $saldo;
+                            $saldo -= $factura_pago['monto_factura'];
                         ?>
                             <tr style="width: 100%;">
                                 <td style="width: 12.5%;word-break: break-all;"><?php echo date('d/m/Y', strtotime($factura_pago['fecha'])); ?></td>

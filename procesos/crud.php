@@ -846,13 +846,13 @@ if ($_SESSION['usuario'] != '') {
     $tipo = $_POST['tipo'];
     $monto = $_POST['monto'];
     $obs = $_POST['obs'];
-    $sqlHayPagosAFavor = $link->query("SELECT * FROM facturas_pagos WHERE id_factura='-1' ORDER BY monto DESC LIMIT 1");
+    $parseTipo = intval($tipo);
+    $sqlHayPagosAFavor = ($parseTipo === 7 || $parseTipo === 8 || $parseTipo === 9 || $parseTipo === 10) ? $link->query("SELECT * FROM facturas_pagos WHERE id_factura='-1' ORDER BY monto DESC LIMIT 1") : null;
     $pagoAFavor = array();
     if ($sqlHayPagosAFavor->num_rows > 0) {
       $pagoAFavor = $sqlHayPagosAFavor->fetch_assoc();
     }
 
-    $parseTipo = intval($tipo);
     if ($parseTipo === 7 || $parseTipo === 8 || $parseTipo === 9 || $parseTipo === 10) {
       $sqlHayFacturaErronea = $link->query("SELECT * FROM facturas WHERE id_proveedor='$proveedor' AND nro_factura='$nro_factura' OR monto='$monto'");
       if (mysqli_num_rows($sqlHayFacturaErronea) === 0) {
