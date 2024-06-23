@@ -87,6 +87,7 @@
                             <tbody id="lista_facturas">
                                 <?php
                                 $busqueda = '';
+                                $busquedaProveedor = '';
                                 if (isset($_GET['buscar'])) {
                                     $palabra = $_GET['buscar'];
                                     $busqueda = "and (nro_factura like '%$palabra%' or tipo like '%$palabra%' )";
@@ -108,12 +109,18 @@
                                 } else {
                                     $vendedor = '';
                                 }
+                                if (isset($_GET['proveedor']) && $_GET['proveedor'] != '') {
+                                    $busquedaProveedor = " and facturas.id_proveedor = '" . $_GET['proveedor'] . "'";
+                                } else {
+                                    $vendedor = '';
+                                }
 
                                 $sqlDeuda = "SELECT facturas.*, proveedores.razon_com_proveedor AS proveedor, tipo_comprobantes.nombre_comprobantes
                                             FROM facturas
                                             LEFT JOIN proveedores ON facturas.id_proveedor = proveedores.id_proveedor
                                             LEFT JOIN tipo_comprobantes ON facturas.tipo = tipo_comprobantes.id_comprobantes
                                             WHERE facturas.id > 0
+                                            $busquedaProveedor
                                             $busqueda
                                             ORDER BY facturas.fecha ASC";
 

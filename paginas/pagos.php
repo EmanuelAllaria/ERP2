@@ -17,7 +17,7 @@
           <input type="hidden" name="pagina" value="pagos">
           <input type="text" id="buscador" name="buscar" class="form-control" placeholder="Buscar...">
         </form>
-    </div>
+      </div>
     </div>
 
     <div class="row">
@@ -99,14 +99,14 @@
                     $hasta = date('Y-m-d 23:59:59');
                   }
                   if (isset($_GET['p']) && $_GET['p'] != '') {
-                      $busqueda = $busqueda . " and facturas_pagos.id_proveedor = '" . $_GET['p'] . "'";
+                    $busqueda = $busqueda . " and facturas_pagos.id_proveedor = '" . $_GET['p'] . "'";
                   } else {
-                      $vendedor = '';
+                    $vendedor = '';
                   }
                   if (isset($_GET['proveedor']) && $_GET['proveedor'] != '') {
-                      $busquedaProveedor = " and facturas_pagos.id_proveedor = '" . $_GET['proveedor'] . "'";
+                    $busquedaProveedor = " and facturas_pagos.id_proveedor = '" . $_GET['proveedor'] . "'";
                   } else {
-                      $vendedor = '';
+                    $vendedor = '';
                   }
                   if (isset($_GET['f']) && $_GET['f'] != '') {
                     $busqueda = ' and facturas_pagos.tipo_pago = ' . $_GET['f'];
@@ -145,6 +145,7 @@
                               WHERE facturas_pagos.id > 0
                               $busquedaProveedor
                               $busqueda
+                              GROUP BY facturas_pagos.id
                               ORDER BY facturas_pagos.fecha ASC";
 
                   $saldo_final = 0;
@@ -160,7 +161,7 @@
                     echo "<td style='width: 12.5%;word-break: break-all;'>{$row['proveedor']}</td>";
                     echo "<td style='width: 12.5%;word-break: break-all;'>" . strtoupper($row['tipo_pago']) . "</td>";
                     echo "<td style='width: 12.5%;word-break: break-all;'>{$row['fecha']}</td>";
-                    echo "<td style='width: 12.5%;word-break: break-all;'>$" . number_format($saldo_final, 2, ',', '.') . "</td>";
+                    echo "<td style='width: 12.5%;word-break: break-all;'>$" . number_format($row['monto'], 2, ',', '.') . "</td>";
                     echo "<td style='width: 12.5%;word-break: break-all;'>{$row['observaciones']}</td>";
                     echo "<td class='d-flex align-items-center' style='width: 12.5%; word-break: break-all;gap: 1em;'>" . ($row['tipo_pago'] === 'cheque' ? '<button onclick="mostrar_tr_cheques(`tr_cheques_' . $row['id'] . '`)" class="btn btn-info btn-lg">Ver Cheques</button>' : '') . " <a target='_blank' href='paginas/recibo_factura_pago.php?id_pago={$id_pago}&proveedor={$row['id_proveedor']}&tipo_pago={$row['tipo_pago']}'><i class='fa-solid fa-receipt'></i></a></td>";
                     echo "</tr>";

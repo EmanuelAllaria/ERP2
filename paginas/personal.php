@@ -7,7 +7,7 @@
     <div class="col-md-6">
       <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="index.php">Inicio</a></li>
-        <li class="breadcrumb-item"><a href="index.php?pagina=clientes">Personal</a></li>
+        <li class="breadcrumb-item"><a href="index.php?pagina=personal">Personal</a></li>
         <?php if ($_GET['buscar']) {
           echo '<li class="breadcrumb-item"><a href="#">Buscar: [' . $_GET['buscar'] . ']</a></li>';
         } ?>
@@ -15,7 +15,7 @@
     </div>
     <div class="col-md-6 text-right">
       <form class="app-search d-none d-md-block d-lg-block" method="get">
-        <input type="hidden" name="pagina" value="clientes">
+        <input type="hidden" name="pagina" value="personal">
         <input type="text" id="buscador" name="buscar" class="form-control" placeholder="Buscar...">
       </form>
     </div>
@@ -98,7 +98,7 @@
                                                                             } ?></span></td>
                                                 <td >
                                                   <a class=" btn-pure btn-outline-success view-row-btn btn-lg" style="padding:0px;" href="index.php?pagina=personal_view&id=<?php echo $row['id'] ?>" data-toggle="tooltip" data-original-title="Ver"><i class="ti-eye" aria-hidden="true"></i></a>
-                        &nbsp;&nbsp;<a class="btn-pure btn-outline-info edit-row-btn btn-lg" style="padding:0px;" href="index.php?pagina=personal_edit&id=<?php echo $row['id'] ?>" data-toggle="tooltip" data-original-title="Editar"><i class="ti-pencil" aria-hidden="true"></i></a>
+                        &nbsp;&nbsp;<a class="btn-pure btn-outline-info edit-row-btn btn-lg" style="padding:0px;" href="#" data-toggle="modal" data-target="#editPersonal_<?php echo $row['id'] ?>" data-id="<?php echo $row['id'] ?>" data-toggle="tooltip" data-original-title="Editar"><i class="ti-pencil" aria-hidden="true"></i></a>
                         &nbsp;&nbsp;<a class="btn-pure btn-outline-danger delete-row-btn btn-lg" style="padding:0px;" href="#" data-toggle="modal" data-target="#del_<?php echo $row['id'] ?>" data-original-title="Borrar"><i class="ti-close" aria-hidden="true"></i></a>
                     </td>
                   </tr>
@@ -196,14 +196,60 @@
 </div>
 </div>
 
+<?php
+$con_personal2 = $link->query("SELECT * FROM personal LEFT JOIN ciudad ON ciudad.id_ciudad = personal.ciudad WHERE estado != '0' $busqueda ORDER BY apellido ASC");
+while ($row2 = mysqli_fetch_array($con_personal2)) {
+?>
+    <div class="modal fade" id="editPersonal_<?php echo $row2['id'] ?>" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title"><center>Ingrese los datos a editar</center></h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="form_edit_<?php echo $row2['id']; ?>" method="post">
+                        <input type="hidden" name="id" value="<?php echo $row2['id']; ?>">
+                        <div class="personal_editado">
+                          <h3>Personal:</h3>
+                          <h4><?php echo $row2['apellido'].','.$row2['nombre']; ?></h4>
+                        </div>
+                        <div class="form-group">
+                            <label for="telefono">Celular</label>
+                            <input type="tel" name="telefono" id="telefono-edit-<?php echo $row2['id']; ?>" class="form-control" value="<?php echo $row2['celular']; ?>">
+                            <label for="direccion">Dirección</label>
+                            <input type="text" name="direccion" id="direccion-edit-<?php echo $row2['id']; ?>" class="form-control" value="<?php echo $row2['direccion']; ?>">
+                            <label for="area">Area</label>
+                            <select id="area-edit-<?php echo $row2['id']; ?>" name="area" class="form-control">
+                                <option value='' <?php echo ($row2['area'] == '') ? 'selected' : ''; ?>>Seleccione un Area</option>
+                                <option value="Admin" <?php echo ($row2['area'] == 'Admin') ? 'selected' : ''; ?>>Administracion</option>
+                                <option value="Reparto" <?php echo ($row2['area'] == 'Reparto') ? 'selected' : ''; ?>>Reparto</option>
+                                <option value="Despacho" <?php echo ($row2['area'] == 'Despacho') ? 'selected' : ''; ?>>Despacho</option>
+                            </select>
+                        </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" onclick="editarPersonal(<?php echo $row2['id']; ?>);" class="btn btn-success">Confirmar</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                </div>
+                    </form>
+            </div>
+        </div>
+    </div>
+<?php
+}
+?>
+
 
 <script>
   $(function() {
     var availableTags = [<?php
                           mysqli_data_seek($con_personal, 0);
                           while ($com_sul = mysqli_fetch_array($con_personal)) {
-                            echo '"' . $com_sul['nombre_personal'] . '",';
-                          } ?>]
+                            echo '"' . $com_sul['nombre'] . '",';
+                          } ?>];
     $("#buscador").autocomplete({
       source: availableTags
     });
@@ -240,4 +286,32 @@
             });
     }
   }
+  
+  
+     function editarPersonal(id) {
+   if(
+    $('#telefono-edit-' + id).val() =='' ||
+    $('#direccion-edit-' + id).val() =='' ||
+    $('#area-edit-' + id).val()==''
+    ){
+      alert('Complete todos los campos');
+    }else{
+
+      var string = "accion=editarPersonal&area="+$('#area-edit-' + id).val()+"&telefono="+$('#telefono-edit-' + id).val()+"&direccion="+$('#direccion-edit-' + id).val()+"&id="+id;
+            $.ajax({
+                type: "POST",
+                url: "procesos/crud.php?",
+                data: string,
+                success: function(data){
+                if(data=='TRUE'){
+                 alert('El personal se editó correctamente');
+                  window.location.href = "index.php?pagina=personal";
+                 } else {
+                    alert('No se pudo editar el personal');
+                    console.log(data);
+                 }
+               }
+            });
+    }
+}
 </script>

@@ -41,11 +41,9 @@ if (isset($_GET['proveedor'], $_GET['id_pago'])) {
     }
 
     while ($row2 = mysqli_fetch_assoc($all_pagos_query)) {
+        $total_pago += $row2['monto'];
         if (intval($row2['id']) === intval($id_pago)) {
             $facturas_pagos[] = $row2;
-            $total_pago += $row2['monto_factura'];
-        } else {
-            $total_factura -= $row2['monto_factura'];
         }
     }
 
@@ -110,7 +108,15 @@ if (isset($_GET['proveedor'], $_GET['id_pago'])) {
 
                         foreach ($facturas_pagos as $key => $factura_pago) {
                             $total = $saldo;
-                            $saldo -= $factura_pago['monto_factura'];
+                            if (intval($factura_pago['monto_factura']) > 0) {
+                                $saldo -= $factura_pago['monto_factura'];
+                            } else {
+                                if ($saldo > 0) {
+                                    $saldo += $factura_pago['monto_factura'];
+                                } else {
+                                    $saldo -= +$factura_pago['monto_factura'];
+                                }
+                            }
                         ?>
                             <tr style="width: 100%;">
                                 <td style="width: 12.5%;word-break: break-all;"><?php echo date('d/m/Y', strtotime($factura_pago['fecha'])); ?></td>
@@ -129,7 +135,7 @@ if (isset($_GET['proveedor'], $_GET['id_pago'])) {
         </div>
         <div class="row mt-4">
             <div class="col-md-12 d-flex justify-content-end">
-                <h3 class="border-top py-2"><strong>Total:</strong> $<?php echo number_format($total_factura - $total_pago, 2, ',', '.'); ?></h3>
+                <h3 class="border-top py-2"><strong>Total:</strong> $<?php echo number_format($saldo, 2, ',', '.'); ?></h3>
             </div>
         </div>
     </div>
