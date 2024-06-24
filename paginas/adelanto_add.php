@@ -42,6 +42,7 @@
                                         <select class="form-control" id="movimiento" name="tipo" aria-describedby="basic-addon2">
                                             <option value="adelanto">Adelanto</option>
                                             <option value="dif caja">Diferencia De Caja</option>
+                                            <option value="dif caja">Sueldos</option>
                                         </select>
                                     </div>
                                 </div>
