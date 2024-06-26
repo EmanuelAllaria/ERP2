@@ -6,7 +6,7 @@
         <div class="col-md-6">
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="index.php">Inicio</a></li>
-                <li class="breadcrumb-item"><a href="index.php?pagina=clientes">Facturas</a></li>
+                <li class="breadcrumb-item"><a href="index.php?pagina=facturas">Facturas</a></li>
                 <?php if (isset($_GET['buscar'])) {
                     echo '<li class="breadcrumb-item"><a href="#">Buscar: [' . $_GET['buscar'] . ']</a></li>';
                 } ?>
@@ -14,7 +14,7 @@
         </div>
         <div class="col-md-6 text-right">
             <form class="app-search d-none d-md-block d-lg-block" method="get">
-                <input type="hidden" name="pagina" value="clientes">
+                <input type="hidden" name="pagina" value="facturas">
                 <input type="text" id="buscador" name="buscar" class="form-control" placeholder="Buscar...">
             </form>
         </div>
@@ -25,7 +25,7 @@
             <div class="card">
                 <div class="card-body">
                     <?php if (isset($_GET['buscar'])) {
-                        echo '<h4 class="card-title">Resultados de [' . $_GET['buscar'] . ']...</h4>';
+                        echo '<h4 class="card-title">Busqueda de N° de Factura: [' . $_GET['buscar'] . ']...</h4>';
                     } else {
                         echo '<h4 class="card-title">Listado</h4>';
                     } ?>
@@ -77,11 +77,13 @@
                                     </td>
                                 </tr>
                                 <tr style="width: 100%;">
-                                    <th style="width: 20%;">Número de Factura</th>
-                                    <th style="width: 20%;">Proveedor</th>
-                                    <th style="width: 20%;">Fecha</th>
-                                    <th style="width: 20%;">Monto</th>
-                                    <th style="width: 20%;">Observaciones</th>
+                                    <th style="width: 14,28571428571429%;">#</th>
+                                    <th style="width: 14,28571428571429%;">N° de Factura</th>
+                                    <th style="width: 14,28571428571429%;">Proveedor</th>
+                                    <th style="width: 14,28571428571429%;">Tipo</th>
+                                    <th style="width: 14,28571428571429%;">Fecha</th>
+                                    <th style="width: 14,28571428571429%;">Monto</th>
+                                    <th style="width: 14,28571428571429%;">Observaciones</th>
                                 </tr>
                             </thead>
                             <tbody id="lista_facturas">
@@ -90,7 +92,7 @@
                                 $busquedaProveedor = '';
                                 if (isset($_GET['buscar'])) {
                                     $palabra = $_GET['buscar'];
-                                    $busqueda = "and (nro_factura like '%$palabra%' or tipo like '%$palabra%' )";
+                                    $busqueda = " and nro_factura = '$palabra'";
                                 }
                                 if (isset($_GET['d']) && $_GET['d'] != '') {
                                     $desde = $_GET['d'];
@@ -131,11 +133,13 @@
                                 while ($row = mysqli_fetch_assoc($con_facturas)) {
                                     $saldo_final += $row['monto'];
                                     echo "<tr style='width: 100%;'>";
-                                    echo "<td style='width: 20%;word-break: break-all;'>{$row['nro_factura']}</td>";
-                                    echo "<td style='width: 20%;word-break: break-all;'>{$row['proveedor']}</td>";
-                                    echo "<td style='width: 20%;word-break: break-all;'>{$row['fecha']}</td>";
-                                    echo "<td style='width: 20%;word-break: break-all;'>$" . number_format($row['monto'], 2, ',', '.') . "</td>";
-                                    echo "<td style='width: 20%;word-break: break-all;'>{$row['observaciones']}</td>";
+                                    echo "<td style='width: 14,28571428571429%;word-break: break-all;'>{$row['id']}</td>";
+                                    echo "<td style='width: 14,28571428571429%;word-break: break-all;'>{$row['nro_factura']}</td>";
+                                    echo "<td style='width: 14,28571428571429%;word-break: break-all;'>{$row['proveedor']}</td>";
+                                    echo "<td style='width: 14,28571428571429%;word-break: break-all;'>{$row['nombre_comprobantes']}</td>";
+                                    echo "<td style='width: 14,28571428571429%;word-break: break-all;'>{$row['fecha']}</td>";
+                                    echo "<td style='width: 14,28571428571429%;word-break: break-all;'>$" . number_format($row['monto'], 2, ',', '.') . "</td>";
+                                    echo "<td style='width: 14,28571428571429%;word-break: break-all;'>{$row['observaciones']}</td>";
                                     echo "</tr>";
                                 }
                                 ?>

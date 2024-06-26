@@ -1,3 +1,7 @@
+<?php
+$provedores_id = [];
+?>
+
 <div class="container-fluid">
     <div class="row page-titles">
         <div class="col-md-12">
@@ -6,17 +10,8 @@
         <div class="col-md-6">
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="index.php">Inicio</a></li>
-                <li class="breadcrumb-item"><a href="index.php?pagina=clientes">Deudas a Proveedores</a></li>
-                <?php if (isset($_GET['buscar'])) {
-                    echo '<li class="breadcrumb-item"><a href="#">Buscar: [' . $_GET['buscar'] . ']</a></li>';
-                } ?>
+                <li class="breadcrumb-item"><a href="index.php?pagina=deudas">Deudas a Proveedores</a></li>
             </ol>
-        </div>
-        <div class="col-md-6 text-right">
-            <form class="app-search d-none d-md-block d-lg-block" method="get">
-                <input type="hidden" name="pagina" value="clientes">
-                <input type="text" id="buscador" name="buscar" class="form-control" placeholder="Buscar...">
-            </form>
         </div>
     </div>
 
@@ -24,12 +19,7 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-body">
-                    <?php if (isset($_GET['buscar'])) {
-                        echo '<h4 class="card-title">Resultados de [' . $_GET['buscar'] . ']...</h4>';
-                    } else {
-                        echo '<h4 class="card-title">Listado</h4>';
-                    } ?>
-
+                    <h4 class="card-title">Listado</h4>
                     <div class="table-responsive">
                         <table id="facturas_lista" class="table m-t-30 table-hover contact-list footable-loaded footable" data-page-size="10">
                             <thead>
@@ -56,6 +46,7 @@
                                                     <?php
                                                     $busca_prov = $link->query("SELECT razon_com_proveedor as nombre, id_proveedor as id FROM `proveedores` WHERE `estado_proveedor` LIKE '1'");
                                                     while ($row = mysqli_fetch_array($busca_prov)) {
+                                                        $provedores_id[] = intval($row['id']);
                                                         echo '<option value="' . $row['id'] . '"';
                                                         if (isset($_GET['p']) && $_GET['p'] == $row['id']) {
                                                             echo ' selected ';
@@ -89,10 +80,6 @@
                             <tbody id="lista_facturas">
                                 <?php
                                 $busqueda = '';
-                                if (isset($_GET['buscar'])) {
-                                    $palabra = $_GET['buscar'];
-                                    $busqueda = "and (nro_factura like '%$palabra%' or tipo like '%$palabra%' )";
-                                }
                                 if (isset($_GET['d']) && $_GET['d'] != '') {
                                     $desde = $_GET['d'];
                                     $busqueda = $busqueda . ' and facturas.fecha >= "' . $desde . '"';
@@ -125,8 +112,10 @@
                                 $haber_total = 0;
 
                                 $con_facturas = $link->query($sqlDeuda);
+                                $ids_proveedores_buscados = [];
 
                                 while ($row = mysqli_fetch_assoc($con_facturas)) {
+                                    $ids_proveedores_buscados[] = intval($row['id_proveedor']);
                                     $consulta_pagos = $link->query("SELECT
                                                                     id, id_proveedor, tipo_pago, fecha, fecha_emision, observaciones, SUM(monto) as monto
                                                                     FROM facturas_pagos
@@ -158,10 +147,33 @@
                                         echo "<td style='width: 14.2857142857142%;word-break: break-all;'>$" . number_format($saldo_factura, 2, ',', '.') . "</td>";
                                         echo "<td style='width: 14.2857142857142%;word-break: break-all;'>{$pago['observaciones']}</td>";
                                         echo "<td style='width: 14.2857142857142%;word-break: break-all;'><a href='index.php?pagina=pagos&proveedor={$row['id_proveedor']}' class='btn btn-info btn-lg' role='button'>Ver Pagos</a></td>";
-                                        // echo "<td><a href='paginas/recibo_factura_pago.php?proveedor={$pago['id_proveedor']}'><i class='fa-solid fa-receipt'></i></a></td>";
                                         echo "</tr>";
                                     }
                                     $saldo_final += $saldo_factura;
+                                }
+                                $proveedores_faltantes = array_diff($provedores_id, $ids_proveedores_buscados);
+                                if ((!isset($busqueda) || $busqueda === '') && isset($proveedores_faltantes[0])) {
+                                    $consulta_pagos_a_favor = $link->query("SELECT facturas_pagos.id, facturas_pagos.id_proveedor, facturas_pagos.tipo_pago, facturas_pagos.fecha, facturas_pagos.fecha_emision, facturas_pagos.observaciones, SUM(facturas_pagos.monto) as monto, proveedores.razon_com_proveedor AS proveedor
+                                                                    FROM facturas_pagos
+                                                                    LEFT JOIN proveedores ON facturas_pagos.id_proveedor = proveedores.id_proveedor
+                                                                    WHERE facturas_pagos.id_proveedor IN (" . implode(', ', $proveedores_faltantes) . ")
+                                                                    GROUP BY facturas_pagos.id_proveedor
+                                                                    ORDER BY facturas_pagos.fecha_emision ASC");
+
+                                    while ($pago_a_favor = mysqli_fetch_assoc($consulta_pagos_a_favor)) {
+                                        $haber_total += $pago_a_favor['monto'];
+                                        $saldo_factura -= $pago_a_favor['monto'];
+                                        echo "<tr>";
+                                        echo "<td style='width: 14.2857142857142%;word-break: break-all;'>{$pago_a_favor['proveedor']}</td>";
+                                        echo "<td style='width: 14.2857142857142%;word-break: break-all;'>{$pago_a_favor['fecha_emision']}</td>";
+                                        echo "<td style='width: 14.2857142857142%;word-break: break-all;'></td>";
+                                        echo "<td style='color: green;width: 14.2857142857142%;word-break: break-all;'>$" . number_format($pago_a_favor['monto'], 2, ',', '.') . "</td>";
+                                        echo "<td style='width: 14.2857142857142%;word-break: break-all;'>$" . number_format($saldo_factura, 2, ',', '.') . "</td>";
+                                        echo "<td style='width: 14.2857142857142%;word-break: break-all;'>Pago a Favor a: {$pago_a_favor['proveedor']}</td>";
+                                        echo "<td style='width: 14.2857142857142%;word-break: break-all;'><a href='index.php?pagina=pagos&proveedor={$pago_a_favor['id_proveedor']}' class='btn btn-info btn-lg' role='button'>Ver Pagos</a></td>";
+                                        echo "</tr>";
+                                    }
+                                    $saldo_final -= $saldo_factura;
                                 }
                                 ?>
                             </tbody>
@@ -184,7 +196,7 @@
 <script>
     function filtrar_prov() {
         const urlParams = new URLSearchParams(window.location.search);
-        urlParams.set('pagina', 'facturas');
+        urlParams.set('pagina', 'deudas');
 
         const desde = document.getElementById('d').value;
         const hasta = document.getElementById('h').value;

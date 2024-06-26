@@ -8,14 +8,14 @@ if (isset($_GET['proveedor'], $_GET['id_pago'])) {
 
 
     if ($tipo_pago !== 'cheque') {
-        $all_pagos_query = $link->query("SELECT facturas_pagos.*, facturas_pagos.monto AS monto_factura, proveedores.razon_com_proveedor as proveedor
+        $all_pagos_query = $link->query("SELECT facturas_pagos.*, facturas_pagos.id_pagos, facturas_pagos.monto AS monto_factura, proveedores.razon_com_proveedor as proveedor
                                         FROM facturas_pagos
                                         INNER JOIN proveedores ON proveedores.id_proveedor = facturas_pagos.id_proveedor
                                         WHERE facturas_pagos.id_proveedor='$proveedor'
                                         AND facturas_pagos.id <= '$id_pago'
                                         ORDER BY facturas_pagos.id ASC");
     } else {
-        $all_pagos_query = $link->query("SELECT facturas_cheques.*, facturas_cheques.monto AS monto_factura, facturas_pagos.*, proveedores.razon_com_proveedor as proveedor
+        $all_pagos_query = $link->query("SELECT facturas_cheques.*, facturas_cheques.monto AS monto_factura, facturas_pagos.id AS id_pagos, facturas_pagos.id_proveedor, facturas_pagos.tipo_pago, proveedores.razon_com_proveedor as proveedor
                             FROM facturas_cheques
                             INNER JOIN facturas_pagos ON facturas_pagos.id = facturas_cheques.id_pago
                             INNER JOIN proveedores ON proveedores.id_proveedor = facturas_pagos.id_proveedor
@@ -42,13 +42,13 @@ if (isset($_GET['proveedor'], $_GET['id_pago'])) {
 
     while ($row2 = mysqli_fetch_assoc($all_pagos_query)) {
         $total_pago += $row2['monto'];
-        if (intval($row2['id']) === intval($id_pago)) {
+        if (intval($row2['id_pagos']) === intval($id_pago)) {
             $facturas_pagos[] = $row2;
         }
     }
 
     $fecha_de_pago = array_reduce($facturas_pagos, function ($max, $current) {
-        return $current['id'] > $max['id'] ? $current : $max;
+        return $current['id_pagos'] > $max['id_pagos'] ? $current : $max;
     }, $facturas_pagos[0]);
     $fecha_de_pago = $fecha_de_pago['fecha_emision'] ?: $fecha_de_pago['fecha'];
 }
@@ -83,23 +83,28 @@ if (isset($_GET['proveedor'], $_GET['id_pago'])) {
             </div>
             <div class="col-md-6 d-flex flex-column align-items-end">
                 <p><strong>Fecha de pago:</strong> <?php echo date('d/m/Y', strtotime($fecha_de_pago)); ?></p>
-                <br>
+                <h3>Proveedor: <b><?php echo $nombre_proveedor; ?></b></h3>
                 <h3>Total debe a proveedor: $<?php echo number_format($total_factura, 2, ',', '.'); ?></h3>
             </div>
         </div>
         <div class="row mt-4">
-            <div class="col-md-12">
+            <div class="col-md-12" style="overflow-y:auto;width:100%;">
                 <table class="table table-bordered">
                     <thead>
                         <tr style="width: 100%;">
-                            <th style="width: 12.5%;">Fecha</th>
-                            <th style="width: 12.5%;">Numero de Pago</th>
-                            <th style="width: 12.5%;">Tipo</th>
-                            <th style="width: 12.5%;">Detalle</th>
-                            <th style="width: 12.5%;">Total</th>
-                            <th style="width: 12.5%;">Pago</th>
-                            <th style="width: 12.5%;">Saldo</th>
-                            <th style="width: 12.5%;">Observaciónes</th>
+                            <th>#</th>
+                            <th>N° de Cheque</th>
+                            <th>Fecha Emisión</th>
+                            <th>Fecha Cobro</th>
+                            <th>Titular</th>
+                            <th>Banco</th>
+                            <th>Cuit</th>
+                            <th>Tipo Pago</th>
+                            <th>Total</th>
+                            <th>Pago</th>
+                            <th>Saldo</th>
+                            <th>Origen</th>
+                            <th>Observaciónes</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -119,14 +124,31 @@ if (isset($_GET['proveedor'], $_GET['id_pago'])) {
                             }
                         ?>
                             <tr style="width: 100%;">
-                                <td style="width: 12.5%;word-break: break-all;"><?php echo date('d/m/Y', strtotime($factura_pago['fecha'])); ?></td>
-                                <td style="width: 12.5%;word-break: break-all;">#<?php echo $factura_pago['id']; ?></td>
-                                <td style="width: 12.5%;word-break: break-all;">PAGO</td>
-                                <td style="width: 12.5%;word-break: break-all;"><?php echo strtoupper($factura_pago['tipo_pago']); ?></td>
-                                <td style="width: 12.5%;word-break: break-all;">$<?php echo number_format($total, 2, ',', '.'); ?></td>
-                                <td style="width: 12.5%;word-break: break-all;">$<?php echo number_format($factura_pago['monto_factura'], 2, ',', '.'); ?></td>
-                                <td style="width: 12.5%;word-break: break-all;">$<?php echo number_format($saldo, 2, ',', '.'); ?></td>
-                                <td style="width: 12.5%;word-break: break-all;"><?php echo $factura_pago['observaciones']; ?></td>
+                                <td><?php echo $factura_pago['id']; ?></td>
+                                <td><?php echo $factura_pago['numero_cheque']; ?></td>
+                                <td>
+                                    <?php
+                                    echo $factura_pago['tipo_pago'] === 'cheque' && !is_null($factura_pago['fecha_emision']) && $factura_pago['fecha_emision'] !== '0000-00-00'
+                                        ? date('d/m/Y', strtotime($factura_pago['fecha_emision']))
+                                        : '00/00/0000';
+                                    ?>
+                                </td>
+                                <td>
+                                    <?php
+                                    echo $factura_pago['tipo_pago'] === 'cheque' && !is_null($factura_pago['fecha_cobro']) && $factura_pago['fecha_cobro'] !== '0000-00-00'
+                                        ? date('d/m/Y', strtotime($factura_pago['fecha_cobro']))
+                                        : '00/00/0000';
+                                    ?>
+                                </td>
+                                <td><?php echo $factura_pago['titular']; ?></td>
+                                <td><?php echo $factura_pago['banco']; ?></td>
+                                <td><?php echo $factura_pago['cuit']; ?></td>
+                                <td><?php echo $factura_pago['tipo_pago']; ?></td>
+                                <td>$<?php echo number_format($total, 2, ',', '.'); ?></td>
+                                <td>$<?php echo number_format($factura_pago['monto_factura'], 2, ',', '.'); ?></td>
+                                <td>$<?php echo number_format($saldo, 2, ',', '.'); ?></td>
+                                <td><?php echo $factura_pago['origen']; ?></td>
+                                <td><?php echo $factura_pago['observaciones']; ?></td>
                             </tr>
                         <?php } ?>
                     </tbody>

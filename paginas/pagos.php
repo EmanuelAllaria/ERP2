@@ -125,14 +125,19 @@
               <table id="clientes_lista" class="table m-t-30 table-hover contact-list footable-loaded footable" data-page-size="10">
                 <thead>
                   <tr style="width: 100%;">
-                    <th style="width: 12.5%;">Número de Pago</th>
-                    <th style="width: 12.5%;">Número de Cheque</th>
-                    <th style="width: 12.5%;">Proveedor</th>
-                    <th style="width: 12.5%;">Tipo de Pago</th>
-                    <th style="width: 12.5%;">Fecha</th>
-                    <th style="width: 12.5%;">Monto</th>
-                    <th style="width: 12.5%;">Observaciones</th>
-                    <th style="width: 12.5%;">Acciones</th>
+                    <th>#</th>
+                    <th>Número de Cheque</th>
+                    <th>Proveedor</th>
+                    <th>Titular</th>
+                    <th>Banco</th>
+                    <th>Cuit</th>
+                    <th>Tipo de Pago</th>
+                    <th>Fecha Pago</th>
+                    <th>Fecha Emisión</th>
+                    <th>Fecha Cobro</th>
+                    <th>Monto</th>
+                    <th>Observaciones</th>
+                    <th>Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -156,14 +161,19 @@
                     $saldo_final += $row['monto'];
                     $id_pago = $row['id'];
                     echo "<tr style='width: 100%;'>";
-                    echo "<td style='width: 12.5%;word-break: break-all;'>{$id_pago}</td>";
-                    echo "<td style='width: 12.5%;word-break: break-all;'></td>";
-                    echo "<td style='width: 12.5%;word-break: break-all;'>{$row['proveedor']}</td>";
-                    echo "<td style='width: 12.5%;word-break: break-all;'>" . strtoupper($row['tipo_pago']) . "</td>";
-                    echo "<td style='width: 12.5%;word-break: break-all;'>{$row['fecha']}</td>";
-                    echo "<td style='width: 12.5%;word-break: break-all;'>$" . number_format($row['monto'], 2, ',', '.') . "</td>";
-                    echo "<td style='width: 12.5%;word-break: break-all;'>{$row['observaciones']}</td>";
-                    echo "<td class='d-flex align-items-center' style='width: 12.5%; word-break: break-all;gap: 1em;'>" . ($row['tipo_pago'] === 'cheque' ? '<button onclick="mostrar_tr_cheques(`tr_cheques_' . $row['id'] . '`)" class="btn btn-info btn-lg">Ver Cheques</button>' : '') . " <a target='_blank' href='paginas/recibo_factura_pago.php?id_pago={$id_pago}&proveedor={$row['id_proveedor']}&tipo_pago={$row['tipo_pago']}'><i class='fa-solid fa-receipt'></i></a></td>";
+                    echo "<td>{$id_pago}</td>";
+                    echo "<td></td>";
+                    echo "<td>{$row['proveedor']}</td>";
+                    echo "<td>{$row['titular']}</td>";
+                    echo "<td>{$row['banco']}</td>";
+                    echo "<td>{$row['cuit']}</td>";
+                    echo "<td>" . strtoupper($row['tipo_pago']) . "</td>";
+                    echo "<td>" . date('d/m/Y', strtotime($row['fecha'])) . "</td>";
+                    echo "<td>" . ($row['tipo_pago'] === 'cheque' && !is_null($row['fecha_emision']) ? date('d/m/Y', strtotime($row['fecha_emision'])) : '') . "</td>";
+                    echo "<td>" . ($row['tipo_pago'] === 'cheque' && !is_null($row['fecha_cobro']) ? date('d/m/Y', strtotime($row['fecha_cobro'])) : '') . "</td>";
+                    echo "<td>$" . number_format($row['monto'], 2, ',', '.') . "</td>";
+                    echo "<td>{$row['observaciones']}</td>";
+                    echo "<td class='d-flex align-items-center' style='gap: 1em;'>" . ($row['tipo_pago'] === 'cheque' ? '<button onclick="mostrar_tr_cheques(`tr_cheques_' . $row['id'] . '`)" class="btn btn-info btn-lg">Ver Cheques</button>' : '') . " <a target='_blank' href='paginas/recibo_factura_pago.php?id_pago={$id_pago}&proveedor={$row['id_proveedor']}&tipo_pago={$row['tipo_pago']}'><i class='fa-solid fa-receipt'></i></a></td>";
                     echo "</tr>";
 
                     if ($row['tipo_pago'] === 'cheque') {
@@ -175,14 +185,19 @@
 
                       while ($row_cheque = mysqli_fetch_assoc($con_cheque)) {
                         echo "<tr style='width:100%;display:none;' class='tr_cheques_$id_pago'>";
-                        echo "<td style='width: 12.5%;word-break: break-all;'>{$row_cheque['id_pago']}</td>";
-                        echo "<td style='width: 12.5%;word-break: break-all;'>{$row_cheque['numero_cheque']}</td>";
-                        echo "<td style='width: 12.5%;word-break: break-all;'>{$row['proveedor']}</td>";
-                        echo "<td style='width: 12.5%;word-break: break-all;'>" . strtoupper($row['tipo_pago']) . "</td>";
-                        echo "<td style='width: 12.5%;word-break: break-all;'>{$row_cheque['fecha_emision']}</td>";
-                        echo "<td style='width: 12.5%;word-break: break-all;'>$" . number_format($row_cheque['monto'], 2, ',', '.') . "</td>";
-                        echo "<td style='width: 12.5%;word-break: break-all;'>{$row_cheque['observaciones']}</td>";
-                        echo "<td style='width: 12.5%; word-break: break-all;'>" .
+                        echo "<td>{$row_cheque['id_pago']}</td>";
+                        echo "<td>{$row_cheque['numero_cheque']}</td>";
+                        echo "<td>{$row['proveedor']}</td>";
+                        echo "<td>{$row_cheque['titular']}</td>";
+                        echo "<td>{$row_cheque['banco']}</td>";
+                        echo "<td>{$row_cheque['cuit']}</td>";
+                        echo "<td>" . strtoupper($row['tipo_pago']) . "</td>";
+                        echo "<td></td>";
+                        echo "<td>" . ($row['tipo_pago'] === 'cheque' && !is_null($row_cheque['fecha_emision']) ? date('d/m/Y', strtotime($row_cheque['fecha_emision'])) : '') . "</td>";
+                        echo "<td>" . ($row['tipo_pago'] === 'cheque' && !is_null($row_cheque['fecha_cobro']) ? date('d/m/Y', strtotime($row_cheque['fecha_cobro'])) : '') . "</td>";
+                        echo "<td>$" . number_format($row_cheque['monto'], 2, ',', '.') . "</td>";
+                        echo "<td>{$row_cheque['observaciones']}</td>";
+                        echo "<td>" .
                           (intval($row_cheque['cheque_rechazado']) === 1
                             ? '<i title="Rechazado" class="fa-solid fa-circle" style="color:red;"></i>'
                             : '<i title="Aceptado" class="fa-solid fa-circle" style="color:green;"></i>') .
