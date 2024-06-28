@@ -143,7 +143,7 @@ $provedores_id = [];
                                         echo "<td style='width: 14.2857142857142%;word-break: break-all;'>{$row['proveedor']}</td>";
                                         echo "<td style='width: 14.2857142857142%;word-break: break-all;'>{$pago['fecha_emision']}</td>";
                                         echo "<td style='width: 14.2857142857142%;word-break: break-all;'></td>";
-                                        echo "<td style='color: green;width: 14.2857142857142%;word-break: break-all;'>$" . number_format($haber_total, 2, ',', '.') . "</td>";
+                                        echo "<td style='color: green;width: 14.2857142857142%;word-break: break-all;'>$" . number_format($pago['monto'], 2, ',', '.') . "</td>";
                                         echo "<td style='width: 14.2857142857142%;word-break: break-all;'>$" . number_format($saldo_factura, 2, ',', '.') . "</td>";
                                         echo "<td style='width: 14.2857142857142%;word-break: break-all;'>{$pago['observaciones']}</td>";
                                         echo "<td style='width: 14.2857142857142%;word-break: break-all;'><a href='index.php?pagina=pagos&proveedor={$row['id_proveedor']}' class='btn btn-info btn-lg' role='button'>Ver Pagos</a></td>";
@@ -160,9 +160,10 @@ $provedores_id = [];
                                                                     GROUP BY facturas_pagos.id_proveedor
                                                                     ORDER BY facturas_pagos.fecha_emision ASC");
 
+                                    $saldo_pago_a_favor = 0;
                                     while ($pago_a_favor = mysqli_fetch_assoc($consulta_pagos_a_favor)) {
                                         $haber_total += $pago_a_favor['monto'];
-                                        $saldo_factura -= $pago_a_favor['monto'];
+                                        $saldo_pago_a_favor += $pago_a_favor['monto'];
                                         echo "<tr>";
                                         echo "<td style='width: 14.2857142857142%;word-break: break-all;color:green;'>{$pago_a_favor['proveedor']}</td>";
                                         echo "<td style='width: 14.2857142857142%;word-break: break-all;color:green;'>{$pago_a_favor['fecha_emision']}</td>";
@@ -173,7 +174,6 @@ $provedores_id = [];
                                         echo "<td style='width: 14.2857142857142%;word-break: break-all;color:green;'><a href='index.php?pagina=pagos&proveedor={$pago_a_favor['id_proveedor']}' class='btn btn-info btn-lg' role='button'>Ver Pagos</a></td>";
                                         echo "</tr>";
                                     }
-                                    $saldo_final -= $saldo_factura;
                                 }
                                 ?>
                             </tbody>
@@ -209,5 +209,5 @@ $provedores_id = [];
         window.location.search = urlParams.toString();
     }
 
-    $('#total_periodo').html('<span class="btn <?php echo $saldo_final > 0 ? 'btn-danger' : 'btn-success' ?> pull-right"><b>TOTAL: $<?php echo number_format($saldo_final, 0, '', '.'); ?></b></span>')
+    $('#total_periodo').html('<span class="btn <?php echo $saldo_final > 0 ? 'btn-danger' : 'btn-success' ?> pull-right"><b>TOTAL: $<?php echo number_format($saldo_final - $saldo_pago_a_favor, 0, '', '.'); ?></b></span>')
 </script>
