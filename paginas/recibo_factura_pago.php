@@ -8,7 +8,7 @@ if (isset($_GET['proveedor'], $_GET['id_pago'])) {
 
 
     if ($tipo_pago !== 'cheque') {
-        $all_pagos_query = $link->query("SELECT facturas_pagos.*, facturas_pagos.id_pagos, facturas_pagos.monto AS monto_factura, proveedores.razon_com_proveedor as proveedor
+        $all_pagos_query = $link->query("SELECT facturas_pagos.*, facturas_pagos.id AS id_pagos, facturas_pagos.monto AS monto_factura, proveedores.razon_com_proveedor as proveedor
                                         FROM facturas_pagos
                                         INNER JOIN proveedores ON proveedores.id_proveedor = facturas_pagos.id_proveedor
                                         WHERE facturas_pagos.id_proveedor='$proveedor'
@@ -92,8 +92,8 @@ if (isset($_GET['proveedor'], $_GET['id_pago'])) {
                 <table class="table table-bordered">
                     <thead>
                         <tr style="width: 100%;">
-                            <th>#</th>
-                            <th>N° de Cheque</th>
+                            <?php echo $tipo_pago === 'cheque' ? '<th>#</th>' : '' ?>
+                            <?php echo $tipo_pago === 'cheque' ? '<th>N° de Cheque</th>' : '' ?>
                             <th>Fecha Emisión</th>
                             <th>Fecha Cobro</th>
                             <th>Titular</th>
@@ -124,8 +124,8 @@ if (isset($_GET['proveedor'], $_GET['id_pago'])) {
                             }
                         ?>
                             <tr style="width: 100%;">
-                                <td><?php echo $factura_pago['id']; ?></td>
-                                <td><?php echo $factura_pago['numero_cheque']; ?></td>
+                                <?php echo $tipo_pago === 'cheque' ? '<td>' . $factura_pago['id'] . '</td>' : '' ?>
+                                <?php echo $tipo_pago === 'cheque' ? '<td>' . $factura_pago["numero_cheque"] . '</td>' : '' ?>
                                 <td>
                                     <?php
                                     echo $factura_pago['tipo_pago'] === 'cheque' && !is_null($factura_pago['fecha_emision']) && $factura_pago['fecha_emision'] !== '0000-00-00'

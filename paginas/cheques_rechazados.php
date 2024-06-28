@@ -3,14 +3,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['rechazado']) && isset
   $rechazado = intval($_POST['rechazado']);
   $id = intval($_POST['id']);
 
-  var_dump($rechazado, $id);
-
   $updateQuery = "UPDATE facturas_cheques_rechazados SET rechazado = $rechazado WHERE id = $id";
   if ($link->query($updateQuery) === TRUE) {
     echo "Estado actualizado correctamente.";
   } else {
     echo "Error actualizando el estado: " . $link->error;
   }
+}
+
+$selectTotalFacturas = $link->query('SELECT SUM(monto) AS total_facturas, id_proveedor
+              FROM facturas
+              GROUP BY id_proveedor;');
+$total_facturas = 0;
+while ($row = mysqli_fetch_array($selectTotalFacturas)) {
+  $total_facturas += intval($row['total_facturas']);
 }
 ?>
 
@@ -193,7 +199,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['rechazado']) && isset
   </div>
 
   <script>
-    $('#total_periodo').html('<span class="btn btn-success pull-right"><b>TOTAL: $<?php echo number_format($saldo_final, 0, '', '.'); ?></b></span>')
+    $('#total_periodo').html('<span class="btn btn-success pull-right"><b>TOTAL: $<?php echo number_format($total_facturas - abs($saldo_final), 0, '', '.'); ?></b></span>')
 
     function filtrar_vende() {
       var datodesde = $('#d').val(); // get selected value
