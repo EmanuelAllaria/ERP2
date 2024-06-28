@@ -104,7 +104,7 @@
                     $vendedor = '';
                   }
                   if (isset($_GET['proveedor']) && $_GET['proveedor'] != '') {
-                    $busquedaProveedor = " and facturas_pagos.id_proveedor = '" . $_GET['proveedor'] . "'";
+                    $busqueda = $busqueda . " and facturas_pagos.id_proveedor = '" . $_GET['proveedor'] . "'";
                   } else {
                     $vendedor = '';
                   }
@@ -153,6 +153,7 @@
                               LEFT JOIN proveedores ON facturas_pagos.id_proveedor = proveedores.id_proveedor
                               LEFT JOIN facturas_cheques ON facturas_pagos.id = facturas_cheques.id_pago
                               WHERE facturas_pagos.id > 0
+                              $busqueda
                               GROUP BY facturas_pagos.id
                               ORDER BY facturas_pagos.fecha ASC;";
 
