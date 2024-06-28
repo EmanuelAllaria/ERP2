@@ -185,6 +185,9 @@ $provedores_id = [];
                                     <td><strong>$<?php echo number_format($saldo_final, 2, ',', '.'); ?></strong></td>
                                 </tr>
                             </tfoot>
+                            <?php
+                            $saldo_final -= $saldo_pago_a_favor;
+                            ?>
                         </table>
                     </div>
                 </div>
@@ -209,5 +212,5 @@ $provedores_id = [];
         window.location.search = urlParams.toString();
     }
 
-    $('#total_periodo').html('<span class="btn <?php echo $saldo_final > 0 ? 'btn-danger' : 'btn-success' ?> pull-right"><b>TOTAL: $<?php echo number_format($saldo_final - $saldo_pago_a_favor, 0, '', '.'); ?></b></span>')
+    $('#total_periodo').html('<span class="btn <?php echo $saldo_final > 0 ? 'btn-danger' : 'btn-success' ?> pull-right"><b>TOTAL: $<?php echo number_format($saldo_final, 0, '', '.'); ?></b></span>')
 </script>
