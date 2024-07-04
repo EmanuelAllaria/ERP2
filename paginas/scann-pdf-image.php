@@ -130,7 +130,11 @@ function scanInvoice($fileInput, $link)
                     try {
                         $id_proveedor = $id_proveedor['id_proveedor'];
                         $fecha = date('Y-m-d H:i:s');
+                        $fechaSinHorario = date('Y-m-d');
                         $link->query("INSERT INTO facturas (nro_factura, id_proveedor, fecha, tipo, monto) VALUES ('$id_factura', '$id_proveedor', '$fecha', '$tipo_factura', '$total_factura')");
+
+                        $insert_compra_mercaderia = $link->query("INSERT INTO compra_mercaderia (prov_compram, fecha_compram, tipocom_compram, numcom_compram, ingresastock_compram, estado_compram, cuando_compram) VALUES ('$id_proveedor', '$fechaSinHorario', '$tipo_factura', '1', '1', '$fecha')");
+                        $id_insert_compra_mercaderia = mysqli_insert_id($insert_compra_mercaderia);
 
                         $stmt = $link->prepare("INSERT INTO pruebas_escaneo (nro_factura, tipo_factura, cuit_cliente, cuit_proveedor, codigo_producto, cantidad_producto, precio_producto, total_factura) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
                         for ($i = 0; $i < $cantidad_items; $i++) {
@@ -138,6 +142,8 @@ function scanInvoice($fileInput, $link)
                                 $codigo = $codigo_vistos[$i];
                                 $price_unity = $price_unity_vistos[$i];
                                 $cantidad = $cantidad_vistos[$i];
+                                $id_producto = mysqli_fetch_assoc($link->query("SELECT id_producto FROM productos WHERE codigo_producto = '$codigo'"))['id_producto'];
+                                $link->query("INSERT INTO productos_comprados (idCMercaderia, idProducto, cantidad) VALUES ('$id_insert_compra_mercaderia', '$id_producto', '$cantidad')");
                                 $stmt->bind_param('sisissidd', $id_factura, $tipo_factura, $cuit_cliente, $cuit_proveedor, $codigo, $cantidad, $price_unity, $total_factura);
                                 $stmt->execute();
                             } else {
