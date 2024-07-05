@@ -56,7 +56,13 @@ function scanInvoice($fileInput, $link)
     }
 
     $uploadResponse = json_decode($response, true);
-    $fileNameId = $uploadResponse['data'];
+    if (isset($uploadResponse['data'])) {
+        $fileNameId = $uploadResponse['data'];
+    } else {
+        echo 'Error: Invalid upload response';
+        curl_close($curl);
+        return;
+    }
 
     $options = [
         'removeFileAfterScan' => false,
@@ -100,72 +106,80 @@ function scanInvoice($fileInput, $link)
     $scanResponse = curl_exec($curl);
     if ($scanResponse === false) {
         echo 'Error: ' . curl_error($curl);
-    } else {
-        $scanData = json_decode($scanResponse, true);
-        $codigo_vistos = [];
-        $price_unity_vistos = [];
-        $cantidad_vistos = [];
-        $total_productos = 0;
-        $id_factura = $scanData['data']['id_factura'];
-        $tipo_factura = $scanData['data']['tipo_factura'] === 'A' ? 1 : 6;
-        $total_factura = $scanData['data']['total'];
-        $cuit_cliente = $scanData['data']['cuit_cliente'];
-        $cuit_proveedor = $scanData['data']['cuit_proveedor'];
-        $cuit_str = (string)$cuit_proveedor;
-        $parte1 = substr($cuit_str, 0, 2);
-        $parte2 = substr($cuit_str, 2, -1);
-        $parte3 = substr($cuit_str, -1);
-        $cuit_formateado = $parte1 . '-' . $parte2 . '-' . $parte3;
-        $cantidad_items = count($scanData['data']['items']);
+        curl_close($curl);
+        return;
+    }
 
-        foreach ($scanData['data']['items'] as $producto) {
-            if (!in_array($producto['codigo'], $codigo_vistos)) {
-                $codigo_vistos[] = $producto['codigo'];
-                $price_unity_vistos[] = $producto['price_unity'];
-                $cantidad_vistos[] = $producto['cantidad'];
-                $total_productos += $producto['cantidad'];
-            }
+    $scanData = json_decode($scanResponse, true);
+    if (!isset($scanData['data'])) {
+        echo 'Error: Invalid scan response';
+        curl_close($curl);
+        return;
+    }
+
+    $codigo_vistos = [];
+    $price_unity_vistos = [];
+    $cantidad_vistos = [];
+    $total_productos = 0;
+    $id_factura = $scanData['data']['id_factura'];
+    $tipo_factura = $scanData['data']['tipo_factura'] === 'A' ? 1 : 6;
+    $total_factura = $scanData['data']['total'];
+    $cuit_cliente = $scanData['data']['cuit_cliente'];
+    $cuit_proveedor = $scanData['data']['cuit_proveedor'];
+    $cuit_str = (string)$cuit_proveedor;
+    $parte1 = substr($cuit_str, 0, 2);
+    $parte2 = substr($cuit_str, 2, -1);
+    $parte3 = substr($cuit_str, -1);
+    $cuit_formateado = $parte1 . '-' . $parte2 . '-' . $parte3;
+    $cantidad_items = count($scanData['data']['items']);
+
+    foreach ($scanData['data']['items'] as $producto) {
+        if (!in_array($producto['codigo'], $codigo_vistos)) {
+            $codigo_vistos[] = $producto['codigo'];
+            $price_unity_vistos[] = $producto['price_unity'];
+            $cantidad_vistos[] = $producto['cantidad'];
+            $total_productos += $producto['cantidad'];
         }
+    }
 
-        if ($total_productos >= $cantidad_items) {
-            $nro_factura_in_bd = $link->query("SELECT nro_factura FROM facturas WHERE nro_factura = '$id_factura'")->fetch_assoc()['nro_factura'];
-            if (!isset($nro_factura_in_bd) || count($nro_factura_in_bd) == 0) {
-                $id_proveedor = $link->query("SELECT id_proveedor FROM proveedores WHERE cuitcuil_com_proveedor = '$cuit_proveedor' OR cuitcuil_com_proveedor = '$cuit_formateado'")->fetch_assoc();
-                if (isset($id_proveedor) && count($id_proveedor) > 0) {
-                    try {
-                        $id_proveedor = (int)$id_proveedor['id_proveedor'];
-                        $fecha = date('Y-m-d H:i:s');
-                        $fechaSinHorario = date('Y-m-d');
-                        $link->query("INSERT INTO facturas (nro_factura, id_proveedor, fecha, tipo, monto) VALUES ('$id_factura', '$id_proveedor', '$fecha', '$tipo_factura', '$total_factura')");
+    if ($total_productos >= $cantidad_items) {
+        $nro_factura_in_bd = $link->query("SELECT nro_factura FROM facturas WHERE nro_factura = '$id_factura'")->fetch_assoc()['nro_factura'];
+        if (!isset($nro_factura_in_bd) || count($nro_factura_in_bd) == 0) {
+            $id_proveedor = $link->query("SELECT id_proveedor FROM proveedores WHERE cuitcuil_com_proveedor = '$cuit_proveedor' OR cuitcuil_com_proveedor = '$cuit_formateado'")->fetch_assoc()['id_proveedor'];
+            if (isset($id_proveedor)) {
+                try {
+                    $id_proveedor = (int)$id_proveedor;
+                    $fecha = date('Y-m-d H:i:s');
+                    $fechaSinHorario = date('Y-m-d');
+                    $link->query("INSERT INTO facturas (nro_factura, id_proveedor, fecha, tipo, monto) VALUES ('$id_factura', '$id_proveedor', '$fecha', '$tipo_factura', '$total_factura')");
 
-                        $insert_compra_mercaderia = $link->query("INSERT INTO compra_mercaderia (prov_compram, fecha_compram, tipocom_compram, numcom_compram, ingresastock_compram, estado_compram, cuando_compram) VALUES ('$id_proveedor', '$fechaSinHorario', '$tipo_factura', '1', '1', '$fecha')");
-                        $id_insert_compra_mercaderia = mysqli_insert_id($insert_compra_mercaderia);
+                    $link->query("INSERT INTO compra_mercaderia (prov_compram, fecha_compram, tipocom_compram, numcom_compram, ingresastock_compram, estado_compram, cuando_compram) VALUES ('$id_proveedor', '$fechaSinHorario', '$tipo_factura', '$id_factura', '1', '1', '$fecha')");
+                    $id_insert_compra_mercaderia = mysqli_insert_id($link);
 
-                        for ($i = 0; $i < $cantidad_items; $i++) {
-                            if (isset($codigo_vistos[$i], $price_unity_vistos[$i], $cantidad_vistos[$i])) {
-                                $codigo = $codigo_vistos[$i];
-                                $price_unity = $price_unity_vistos[$i];
-                                $cantidad = $cantidad_vistos[$i];
-                                $link->prepare("INSERT INTO pruebas_escaneo (nro_factura, tipo_factura, cuit_cliente, cuit_proveedor, codigo_producto, cantidad_producto, precio_producto, total_factura) VALUES ($id_factura, $tipo_factura, $cuit_cliente, $cuit_proveedor, $codigo, $cantidad, $price_unity, $total_factura)");
-                                $id_producto = $link->query("SELECT id_producto FROM productos WHERE codigo_producto = '$codigo'")->fetch_assoc()['id_producto'];
-                                $link->query("INSERT INTO productos_comprados (idCMercaderia, idProducto, cantidad) VALUES ('$id_insert_compra_mercaderia', '$id_producto', '$cantidad')");
-                            } else {
-                                $cantidad_items_error++;
-                            }
+                    for ($i = 0; $i < $cantidad_items; $i++) {
+                        if (isset($codigo_vistos[$i], $price_unity_vistos[$i], $cantidad_vistos[$i])) {
+                            $codigo = $codigo_vistos[$i];
+                            $price_unity = $price_unity_vistos[$i];
+                            $cantidad = $cantidad_vistos[$i];
+                            $link->query("INSERT INTO pruebas_escaneo (nro_factura, tipo_factura, cuit_cliente, cuit_proveedor, codigo_producto, cantidad_producto, precio_producto, total_factura) VALUES ('$id_factura', '$tipo_factura', '$cuit_cliente', '$cuit_proveedor', '$codigo', '$cantidad', '$price_unity', '$total_factura')");
+                            $id_producto = $link->query("SELECT id_producto FROM productos WHERE codigo_producto = '$codigo'")->fetch_assoc()['id_producto'];
+                            $link->query("INSERT INTO productos_comprados (idCMercaderia, idProducto, cantidad) VALUES ('$id_insert_compra_mercaderia', '$id_producto', '$cantidad')");
+                        } else {
+                            $cantidad_items_error++;
                         }
-                    } catch (\Exception $e) {
-                        $cantidad_items_error = count($scanData['data']['items']);
-                        echo "<script>console.error('Ha habido un error: " . $e->getMessage() . "');</script>";
                     }
-                } else {
+                } catch (\Exception $e) {
                     $cantidad_items_error = count($scanData['data']['items']);
-                    echo "<script>alert('No existe ningun proveedor con ese cuil.');</script>";
+                    echo "<script>console.error('Ha habido un error: " . $e->getMessage() . "');</script>";
                 }
+            } else {
+                $cantidad_items_error = count($scanData['data']['items']);
+                echo "<script>alert('No existe ningun proveedor con ese cuil.');</script>";
             }
-        } else {
-            $cantidad_items_error = count($scanData['data']['items']);
-            echo "<script>alert('Ha habido un error al subir los datos, intentelo de nuevo.');</script>";
         }
+    } else {
+        $cantidad_items_error = count($scanData['data']['items']);
+        echo "<script>alert('Ha habido un error al subir los datos, intentelo de nuevo.');</script>";
     }
 
     curl_close($curl);
