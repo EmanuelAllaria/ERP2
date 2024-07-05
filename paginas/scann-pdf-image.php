@@ -22,7 +22,7 @@ function scanInvoice($fileInput, $link)
     $cantidad_items_error = 0;
     $uploadUrl = 'https://api.totalum.app/api/v1/files/upload';
     $scanUrl = 'https://api.totalum.app/api/v1/files/scan-document';
-    $apiKey = 'sk-eyJrZXkiOiJjZWRjZDZkMDNmYzA3NmExY2RlNGJhMDQiLCJuYW1lIjoiRGVmYXVsdCBBUEkgS2V5IGF1dG9nZW5lcmF0ZWQgbWxjNSIsIm9yZ2FuaXphdGlvbklkIjoibXktcHJveWVjdC10ZXN0In0_';
+    $apiKey = 'sk-eyJrZXkiOiJmZThjZjUyZTg1N2RhZWUwZGE4MDA1MjkiLCJuYW1lIjoiRGVmYXVsdCBBUEkgS2V5IGF1dG9nZW5lcmF0ZWQgMTlhcCIsIm9yZ2FuaXphdGlvbklkIjoicHJ1ZWJhLWVycC0yIn0_';
 
     if (!isset($_FILES[$fileInput]) || $_FILES[$fileInput]['error'] !== UPLOAD_ERR_OK) {
         die('Error uploading file.');
@@ -111,6 +111,11 @@ function scanInvoice($fileInput, $link)
         $total_factura = $scanData['data']['total'];
         $cuit_cliente = $scanData['data']['cuit_cliente'];
         $cuit_proveedor = $scanData['data']['cuit_proveedor'];
+        $cuit_str = (string)$cuit_proveedor;
+        $parte1 = substr($cuit_str, 0, 2);
+        $parte2 = substr($cuit_str, 2, -1);
+        $parte3 = substr($cuit_str, -1);
+        $cuit_formateado = $parte1 . '-' . $parte2 . '-' . $parte3;
         $cantidad_items = count($scanData['data']['items']);
 
         foreach ($scanData['data']['items'] as $producto) {
@@ -123,12 +128,12 @@ function scanInvoice($fileInput, $link)
         }
 
         if ($total_productos >= $cantidad_items) {
-            $nro_factura_in_bd = mysqli_fetch_assoc($link->query("SELECT nro_factura FROM facturas WHERE nro_factura = '$id_factura'"));
+            $nro_factura_in_bd = $link->query("SELECT nro_factura FROM facturas WHERE nro_factura = '$id_factura'")->fetch_assoc()['nro_factura'];
             if (!isset($nro_factura_in_bd) || count($nro_factura_in_bd) == 0) {
-                $id_proveedor = mysqli_fetch_assoc($link->query("SELECT id_proveedor FROM proveedores WHERE cuitcuil_com_proveedor = '$cuit_proveedor'"));
+                $id_proveedor = $link->query("SELECT id_proveedor FROM proveedores WHERE cuitcuil_com_proveedor = '$cuit_proveedor' OR cuitcuil_com_proveedor = '$cuit_formateado'")->fetch_assoc();
                 if (isset($id_proveedor) && count($id_proveedor) > 0) {
                     try {
-                        $id_proveedor = $id_proveedor['id_proveedor'];
+                        $id_proveedor = (int)$id_proveedor['id_proveedor'];
                         $fecha = date('Y-m-d H:i:s');
                         $fechaSinHorario = date('Y-m-d');
                         $link->query("INSERT INTO facturas (nro_factura, id_proveedor, fecha, tipo, monto) VALUES ('$id_factura', '$id_proveedor', '$fecha', '$tipo_factura', '$total_factura')");
@@ -136,21 +141,18 @@ function scanInvoice($fileInput, $link)
                         $insert_compra_mercaderia = $link->query("INSERT INTO compra_mercaderia (prov_compram, fecha_compram, tipocom_compram, numcom_compram, ingresastock_compram, estado_compram, cuando_compram) VALUES ('$id_proveedor', '$fechaSinHorario', '$tipo_factura', '1', '1', '$fecha')");
                         $id_insert_compra_mercaderia = mysqli_insert_id($insert_compra_mercaderia);
 
-                        $stmt = $link->prepare("INSERT INTO pruebas_escaneo (nro_factura, tipo_factura, cuit_cliente, cuit_proveedor, codigo_producto, cantidad_producto, precio_producto, total_factura) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
                         for ($i = 0; $i < $cantidad_items; $i++) {
                             if (isset($codigo_vistos[$i], $price_unity_vistos[$i], $cantidad_vistos[$i])) {
                                 $codigo = $codigo_vistos[$i];
                                 $price_unity = $price_unity_vistos[$i];
                                 $cantidad = $cantidad_vistos[$i];
-                                $id_producto = mysqli_fetch_assoc($link->query("SELECT id_producto FROM productos WHERE codigo_producto = '$codigo'"))['id_producto'];
+                                $link->prepare("INSERT INTO pruebas_escaneo (nro_factura, tipo_factura, cuit_cliente, cuit_proveedor, codigo_producto, cantidad_producto, precio_producto, total_factura) VALUES ($id_factura, $tipo_factura, $cuit_cliente, $cuit_proveedor, $codigo, $cantidad, $price_unity, $total_factura)");
+                                $id_producto = $link->query("SELECT id_producto FROM productos WHERE codigo_producto = '$codigo'")->fetch_assoc()['id_producto'];
                                 $link->query("INSERT INTO productos_comprados (idCMercaderia, idProducto, cantidad) VALUES ('$id_insert_compra_mercaderia', '$id_producto', '$cantidad')");
-                                $stmt->bind_param('sisissidd', $id_factura, $tipo_factura, $cuit_cliente, $cuit_proveedor, $codigo, $cantidad, $price_unity, $total_factura);
-                                $stmt->execute();
                             } else {
                                 $cantidad_items_error++;
                             }
                         }
-                        $stmt->close();
                     } catch (\Exception $e) {
                         $cantidad_items_error = count($scanData['data']['items']);
                         echo "<script>console.error('Ha habido un error: " . $e->getMessage() . "');</script>";
