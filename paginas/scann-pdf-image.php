@@ -22,7 +22,7 @@ function scanInvoice($fileInput, $link)
     $cantidad_items_error = 0;
     $uploadUrl = 'https://api.totalum.app/api/v1/files/upload';
     $scanUrl = 'https://api.totalum.app/api/v1/files/scan-document';
-    $apiKey = 'sk-eyJrZXkiOiJmZThjZjUyZTg1N2RhZWUwZGE4MDA1MjkiLCJuYW1lIjoiRGVmYXVsdCBBUEkgS2V5IGF1dG9nZW5lcmF0ZWQgMTlhcCIsIm9yZ2FuaXphdGlvbklkIjoicHJ1ZWJhLWVycC0yIn0_';
+    $apiKey = 'sk-eyJrZXkiOiI2YmI3MzU5NTM3OGI0Njk3MDgwOGVjM2EiLCJuYW1lIjoiRGVmYXVsdCBBUEkgS2V5IGF1dG9nZW5lcmF0ZWQgd3NyeSIsIm9yZ2FuaXphdGlvbklkIjoiZXJwLTMifQ__';
 
     if (!isset($_FILES[$fileInput]) || $_FILES[$fileInput]['error'] !== UPLOAD_ERR_OK) {
         die('Error uploading file.');
@@ -135,8 +135,11 @@ function scanInvoice($fileInput, $link)
 
     foreach ($scanData['data']['items'] as $producto) {
         if (!in_array($producto['codigo'], $codigo_vistos)) {
+            $price_unity = str_replace(',', '', $producto['price_unity']);
+            $price_unity = str_replace('.', '.', $price_unity);
+            $price_unity_float = (float)$price_unity;
             $codigo_vistos[] = $producto['codigo'];
-            $price_unity_vistos[] = $producto['price_unity'];
+            $price_unity_vistos[] = $price_unity_float;
             $cantidad_vistos[] = $producto['cantidad'];
             $total_productos += $producto['cantidad'];
         }
