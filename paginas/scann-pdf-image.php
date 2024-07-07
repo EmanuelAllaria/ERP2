@@ -80,8 +80,8 @@ function scanInvoice($fileInput, $link)
         "items" => ["type" => "array", "description" => "productos de la factura", "items" => [
             "type" => "object", "properties" => [
                 "codigo" => ["type" => "number", "description" => "el codigo de cada producto"],
-                "price_unity" => ["type" => "number", "description" => "el precio por unidad de cada producto"],
-                "cantidad" => ["type" => "string", "description" => "la cantidad de productos de cada item"]
+                "price_unity" => ["type" => "string", "description" => "el precio por unidad de cada producto"],
+                "cantidad" => ["type" => "number", "description" => "la cantidad de productos de cada item"]
             ]
         ]]
     ];
