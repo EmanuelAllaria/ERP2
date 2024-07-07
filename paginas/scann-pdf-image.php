@@ -73,15 +73,15 @@ function scanInvoice($fileInput, $link)
 
     $properties = [
         "id_factura" => ["type" => "string", "description" => "el numero de factura"],
-        "tipo_factura" => ["type" => "string", "description" => "el tipo de la factura"],
-        "total" => ["type" => "number", "description" => "el total de la factura"],
+        "tipo_factura" => ["type" => "string", "description" => "el tipo de la factura 'A' o 'B'"],
+        "total" => ["type" => "string", "description" => "el total de la factura"],
         "cuit_cliente" => ["type" => "number", "description" => "el cuit del cliente"],
         "cuit_proveedor" => ["type" => "number", "description" => "el cuit del proveedor"],
         "items" => ["type" => "array", "description" => "productos de la factura", "items" => [
             "type" => "object", "properties" => [
                 "codigo" => ["type" => "number", "description" => "el codigo de cada producto"],
                 "price_unity" => ["type" => "number", "description" => "el precio por unidad de cada producto"],
-                "cantidad" => ["type" => "number", "description" => "la cantidad de productos de cada item"]
+                "cantidad" => ["type" => "string", "description" => "la cantidad de productos de cada item"]
             ]
         ]]
     ];
