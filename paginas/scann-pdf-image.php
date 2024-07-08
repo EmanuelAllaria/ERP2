@@ -1,37 +1,25 @@
 <?php
 header("Access-Control-Allow-Origin: *");
 ini_set('memory_limit', '-1');
-
 date_default_timezone_set("America/Argentina/Buenos_Aires");
 setlocale(LC_ALL, "es_ES");
 
-try {
-    $link = new mysqli('localhost', 'u598064194_sistemabig', 'CBV#*Bi0', 'u598064194_sistemabig');
-    if ($link->connect_error) {
-        throw new Exception("Connection failed: " . $link->connect_error);
+function connectDatabase()
+{
+    $remoteDB = new mysqli('localhost', 'u598064194_sistemabig', 'CBV#*Bi0', 'u598064194_sistemabig');
+    if ($remoteDB->connect_error) {
+        $localDB = new mysqli('localhost', 'root', '', 'bpgestion');
+        if ($localDB->connect_error) {
+            die("Connection failed: " . $localDB->connect_error);
+        }
+        return $localDB;
     }
-} catch (Exception $e) {
-    $link = new mysqli('localhost', 'root', '', 'bpgestion');
-    if ($link->connect_error) {
-        die("Connection failed: " . $link->connect_error);
-    }
+    return $remoteDB;
 }
 
-function scanInvoice($fileInput, $link)
+function uploadFileToTotalum($fileTmpPath, $fileName, $fileType, $apiKey)
 {
-    $cantidad_items_error = 0;
     $uploadUrl = 'https://api.totalum.app/api/v1/files/upload';
-    $scanUrl = 'https://api.totalum.app/api/v1/files/scan-document';
-    $apiKey = 'sk-eyJrZXkiOiI2YmI3MzU5NTM3OGI0Njk3MDgwOGVjM2EiLCJuYW1lIjoiRGVmYXVsdCBBUEkgS2V5IGF1dG9nZW5lcmF0ZWQgd3NyeSIsIm9yZ2FuaXphdGlvbklkIjoiZXJwLTMifQ__';
-
-    if (!isset($_FILES[$fileInput]) || $_FILES[$fileInput]['error'] !== UPLOAD_ERR_OK) {
-        die('Error uploading file.');
-    }
-
-    $fileTmpPath = $_FILES[$fileInput]['tmp_name'];
-    $fileName = $_FILES[$fileInput]['name'];
-    $fileType = $_FILES[$fileInput]['type'];
-
     $curl = curl_init();
     $headers = ['api-key: ' . $apiKey];
     $file = new CURLFile($fileTmpPath, $fileType, $fileName);
@@ -44,26 +32,23 @@ function scanInvoice($fileInput, $link)
         CURLOPT_POST => true,
         CURLOPT_POSTFIELDS => $postData,
         CURLOPT_SAFE_UPLOAD => true,
-        CURLOPT_SSL_VERIFYPEER => false,
-        CURLOPT_SSL_VERIFYHOST => false
     ]);
 
     $response = curl_exec($curl);
     if ($response === false) {
         echo 'Error: ' . curl_error($curl);
         curl_close($curl);
-        return;
+        return false;
     }
 
     $uploadResponse = json_decode($response, true);
-    if (isset($uploadResponse['data'])) {
-        $fileNameId = $uploadResponse['data'];
-    } else {
-        echo 'Error: Invalid upload response';
-        curl_close($curl);
-        return;
-    }
+    curl_close($curl);
+    return $uploadResponse['data'] ?? false;
+}
 
+function scanDocumentWithTotalum($fileNameId, $apiKey)
+{
+    $scanUrl = 'https://api.totalum.app/api/v1/files/scan-document';
     $options = [
         'removeFileAfterScan' => false,
         'returnOcrFullResult' => false,
@@ -72,16 +57,16 @@ function scanInvoice($fileInput, $link)
     ];
 
     $properties = [
-        "id_factura" => ["type" => "string", "description" => "el numero de factura"],
-        "tipo_factura" => ["type" => "string", "description" => "el tipo de la factura 'A' o 'B'"],
-        "total" => ["type" => "string", "description" => "el total de la factura"],
-        "cuit_cliente" => ["type" => "number", "description" => "el cuit del cliente"],
-        "cuit_proveedor" => ["type" => "number", "description" => "el cuit del proveedor"],
-        "items" => ["type" => "array", "description" => "productos de la factura", "items" => [
+        "id_factura" => ["type" => "string", "description" => "Número de factura"],
+        "tipo_factura" => ["type" => "string", "description" => "Tipo de factura 'A' o 'B'"],
+        "total" => ["type" => "string", "description" => "Total de la factura"],
+        "cuit_cliente" => ["type" => "number", "description" => "CUIT del cliente"],
+        "cuit_proveedor" => ["type" => "number", "description" => "CUIT del proveedor"],
+        "items" => ["type" => "array", "description" => "Productos de la factura", "items" => [
             "type" => "object", "properties" => [
-                "codigo" => ["type" => "number", "description" => "el codigo de cada producto"],
-                "price_unity" => ["type" => "string", "description" => "el precio por unidad de cada producto en decimal, sin redondear"],
-                "cantidad" => ["type" => "number", "description" => "la cantidad de productos de cada item"]
+                "codigo" => ["type" => "number", "description" => "Código del producto"],
+                "price_unity" => ["type" => "string", "description" => "Precio unitario del producto en decimal, sin redondear"],
+                "cantidad" => ["type" => "number", "description" => "Cantidad de productos"]
             ]
         ]]
     ];
@@ -92,6 +77,7 @@ function scanInvoice($fileInput, $link)
         'options' => $options
     ]);
 
+    $curl = curl_init();
     $headers = ['Content-Type: application/json', 'api-key: ' . $apiKey];
     curl_setopt_array($curl, [
         CURLOPT_URL => $scanUrl,
@@ -99,44 +85,39 @@ function scanInvoice($fileInput, $link)
         CURLOPT_HTTPHEADER => $headers,
         CURLOPT_POST => true,
         CURLOPT_POSTFIELDS => $postData,
-        CURLOPT_SSL_VERIFYPEER => false,
-        CURLOPT_SSL_VERIFYHOST => false
     ]);
 
-    $scanResponse = curl_exec($curl);
-    if ($scanResponse === false) {
+    $response = curl_exec($curl);
+    if ($response === false) {
         echo 'Error: ' . curl_error($curl);
         curl_close($curl);
-        return;
+        return false;
     }
 
-    $scanData = json_decode($scanResponse, true);
-    if (!isset($scanData['data'])) {
-        echo 'Error: Invalid scan response';
-        curl_close($curl);
-        return;
-    }
+    $scanResponse = json_decode($response, true);
+    curl_close($curl);
+    return $scanResponse['data'] ?? false;
+}
 
+function processInvoiceData($scanData, $link)
+{
     $codigo_vistos = [];
     $price_unity_vistos = [];
     $cantidad_vistos = [];
     $total_productos = 0;
-    $id_factura = $scanData['data']['id_factura'];
-    $tipo_factura = $scanData['data']['tipo_factura'] === 'A' ? 1 : 6;
-    $total_factura = $scanData['data']['total'];
-    $cuit_cliente = $scanData['data']['cuit_cliente'];
-    $cuit_proveedor = $scanData['data']['cuit_proveedor'];
+    $id_factura = $scanData['id_factura'];
+    $tipo_factura = $scanData['tipo_factura'] === 'A' ? 1 : 6;
+    $total_factura = $scanData['total'];
+    $cuit_cliente = $scanData['cuit_cliente'];
+    $cuit_proveedor = $scanData['cuit_proveedor'];
     $cuit_str = (string)$cuit_proveedor;
-    $parte1 = substr($cuit_str, 0, 2);
-    $parte2 = substr($cuit_str, 2, -1);
-    $parte3 = substr($cuit_str, -1);
-    $cuit_formateado = $parte1 . '-' . $parte2 . '-' . $parte3;
-    $cantidad_items = count($scanData['data']['items']);
+    $cuit_formateado = substr($cuit_str, 0, 2) . '-' . substr($cuit_str, 2, -1) . '-' . substr($cuit_str, -1);
+    $cantidad_items = count($scanData['items']);
+    $cantidad_items_error = 0;
 
-    foreach ($scanData['data']['items'] as $producto) {
+    foreach ($scanData['items'] as $producto) {
         if (!in_array($producto['codigo'], $codigo_vistos)) {
             $price_unity = str_replace(',', '', $producto['price_unity']);
-            $price_unity = str_replace('.', '.', $price_unity);
             $price_unity_float = (float)$price_unity;
             $codigo_vistos[] = $producto['codigo'];
             $price_unity_vistos[] = $price_unity_float;
@@ -154,8 +135,8 @@ function scanInvoice($fileInput, $link)
                     $id_proveedor = (int)$id_proveedor;
                     $fecha = date('Y-m-d H:i:s');
                     $fechaSinHorario = date('Y-m-d');
-                    $link->query("INSERT INTO facturas (nro_factura, id_proveedor, fecha, tipo, monto) VALUES ('$id_factura', '$id_proveedor', '$fecha', '$tipo_factura', '$total_factura')");
 
+                    $link->query("INSERT INTO facturas (nro_factura, id_proveedor, fecha, tipo, monto) VALUES ('$id_factura', '$id_proveedor', '$fecha', '$tipo_factura', '$total_factura')");
                     $link->query("INSERT INTO compra_mercaderia (prov_compram, fecha_compram, tipocom_compram, numcom_compram, ingresastock_compram, estado_compram, cuando_compram) VALUES ('$id_proveedor', '$fechaSinHorario', '$tipo_factura', '$id_factura', '1', '1', '$fecha')");
                     $id_insert_compra_mercaderia = mysqli_insert_id($link);
 
@@ -167,42 +148,58 @@ function scanInvoice($fileInput, $link)
                             $link->query("INSERT INTO pruebas_escaneo (nro_factura, tipo_factura, cuit_cliente, cuit_proveedor, codigo_producto, cantidad_producto, precio_producto, total_factura) VALUES ('$id_factura', '$tipo_factura', '$cuit_cliente', '$cuit_proveedor', '$codigo', '$cantidad', '$price_unity', '$total_factura')");
                             $id_producto = $link->query("SELECT id_producto FROM productos WHERE codigo_producto = '$codigo'")->fetch_assoc()['id_producto'];
                             $link->query("INSERT INTO productos_comprados (idCMercaderia, idProducto, cantidad) VALUES ('$id_insert_compra_mercaderia', '$id_producto', '$cantidad')");
+                            $link->query("UPDATE productos SET stock_producto = stock_producto + $cantidad WHERE codigo_producto = $codigo;");
                         } else {
                             $cantidad_items_error++;
                         }
                     }
                 } catch (\Exception $e) {
-                    $cantidad_items_error = count($scanData['data']['items']);
+                    $cantidad_items_error = count($scanData['items']);
                     echo "<script>console.error('Ha habido un error: " . $e->getMessage() . "');</script>";
                 }
             } else {
-                $cantidad_items_error = count($scanData['data']['items']);
-                echo "<script>alert('No existe ningun proveedor con ese cuil.');</script>";
+                $cantidad_items_error = count($scanData['items']);
+                echo "<script>alert('No existe ningún proveedor con ese CUIT.');</script>";
             }
         }
     } else {
-        $cantidad_items_error = count($scanData['data']['items']);
-        echo "<script>alert('Ha habido un error al subir los datos, intentelo de nuevo.');</script>";
+        $cantidad_items_error = count($scanData['items']);
+        echo "<script>alert('Ha habido un error al subir los datos, inténtelo de nuevo.');</script>";
     }
 
-    curl_close($curl);
-    $cantidad_items = count($scanData['data']['items']);
     return ['cantidad_items_error' => $cantidad_items_error, 'cantidad_items' => $cantidad_items];
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $response = scanInvoice('fileInput', $link);
-    $cantidad_items_error = $response['cantidad_items_error'];
-    $cantidad_items = $response['cantidad_items'];
+    $link = connectDatabase();
+    $apiKey = 'sk-eyJrZXkiOiI2YmI3MzU5NTM3OGI0Njk3MDgwOGVjM2EiLCJuYW1lIjoiRGVmYXVsdCBBUEkgS2V5IGF1dG9nZW5lcmF0ZWQgd3NyeSIsIm9yZ2FuaXphdGlvbklkIjoiZXJwLTMifQ__';
 
-    if ($cantidad_items_error > 0) {
-        if ($cantidad_items_error === $cantidad_items) {
-            echo "<script>alert('No se pudieron subir los datos.');</script>";
-        } else {
-            echo "<script>alert('Se subieron los datos con exito. Pero hubieron $cantidad_items_error errores.');</script>";
+    if (!isset($_FILES['fileInput']) || $_FILES['fileInput']['error'] !== UPLOAD_ERR_OK) {
+        die('Error uploading file.');
+    }
+
+    $fileTmpPath = $_FILES['fileInput']['tmp_name'];
+    $fileName = $_FILES['fileInput']['name'];
+    $fileType = $_FILES['fileInput']['type'];
+
+    $fileNameId = uploadFileToTotalum($fileTmpPath, $fileName, $fileType, $apiKey);
+    if ($fileNameId) {
+        $scanData = scanDocumentWithTotalum($fileNameId, $apiKey);
+        if ($scanData) {
+            $response = processInvoiceData($scanData, $link);
+            $cantidad_items_error = $response['cantidad_items_error'];
+            $cantidad_items = $response['cantidad_items'];
+
+            if ($cantidad_items_error > 0) {
+                if ($cantidad_items_error === $cantidad_items) {
+                    echo "<script>alert('No se pudieron subir los datos.');</script>";
+                } else {
+                    echo "<script>alert('Se subieron los datos con éxito. Pero hubieron $cantidad_items_error errores.');</script>";
+                }
+            } else {
+                echo "<script>alert('Se subieron todos los datos con éxito.');</script>";
+            }
         }
-    } else {
-        echo "<script>alert('Se subieron todos los datos con exito.');</script>";
     }
 }
 ?>
@@ -246,7 +243,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </thead>
         <tbody>
             <?php
-            $query = $link->query('SELECT * FROM pruebas_escaneo');
+            $link = connectDatabase();
+            $query = $link->query('SELECT * FROM pruebas_escaneo ORDER BY id DESC');
             while ($row = mysqli_fetch_assoc($query)) {
                 echo "<tr>
                     <td>{$row['id']}</td>
