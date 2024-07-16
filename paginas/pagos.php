@@ -160,10 +160,17 @@
                   $saldo_final = 0;
 
                   $con_facturas = $link->query($sqlDeuda);
+                  $monto = 0;
 
                   while ($row = mysqli_fetch_assoc($con_facturas)) {
-                    $saldo_final += $row['monto'];
                     $id_pago = $row['id'];
+                    $monto_cheque = $link->query("SELECT SUM(monto) as total
+                                                FROM facturas_cheques
+                                                WHERE id > 0
+                                                AND id_pago = '$id_pago'
+                                                ORDER BY id ASC");
+                    $monto += $monto_cheque->fetch_assoc()['total'];
+                    $saldo_final += $row['monto'];
                     echo "<tr style='width: 100%;" . ($row['pago_favor'] == 1 ? 'color:green;' : '') . "'>";
                     echo "<td style='" . ($row['pago_favor'] == 1 ? 'color:green;' : '') . "'>{$id_pago}</td>";
                     echo "<td style='" . ($row['pago_favor'] == 1 ? 'color:green;' : '') . "'></td>";
@@ -175,7 +182,7 @@
                     echo "<td style='" . ($row['pago_favor'] == 1 ? 'color:green;' : '') . "'>" . date('d/m/Y', strtotime($row['fecha'])) . "</td>";
                     echo "<td style='" . ($row['pago_favor'] == 1 ? 'color:green;' : '') . "'>" . ($row['tipo_pago'] === 'cheque' && !is_null($row['fecha_emision']) ? date('d/m/Y', strtotime($row['fecha_emision'])) : '') . "</td>";
                     echo "<td style='" . ($row['pago_favor'] == 1 ? 'color:green;' : '') . "'>" . ($row['tipo_pago'] === 'cheque' && !is_null($row['fecha_cobro']) ? date('d/m/Y', strtotime($row['fecha_cobro'])) : '') . "</td>";
-                    echo "<td style='" . ($row['pago_favor'] == 1 ? 'color:green;' : '') . "'>$" . number_format($row['monto'], 2, ',', '.') . "</td>";
+                    echo "<td style='" . ($row['pago_favor'] == 1 ? 'color:green;' : '') . "'>$" . number_format($monto, 2, ',', '.') . "</td>";
                     echo "<td style='" . ($row['pago_favor'] == 1 ? 'color:green;' : '') . "'>" . ($row['pago_favor'] == 1 ? 'Factura a favor' : $row['observaciones']) . "</td>";
                     echo "<td class='d-flex align-items-center' style='gap: 1em;" . ($row['pago_favor'] == 1 ? 'color:green;' : '') . "'>" . ($row['tipo_pago'] === 'cheque' ? '<button onclick="mostrar_tr_cheques(`tr_cheques_' . $row['id'] . '`)" class="btn btn-info btn-lg">Ver Cheques</button>' : '') . " <a target='_blank' href='paginas/recibo_factura_pago.php?id_pago={$id_pago}&proveedor={$row['id_proveedor']}&tipo_pago={$row['tipo_pago']}'><i class='fa-solid fa-receipt'></i></a></td>";
                     echo "</tr>";
@@ -209,6 +216,7 @@
                         echo "</tr>";
                       }
                     }
+                    $monto = 0;
                   }
                   ?>
                 </tbody>
