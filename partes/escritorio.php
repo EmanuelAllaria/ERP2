@@ -783,8 +783,8 @@ if (isset($_GET['e']) && $_GET['e'] == 'crcok') {
                     <label for="comprobante">El cheque esta rechazado?</label>
                     <div class="input-group mb-3">
                         <select class="form-control" name="cheque_rechazado" id="cheque_rechazado_factura_pago2">
-                            <option selected value="1">Si</option>
-                            <option value="0">No</option>
+                            <option value="1">Si</option>
+                            <option selected value="0">No</option>
                         </select>
                     </div>
                 </div>
