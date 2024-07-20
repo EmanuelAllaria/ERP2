@@ -35,8 +35,9 @@ while ($row = mysqli_fetch_array($selectTotalFacturas)) {
         </ol>
       </div>
       <div class="col-md-6 text-right">
-        <form class="app-search d-none d-md-block d-lg-block">
-          <input type="text" class="form-control" placeholder="Buscar...">
+        <form class="app-search d-none d-md-block d-lg-block" method="get">
+          <input type="hidden" name="pagina" value="cheques_rechazados">
+          <input type="text" id="buscador" name="buscar" class="form-control" placeholder="Buscar...">
         </form>
       </div>
     </div>
@@ -46,6 +47,9 @@ while ($row = mysqli_fetch_array($selectTotalFacturas)) {
         <div class="card">
           <div class="card-body">
             <h4 class="card-title">Listado</h4>
+            <?php if (isset($_GET['buscar'])) {
+              echo '<h5><a href="index.php?pagina=cheques_rechazados">Número de cheque: [' . $_GET['buscar'] . ']</a></h5>';
+            } ?>
             <div class="row">
               <div class="col-md-2"><small class="form-control-feedback"> Desde </small>
                 <input class="form-control filtro" type="date" id="d" name="d" value="<?php if (isset($_GET['d'])) {
@@ -76,23 +80,6 @@ while ($row = mysqli_fetch_array($selectTotalFacturas)) {
                   ?>
                 </select>
               </div>
-              <div class="col-md-2"><small class="form-control-feedback">Forma pago </small><br>
-                <select class="form-control" id="formasel">
-                  <option value='' selected>Todas</option>
-                  <?php
-                  $busca_f = $link->query("SELECT * FROM `formas_pagos` WHERE `estado_formapago` LIKE '1'");
-                  while ($row = mysqli_fetch_array($busca_f)) {
-
-                    echo '<option value="' . (strtolower($row['detalle_formapago']) === 'mercado pago' ? 'mp' : strtolower($row['detalle_formapago'])) . '"';
-                    if (isset($_GET['f']) && $_GET['f'] == strtolower($row['detalle_formapago'])) {
-                      echo ' selected ';
-                    }
-                    echo '>' . $row['detalle_formapago'] . '</option>';
-                  }
-                  ?>
-                </select>
-
-              </div>
               <div class="col-md-2" style="margin-top:17px">
                 <a href="#" onclick="filtrar_vende()" class="btn btn-info btn-lg" role="button">Filtrar</a>
                 <?php if (isset($_GET['d']) || isset($_GET['h'])) { ?><a href="index.php?pagina=cheques_rechazados">Quitar Filtros</a><?php } ?>
@@ -104,27 +91,22 @@ while ($row = mysqli_fetch_array($selectTotalFacturas)) {
                   $busqueda = '';
                   if (isset($_GET['buscar'])) {
                     $palabra = $_GET['buscar'];
-                    $busqueda = "and (nro_factura like '%$palabra%' or tipo like '%$palabra%' )";
+                    $busqueda = "and numero_cheque like '%$palabra%'";
                   }
                   if (isset($_GET['d']) && $_GET['d'] != '') {
                     $desde = $_GET['d'];
-                    $busqueda = $busqueda . ' and facturas.fecha >= "' . $desde . '"';
+                    $busqueda = $busqueda . ' and facturas_cheques_rechazados.fecha_emision >= "' . $desde . '"';
                   } else {
                     $desde = date('Y-m-01');
                   }
                   if (isset($_GET['h']) && $_GET['h'] != '') {
                     $hasta = date('Y-m-d', strtotime($_GET['h'] . ' +1 day'));;
-                    $busqueda = $busqueda . ' and facturas.fecha <= "' . $hasta . '"';
+                    $busqueda = $busqueda . ' and facturas_cheques_rechazados.fecha_emision <= "' . $hasta . '"';
                   } else {
                     $hasta = date('Y-m-d 23:59:59');
                   }
                   if (isset($_GET['p']) && $_GET['p'] != '') {
-                    $busqueda = $busqueda . ' and facturas_pagos.id_proveedor = ' . $_GET['p'];
-                  } else {
-                    $vendedor = '';
-                  }
-                  if (isset($_GET['f']) && $_GET['f'] != '') {
-                    $busqueda = ' and facturas_pagos.tipo_pago = ' . $_GET['f'];
+                    $busqueda = $busqueda . " and facturas_cheques_rechazados.id_proveedor = '" . $_GET['p'] . "'";
                   } else {
                     $vendedor = '';
                   }
@@ -204,10 +186,9 @@ while ($row = mysqli_fetch_array($selectTotalFacturas)) {
     function filtrar_vende() {
       var datodesde = $('#d').val(); // get selected value
       var datohasta = $('#h').val(); // get selected value
-      var datovendedor = $('#vendedorsel option:selected').val(); // get selected value
-      var datoforma = $('#formasel option:selected').val(); // get selected valu
+      var datovendedor = $('#proveedorsel').val(); // get selected value
       if (datodesde) { // require a URL
-        window.location = 'index.php?pagina=pagos&d=' + datodesde + '&h=' + datohasta + '&v=' + datovendedor + '&f=' + datoforma; // redirect
+        window.location = 'index.php?pagina=cheques_rechazados&d=' + datodesde + '&h=' + datohasta + '&p=' + datovendedor; // redirect
       }
       return false;
     };

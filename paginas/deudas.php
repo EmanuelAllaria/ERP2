@@ -1,5 +1,6 @@
 <?php
 $provedores_id = [];
+$saldo_pago_a_favor = 0;
 ?>
 
 <div class="container-fluid">
@@ -42,7 +43,7 @@ $provedores_id = [];
                                             </div>
                                             <div class="col-md-2"><small class="form-control-feedback"> Proveedor </small><br>
                                                 <select class="form-control" id="proveedorsel">
-                                                    <option value='' selected>Todos</option>
+                                                    <option value='all' selected>Todos</option>
                                                     <?php
                                                     $busca_prov = $link->query("SELECT razon_com_proveedor as nombre, id_proveedor as id FROM `proveedores` WHERE `estado_proveedor` LIKE '1'");
                                                     while ($row = mysqli_fetch_array($busca_prov)) {
@@ -92,8 +93,9 @@ $provedores_id = [];
                                 } else {
                                     $hasta = date('Y-m-d 23:59:59');
                                 }
-                                if (isset($_GET['p'], $_GET['proveedor']) && ($_GET['p'] != '' || $_GET['proveedor'] != '')) {
-                                    $busqueda = $busqueda . ' and facturas.id_proveedor = ' . $_GET['p'] ?: $_GET['proveedor'];
+                                if ((isset($_GET['p']) || isset($_GET['proveedor'])) && ($_GET['p'] != '' || $_GET['proveedor'] != '') && $_GET['p'] != 'all') {
+                                    $id_proveedor = !empty($_GET['p']) ? $_GET['p'] : $_GET['proveedor'];
+                                    $busqueda .= " and facturas.id_proveedor = '" . $id_proveedor . "'";
                                 } else {
                                     $vendedor = '';
                                 }
@@ -160,7 +162,6 @@ $provedores_id = [];
                                                                     GROUP BY facturas_pagos.id_proveedor
                                                                     ORDER BY facturas_pagos.fecha_emision ASC");
 
-                                    $saldo_pago_a_favor = 0;
                                     while ($pago_a_favor = mysqli_fetch_assoc($consulta_pagos_a_favor)) {
                                         $haber_total += $pago_a_favor['monto'];
                                         $saldo_pago_a_favor += $pago_a_favor['monto'];

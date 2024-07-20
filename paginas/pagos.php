@@ -88,13 +88,13 @@
                   }
                   if (isset($_GET['d']) && $_GET['d'] != '') {
                     $desde = $_GET['d'];
-                    $busqueda = $busqueda . ' and facturas.fecha >= "' . $desde . '"';
+                    $busqueda = $busqueda . ' and facturas_pagos.fecha >= "' . $desde . '"';
                   } else {
                     $desde = date('Y-m-01');
                   }
                   if (isset($_GET['h']) && $_GET['h'] != '') {
                     $hasta = date('Y-m-d', strtotime($_GET['h'] . ' +1 day'));;
-                    $busqueda = $busqueda . ' and facturas.fecha <= "' . $hasta . '"';
+                    $busqueda = $busqueda . ' and facturas_pagos.fecha <= "' . $hasta . '"';
                   } else {
                     $hasta = date('Y-m-d 23:59:59');
                   }
@@ -109,7 +109,7 @@
                     $vendedor = '';
                   }
                   if (isset($_GET['f']) && $_GET['f'] != '') {
-                    $busqueda = ' and facturas_pagos.tipo_pago = ' . $_GET['f'];
+                    $busqueda = $busqueda . " and facturas_pagos.tipo_pago = '" . $_GET['f'] . "'";
                   } else {
                     $vendedor = '';
                   }
@@ -182,7 +182,7 @@
                     echo "<td style='" . ($row['pago_favor'] == 1 ? 'color:green;' : '') . "'>" . date('d/m/Y', strtotime($row['fecha'])) . "</td>";
                     echo "<td style='" . ($row['pago_favor'] == 1 ? 'color:green;' : '') . "'>" . ($row['tipo_pago'] === 'cheque' && !is_null($row['fecha_emision']) ? date('d/m/Y', strtotime($row['fecha_emision'])) : '') . "</td>";
                     echo "<td style='" . ($row['pago_favor'] == 1 ? 'color:green;' : '') . "'>" . ($row['tipo_pago'] === 'cheque' && !is_null($row['fecha_cobro']) ? date('d/m/Y', strtotime($row['fecha_cobro'])) : '') . "</td>";
-                    echo "<td style='" . ($row['pago_favor'] == 1 ? 'color:green;' : '') . "'>$" . number_format($monto, 2, ',', '.') . "</td>";
+                    echo "<td style='" . ($row['pago_favor'] == 1 ? 'color:green;' : '') . "'>$" . number_format($row['tipo_pago'] === 'cheque' ? $monto : $row['monto'], 2, ',', '.') . "</td>";
                     echo "<td style='" . ($row['pago_favor'] == 1 ? 'color:green;' : '') . "'>" . ($row['pago_favor'] == 1 ? 'Factura a favor' : $row['observaciones']) . "</td>";
                     echo "<td class='d-flex align-items-center' style='gap: 1em;" . ($row['pago_favor'] == 1 ? 'color:green;' : '') . "'>" . ($row['tipo_pago'] === 'cheque' ? '<button onclick="mostrar_tr_cheques(`tr_cheques_' . $row['id'] . '`)" class="btn btn-info btn-lg">Ver Cheques</button>' : '') . " <a target='_blank' href='paginas/recibo_factura_pago.php?id_pago={$id_pago}&proveedor={$row['id_proveedor']}&tipo_pago={$row['tipo_pago']}'><i class='fa-solid fa-receipt'></i></a></td>";
                     echo "</tr>";
@@ -237,10 +237,10 @@
     function filtrar_vende() {
       var datodesde = $('#d').val(); // get selected value
       var datohasta = $('#h').val(); // get selected value
-      var datovendedor = $('#vendedorsel option:selected').val(); // get selected value
-      var datoforma = $('#formasel option:selected').val(); // get selected valu
+      var datovendedor = $('#proveedorsel').val(); // get selected value
+      var datoforma = $('#formasel').val(); // get selected valu
       if (datodesde) { // require a URL
-        window.location = 'index.php?pagina=pagos&d=' + datodesde + '&h=' + datohasta + '&v=' + datovendedor + '&f=' + datoforma; // redirect
+        window.location = 'index.php?pagina=pagos&d=' + datodesde + '&h=' + datohasta + '&p=' + datovendedor + '&f=' + datoforma; // redirect
       }
       return false;
     };
