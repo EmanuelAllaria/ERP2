@@ -31,10 +31,9 @@ if ($_SESSION['usuario'] != '') { ?>
         transform: translate(-50%, -50%);
         z-index: 999999;
         background: #fff;
-        width: 75%;
-        height: 70%;
         border-radius: 20px;
         box-shadow: #000 5px 5px 20px 0;
+        padding: 1em;
       }
 
       .switch {

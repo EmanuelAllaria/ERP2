@@ -1060,11 +1060,24 @@ if ($_SESSION['usuario'] != '') {
     $monto = $_POST['cheque_rechazado'] == 1 ? -$_POST['monto'] : $_POST['monto'];
     $origen = $_POST['origen'];
     $cheque_rechazado = $_POST['cheque_rechazado'];
-    $inserta = null;
-    $inserta2 = null;
+
+    $uploads_dir = '../uploads/cheques';
+    $nombre_imagen = null;
+
+    if (isset($_FILES['imagen_cheque']) && $_FILES['imagen_cheque']['error'] == UPLOAD_ERR_OK) {
+      $nombre_imagen = uniqid() . '_' . str_replace(' ', '_', basename($_FILES['imagen_cheque']['name']));
+      $ruta_imagen = $uploads_dir . '/' . $nombre_imagen;
+
+      move_uploaded_file($_FILES['imagen_cheque']['tmp_name'], $ruta_imagen);
+    }
 
     $inserta = $link->query("INSERT INTO facturas_cheques SET banco='$banco', numero_cheque='$numero_cheque', fecha_emision='$fecha_emision', fecha_cobro='$fecha_cobro', titular='$titular', cuit='$cuit', monto='$monto', origen='$origen', cheque_rechazado='$cheque_rechazado'");
     $id = mysqli_insert_id($link);
+    if (isset($nombre_imagen, $numero_cheque) && $nombre_imagen !== '') {
+      if ($link->query("INSERT INTO imagen_cheque SET numero_cheque='$numero_cheque', url_imagen='$nombre_imagen'") === FALSE) {
+        echo "Error en la consulta imagen_cheque: " . $link->error;
+      }
+    }
     if ($_POST['cheque_rechazado'] == 1) {
       $inserta2 = $link->query("INSERT INTO facturas_cheques_rechazados SET id_cheque='$id', id_proveedor='$proveedor', banco='$banco', numero_cheque='$numero_cheque', fecha_emision='$fecha_emision', fecha_cobro='$fecha_cobro', titular='$titular', cuit='$cuit', monto='$monto', origen='$origen', rechazado='1'");
     }
@@ -1074,6 +1087,7 @@ if ($_SESSION['usuario'] != '') {
       $selectPagoGuardado = $link->query("SELECT * FROM facturas_cheques WHERE id='$id'")->fetch_assoc();
       $selectPagoGuardado['nombre_proveedor'] = $nombreProveedor;
       $selectPagoGuardado['tipo_pago'] = 'cheque';
+      $selectPagoGuardado['imagen_cheque'] = $nombre_imagen;
       if ($selectPagoGuardado) {
         echo json_encode($selectPagoGuardado, JSON_PRETTY_PRINT);
       }

@@ -71,61 +71,61 @@ function add_factura_pago_cheque() {
   var monto = $("#monto_factura_pago2").val();
   var origen = $("#origen_factura_pago2").val();
   var cheque_rechazado = $("#cheque_rechazado_factura_pago2").val();
-  var string2 =
-    "accion=add_facturas_cheque&proveedor=" +
-    proveedor +
-    "&total=" +
-    total +
-    "&fecha=" +
-    fecha +
-    "&banco=" +
-    banco +
-    "&numero_cheque=" +
-    numero_cheque +
-    "&fecha_emision=" +
-    fecha_emision +
-    "&fecha_cobro=" +
-    fecha_cobro +
-    "&titular=" +
-    titular +
-    "&cuit=" +
-    cuit +
-    "&monto=" +
-    monto +
-    "&origen=" +
-    origen +
-    "&cheque_rechazado=" +
-    cheque_rechazado;
+  var imagen_cheque = $("#imagen_cheque")[0].files[0];
 
   if (!monto || monto == "") {
     alert("Ingresar monto");
-  } else {
-    $.ajax({
-      type: "POST",
-      url: "procesos/crud.php?",
-      data: string2,
-      success: function (data) {
-        console.log(data);
-        data = data.split(" ? ");
-        if (data[1] != "FALSE") {
-          facturas.push(JSON.parse(data));
-          dibuja_factura();
-          $("#modal_agregar_pago_factura").hide();
-          $("#banco_factura_pago2").val("");
-          $("#numero_cheque_factura_pago2").val("");
-          $("#fecha_emision_factura_pago2").val("");
-          $("#fecha_cobro_factura_pago2").val("");
-          $("#titular_factura_pago2").val("");
-          $("#cuit_factura_pago2").val("");
-          $("#monto_factura_pago2").val("");
-          $("#origen_factura_pago2").val("");
-          $("#cheque_rechazado_factura_pago2").val("");
-        } else {
-          alert(data[0] || "Error al insertar el cheque");
-        }
-      },
-    });
+    return;
   }
+
+  var formData = new FormData();
+  formData.append("accion", "add_facturas_cheque");
+  formData.append("proveedor", proveedor);
+  formData.append("total", total);
+  formData.append("banco", banco);
+  formData.append("numero_cheque", numero_cheque);
+  formData.append("fecha_emision", fecha_emision);
+  formData.append("fecha_cobro", fecha_cobro);
+  formData.append("titular", titular);
+  formData.append("cuit", cuit);
+  formData.append("monto", monto);
+  formData.append("origen", origen);
+  formData.append("cheque_rechazado", cheque_rechazado);
+
+  if (imagen_cheque) {
+    formData.append("imagen_cheque", imagen_cheque);
+  }
+
+  $.ajax({
+    type: "POST",
+    url: "procesos/crud.php",
+    data: formData,
+    contentType: false,
+    processData: false,
+    success: function (data) {
+      console.log(data);
+      if (data !== "FALSE") {
+        facturas.push(JSON.parse(data));
+        dibuja_factura();
+        $("#modal_agregar_pago_factura").hide();
+        $("#banco_factura_pago2").val("");
+        $("#numero_cheque_factura_pago2").val("");
+        $("#fecha_emision_factura_pago2").val("");
+        $("#fecha_cobro_factura_pago2").val("");
+        $("#titular_factura_pago2").val("");
+        $("#cuit_factura_pago2").val("");
+        $("#monto_factura_pago2").val("");
+        $("#origen_factura_pago2").val("");
+        $("#cheque_rechazado_factura_pago2").val("");
+      } else {
+        alert("Error al insertar el cheque");
+      }
+    },
+    error: function (jqXHR, textStatus, errorThrown) {
+      console.error("Error:", textStatus, errorThrown);
+      alert("Error en la solicitud. Ver consola para detalles.");
+    },
+  });
 }
 
 function abrirModalAddFacturaPagoCheque() {

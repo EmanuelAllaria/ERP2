@@ -682,114 +682,112 @@ if (isset($_GET['e']) && $_GET['e'] == 'crcok') {
         <h2>Agregar pago a factura</h2>
     </div>
     <div class="modal-body">
-        <form id="pagofacturaadd2" style="width:100%" name="pagofacturaadd" method="post"></form>
-        <div class="row">
-            <div class="col-md-6">
-                <div class="form-group">
-                    <label for="comprobante">Ingrese banco</label>
-                    <div class="input-group mb-3">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text" id="basic-addon2"><i class="fa fa-bank"></i></span>
+        <form id="pagofacturaadd2" style="width:100%" name="pagofacturaadd" method="post">
+            <div class="row">
+                <div class="col-md-6 col-sm-12">
+                    <div class="form-group">
+                        <label for="comprobante">Ingrese banco</label>
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="basic-addon2"><i class="fa fa-bank"></i></span>
+                            </div>
+                            <input id="banco_factura_pago2" name="banco" placeholder="Ingrese banco" class="form-control" step="any" type="text">
                         </div>
-                        <input id="banco_factura_pago2" name="banco" placeholder="Ingrese banco" class="form-control" step="any" type="text">
                     </div>
                 </div>
-            </div>
-            <div class="col-md-6">
-                <div class="form-group">
-                    <label for="comprobante">Ingrese numero de cheque</label>
-                    <div class="input-group mb-3">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text" id="basic-addon2"><i class="fas fa-money-check"></i></span>
+                <div class="col-md-6 col-sm-12">
+                    <div class="form-group">
+                        <label for="comprobante">Ingrese numero de cheque</label>
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="basic-addon2"><i class="fas fa-money-check"></i></span>
+                            </div>
+                            <input id="numero_cheque_factura_pago2" name="numero_cheque" placeholder="Ingrese numero de cheque" class="form-control" step="any" type="number">
                         </div>
-                        <input id="numero_cheque_factura_pago2" name="numero_cheque" placeholder="Ingrese numero de cheque" class="form-control" step="any" type="number">
                     </div>
                 </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-6">
-                <div class="form-group">
-                    <label for="comprobante">Ingrese fecha de emision</label>
-                    <div class="input-group mb-3">
-                        <input id="fecha_emision_factura_pago2" name="fecha_emision" placeholder="Ingrese fecha de emision" class="form-control" step="any" type="date" value="<?php echo date('Y-m-d') ?>">
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="form-group">
-                    <label for="comprobante">Ingrese fecha de cobro</label>
-                    <div class="input-group mb-3">
-                        <input id="fecha_cobro_factura_pago2" name="fecha_cobro" placeholder="Ingrese fecha de cobro" class="form-control" step="any" type="date" value="<?php echo date('Y-m-d') ?>">
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-6">
-                <div class="form-group">
-                    <label for="comprobante">Ingrese titular</label>
-                    <div class="input-group mb-3">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text" id="basic-addon2"><i class="fas fa-user"></i></span>
+                <div class="col-md-6 col-sm-12">
+                    <div class="form-group">
+                        <label for="comprobante">Ingrese fecha de emision</label>
+                        <div class="input-group mb-3">
+                            <input id="fecha_emision_factura_pago2" name="fecha_emision" placeholder="Ingrese fecha de emision" class="form-control" step="any" type="date" value="<?php echo date('Y-m-d') ?>">
                         </div>
-                        <input id="titular_factura_pago2" name="titular" placeholder="Ingrese titular" class="form-control" step="any" type="text">
                     </div>
                 </div>
-            </div>
-            <div class="col-md-6">
-                <div class="form-group">
-                    <label for="comprobante">Ingrese cuit</label>
-                    <div class="input-group mb-3">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text" id="basic-addon2"><i class="fas fa-address-card"></i></span>
+                <div class="col-md-6 col-sm-12">
+                    <div class="form-group">
+                        <label for="comprobante">Ingrese fecha de cobro</label>
+                        <div class="input-group mb-3">
+                            <input id="fecha_cobro_factura_pago2" name="fecha_cobro" placeholder="Ingrese fecha de cobro" class="form-control" step="any" type="date" value="<?php echo date('Y-m-d') ?>">
                         </div>
-                        <input id="cuit_factura_pago2" name="cuit" placeholder="Ingrese cuit" class="form-control" step="any" type="number">
                     </div>
                 </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-6">
-                <div class="form-group">
-                    <label for="comprobante">Ingrese monto</label>
-                    <div class="input-group mb-3">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text" id="basic-addon2"><i class="fa fa-money"></i></span>
+                <div class="col-md-6 col-sm-12">
+                    <div class="form-group">
+                        <label for="comprobante">Ingrese titular</label>
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="basic-addon2"><i class="fas fa-user"></i></span>
+                            </div>
+                            <input id="titular_factura_pago2" name="titular" placeholder="Ingrese titular" class="form-control" step="any" type="text">
                         </div>
-                        <input id="monto_factura_pago2" name="monto" placeholder="Ingrese monto" class="form-control" step="any" type="number">
                     </div>
                 </div>
-            </div>
-            <div class="col-md-6">
-                <div class="form-group">
-                    <label for="comprobante">Ingrese origen</label>
-                    <div class="input-group mb-3">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text" id="basic-addon2"><i class="fas fa-earth-americas"></i></span>
+                <div class="col-md-6 col-sm-12">
+                    <div class="form-group">
+                        <label for="comprobante">Ingrese cuit</label>
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="basic-addon2"><i class="fas fa-address-card"></i></span>
+                            </div>
+                            <input id="cuit_factura_pago2" name="cuit" placeholder="Ingrese cuit" class="form-control" step="any" type="number">
                         </div>
-                        <input id="origen_factura_pago2" name="origen" placeholder="Ingrese origen" class="form-control" step="any" type="text">
+                    </div>
+                </div>
+                <div class="col-md-6 col-sm-12">
+                    <div class="form-group">
+                        <label for="comprobante">Ingrese monto</label>
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="basic-addon2"><i class="fa fa-money"></i></span>
+                            </div>
+                            <input id="monto_factura_pago2" name="monto" placeholder="Ingrese monto" class="form-control" step="any" type="number">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-sm-12">
+                    <div class="form-group">
+                        <label for="comprobante">Ingrese origen</label>
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="basic-addon2"><i class="fas fa-earth-americas"></i></span>
+                            </div>
+                            <input id="origen_factura_pago2" name="origen" placeholder="Ingrese origen" class="form-control" step="any" type="text">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-sm-12">
+                    <div class="form-group">
+                        <label for="comprobante">El cheque esta rechazado?</label>
+                        <div class="input-group mb-3">
+                            <select class="form-control" name="cheque_rechazado" id="cheque_rechazado_factura_pago2">
+                                <option value="1">Si</option>
+                                <option selected value="0">No</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-sm-12">
+                    <button class="btn btn-success" type="button" onclick="add_factura_pago_cheque()">Guardar</button>
+                    <button class="btn btn-cancel" type="button" onclick="$('#modal_agregar_pago_factura').hide()">Cancelar</button>
+                </div>
+                <div class="col-md-6 col-sm-12">
+                    <div class="form-group">
+                        <label for="imagen_cheque">Cargar Imagen</label>
+                        <input id="imagen_cheque" name="imagen_cheque" class="form-control" type="file" accept="image/*">
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="row">
-            <div class="col-md-6">
-                <button class="btn btn-success" type="button" onclick="add_factura_pago_cheque()">Guardar</button>
-                <button class="btn btn-cancel" type="button" onclick="$('#modal_agregar_pago_factura').hide()">Cancelar</button>
-            </div>
-            <div class="col-md-6">
-                <div class="form-group">
-                    <label for="comprobante">El cheque esta rechazado?</label>
-                    <div class="input-group mb-3">
-                        <select class="form-control" name="cheque_rechazado" id="cheque_rechazado_factura_pago2">
-                            <option value="1">Si</option>
-                            <option selected value="0">No</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-        </div>
         </form>
     </div>
 </div>
