@@ -1073,7 +1073,7 @@ if ($_SESSION['usuario'] != '') {
 
     $inserta = $link->query("INSERT INTO facturas_cheques SET banco='$banco', numero_cheque='$numero_cheque', fecha_emision='$fecha_emision', fecha_cobro='$fecha_cobro', titular='$titular', cuit='$cuit', monto='$monto', origen='$origen', cheque_rechazado='$cheque_rechazado'");
     $id = mysqli_insert_id($link);
-    if (isset($nombre_imagen, $numero_cheque) && $nombre_imagen !== '') {
+    if (isset($nombre_imagen) && $nombre_imagen !== '') {
       if ($link->query("INSERT INTO imagen_cheque SET numero_cheque='$numero_cheque', url_imagen='$nombre_imagen'") === FALSE) {
         echo "Error en la consulta imagen_cheque: " . $link->error;
       }
