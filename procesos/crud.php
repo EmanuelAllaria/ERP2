@@ -847,23 +847,6 @@ if ($_SESSION['usuario'] != '') {
     $monto = $_POST['monto'];
     $obs = $_POST['obs'];
     $parseTipo = intval($tipo);
-    $sqlHayPagosAFavor = ($parseTipo === 7 || $parseTipo === 8 || $parseTipo === 9 || $parseTipo === 10) ? $link->query("SELECT * FROM facturas_pagos WHERE id_factura='-1' ORDER BY monto DESC LIMIT 1") : null;
-    $pagoAFavor = array();
-    if ($sqlHayPagosAFavor->num_rows > 0) {
-      $pagoAFavor = $sqlHayPagosAFavor->fetch_assoc();
-    }
-
-    if ($parseTipo === 7 || $parseTipo === 8 || $parseTipo === 9 || $parseTipo === 10) {
-      $sqlHayFacturaErronea = $link->query("SELECT * FROM facturas WHERE id_proveedor='$proveedor' AND nro_factura='$nro_factura' OR monto='$monto'");
-      if (mysqli_num_rows($sqlHayFacturaErronea) === 0) {
-        echo 'ERROR NO EXISTE FACTURA';
-        exit;
-      }
-      if (intval(mysqli_fetch_ASSOC($sqlHayFacturaErronea)['monto']) !== abs(intval($monto))) {
-        echo 'ERROR EL MONTO NO COINCIDE';
-        exit;
-      }
-    }
 
     if ($parseTipo === 7 || $parseTipo === 8 || $parseTipo === 9 || $parseTipo === 10) {
       $inserta = $link->query("INSERT INTO facturas SET nro_factura='$nro_factura', id_proveedor='$proveedor',  tipo='$tipo', monto='-$monto', observaciones='$obs'");
@@ -871,28 +854,6 @@ if ($_SESSION['usuario'] != '') {
       $inserta = $link->query("INSERT INTO facturas SET nro_factura='$nro_factura', id_proveedor='$proveedor',  tipo='$tipo', monto='$monto', observaciones='$obs'");
     }
     $id = mysqli_insert_id($link);
-    if ($pagoAFavor && ($parseTipo !== 7 || $parseTipo !== 8 || $parseTipo !== 9 || $parseTipo !== 10)) {
-      $idPagoAFavor = $pagoAFavor['id'];
-      $tipo_pago = $pagoAFavor['tipo_pago'];
-      $fecha = $pagoAFavor['fecha'];
-      $banco = $pagoAFavor['banco'];
-      $numero_cheque = $pagoAFavor['numero_cheque'];
-      $fecha_emision = $pagoAFavor['fecha_emision'];
-      $fecha_cobro = $pagoAFavor['fecha_cobro'];
-      $cuit = $pagoAFavor['cuit'];
-      $titular = $pagoAFavor['titular'];
-      $montoFactura = intval($pagoAFavor['monto']) - intval($monto);
-      $origen = $pagoAFavor['origen'];
-      if (intval($pagoAFavor['monto']) > intval($monto)) {
-        $link->query("UPDATE facturas_pagos SET id_factura='$id', monto='$monto' WHERE id=$idPagoAFavor and id_proveedor='$proveedor';");
-        if ($link->affected_rows > 0) {
-          $razon_com_proveedor = $link->query("SELECT razon_com_proveedor FROM proveedores WHERE id_proveedor='$proveedor'")->fetch_assoc()['razon_com_proveedor'];
-          $link->query("INSERT INTO facturas_pagos SET id_factura='-1', id_proveedor='$proveedor', tipo_pago='$tipo_pago', fecha='$fecha', banco='$banco', numero_cheque='$numero_cheque', fecha_emision='$fecha_emision', fecha_cobro='$fecha_cobro', titular='$titular', cuit='$cuit', monto='$montoFactura', origen='$origen', observaciones='Pago a favor a $razon_com_proveedor'");
-        }
-      } else {
-        $link->query("UPDATE facturas_pagos SET id_factura='$id' WHERE id=$idPagoAFavor and id_proveedor='$proveedor';");
-      }
-    }
 
     if ($inserta) {
       echo $id . '@' . $nro_factura . ', ' . $tipo . '@' . $monto;

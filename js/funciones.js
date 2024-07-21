@@ -1373,7 +1373,7 @@ function desactivarCliente(id) {
 function add_factura() {
   var proveedor = $("#provee_factura").val();
   var nro_factura = $("#nro_factura").val();
-  var tipo = $("#tipo_factura option:selected").val();
+  var tipo = $("#tipo_factura").val();
   var monto = $("#monto_factura").val();
   var obs = $("#detalle_factura").val();
 
