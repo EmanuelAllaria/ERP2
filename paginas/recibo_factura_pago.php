@@ -67,7 +67,7 @@ if (isset($_GET['proveedor'], $_GET['id_pago'])) {
 </head>
 
 <body>
-    <div class="container py-4">
+    <div class="p-4">
         <div class="d-flex flex-row align-items-center justify-content-between">
             <div class="col-md">
                 <h2>Recibo de Pago</h2>
