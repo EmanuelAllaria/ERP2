@@ -122,20 +122,26 @@ while ($row = mysqli_fetch_array($selectTotalFacturas)) {
               <table id="clientes_lista" class="table m-t-30 table-hover contact-list footable-loaded footable" data-page-size="10">
                 <thead>
                   <tr style="width: 100%;">
-                    <th style="width: 16,66666666666667%;">Número de Cheque</th>
-                    <th style="width: 16,66666666666667%;">Proveedor</th>
-                    <th style="width: 16,66666666666667%;">Fecha</th>
-                    <th style="width: 16,66666666666667%;">Monto</th>
-                    <th style="width: 16,66666666666667%;">Observaciones</th>
-                    <th style="width: 16,66666666666667%;">Acciones</th>
+                    <th>#</th>
+                    <th>Número de Cheque</th>
+                    <th>Proveedor</th>
+                    <th>Titular</th>
+                    <th>Banco</th>
+                    <th>Cuit</th>
+                    <th>Fecha Emisión</th>
+                    <th>Fecha Cobro</th>
+                    <th>Monto</th>
+                    <th>ORIGEN</th>
+                    <th>Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
                   <?php
 
-                  $sqlChequesRechazados = "SELECT facturas_cheques_rechazados.*, proveedores.razon_com_proveedor AS proveedor
+                  $sqlChequesRechazados = "SELECT facturas_cheques_rechazados.*, proveedores.razon_com_proveedor AS proveedor, clientes.nombre_clientes, clientes.apellido_clientes
                               FROM facturas_cheques_rechazados
                               LEFT JOIN proveedores ON facturas_cheques_rechazados.id_proveedor = proveedores.id_proveedor
+                              LEFT JOIN clientes ON facturas_cheques_rechazados.origen = clientes.id_clientes
                               WHERE facturas_cheques_rechazados.id > 0
                               $busqueda
                               ORDER BY facturas_cheques_rechazados.id ASC";
@@ -150,12 +156,17 @@ while ($row = mysqli_fetch_array($selectTotalFacturas)) {
                     $rechazado = intval($row['rechazado']) === 1 ? 0 : 1;
                   ?>
                     <tr style='width: 100%;'>
-                      <td style='width: 16,66666666666667%;word-break: break-all;'><?php echo $row['numero_cheque'] ?></td>
-                      <td style='width: 16,66666666666667%;word-break: break-all;'><?php echo $row['proveedor'] ?></td>
-                      <td style='width: 16,66666666666667%;word-break: break-all;'><?php echo $row['fecha_emision'] ?></td>
-                      <td style='width: 16,66666666666667%;word-break: break-all;'><?php echo number_format($row['monto'], 2, ',', '.') ?></td>
-                      <td style='width: 16,66666666666667%;word-break: break-all;'><?php echo $row['observaciones'] ?></td>
-                      <td style='width: 16,66666666666667%;word-break: break-all;'>
+                      <td><?php echo $row['id'] ?></td>
+                      <td><?php echo $row['numero_cheque'] ?></td>
+                      <td><?php echo $row['proveedor'] ?></td>
+                      <td><?php echo $row['titular'] ?></td>
+                      <td><?php echo $row['banco'] ?></td>
+                      <td><?php echo $row['cuit'] ?></td>
+                      <td><?php echo $row['fecha_emision'] ?></td>
+                      <td><?php echo $row['fecha_cobro'] ?></td>
+                      <td><?php echo number_format($row['monto'], 2, ',', '.') ?></td>
+                      <td><?php echo $row['nombre_clientes'] . " " . $row['apellido_clientes'] ?></td>
+                      <td>
                         <form method='post'>
                           <input type='hidden' name='id' id="id-<?php echo $row['id'] ?>" value='<?php echo $row['id'] ?>'>
                           <label class='switch'>
