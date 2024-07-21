@@ -136,14 +136,14 @@
                     <th>Fecha Emisión</th>
                     <th>Fecha Cobro</th>
                     <th>Monto</th>
-                    <th>Observaciones</th>
+                    <th>ORIGEN</th>
                     <th>Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
                   <?php
 
-                  $sqlDeuda = "SELECT facturas_pagos.*, proveedores.razon_com_proveedor AS proveedor, facturas_cheques.monto AS monto_rechazado,
+                  $sqlDeuda = "SELECT facturas_pagos.*, proveedores.razon_com_proveedor AS proveedor, facturas_cheques.monto AS monto_rechazado, clientes.nombre_clientes, clientes.apellido_clientes,
                                 CASE 
                                     WHEN (SELECT COUNT(*) FROM facturas WHERE facturas.id_proveedor = facturas_pagos.id_proveedor) = 0 
                                     THEN 1 
@@ -152,6 +152,7 @@
                               FROM facturas_pagos
                               LEFT JOIN proveedores ON facturas_pagos.id_proveedor = proveedores.id_proveedor
                               LEFT JOIN facturas_cheques ON facturas_pagos.id = facturas_cheques.id_pago
+                              LEFT JOIN clientes ON facturas_cheques.origen = clientes.id_clientes or facturas_pagos.origen = clientes.id_clientes
                               WHERE facturas_pagos.id > 0
                               $busqueda
                               GROUP BY facturas_pagos.id
@@ -183,7 +184,7 @@
                     echo "<td style='" . ($row['pago_favor'] == 1 ? 'color:green;' : '') . "'>" . ($row['tipo_pago'] === 'cheque' && !is_null($row['fecha_emision']) ? date('d/m/Y', strtotime($row['fecha_emision'])) : '') . "</td>";
                     echo "<td style='" . ($row['pago_favor'] == 1 ? 'color:green;' : '') . "'>" . ($row['tipo_pago'] === 'cheque' && !is_null($row['fecha_cobro']) ? date('d/m/Y', strtotime($row['fecha_cobro'])) : '') . "</td>";
                     echo "<td style='" . ($row['pago_favor'] == 1 ? 'color:green;' : '') . "'>$" . number_format($row['tipo_pago'] === 'cheque' ? $monto : $row['monto'], 2, ',', '.') . "</td>";
-                    echo "<td style='" . ($row['pago_favor'] == 1 ? 'color:green;' : '') . "'>" . ($row['pago_favor'] == 1 ? 'Factura a favor' : $row['observaciones']) . "</td>";
+                    echo "<td style='" . ($row['pago_favor'] == 1 ? 'color:green;' : '') . "'>" . $row['nombre_clientes'] . ' ' . $row['apellido_clientes'] . "</td>";
                     echo "<td class='d-flex align-items-center' style='gap: 1em;" . ($row['pago_favor'] == 1 ? 'color:green;' : '') . "'>" . ($row['tipo_pago'] === 'cheque' ? '<button onclick="mostrar_tr_cheques(`tr_cheques_' . $row['id'] . '`)" class="btn btn-info btn-lg">Ver Cheques</button>' : '') . " <a target='_blank' href='paginas/recibo_factura_pago.php?id_pago={$id_pago}&proveedor={$row['id_proveedor']}&tipo_pago={$row['tipo_pago']}'><i class='fa-solid fa-receipt'></i></a></td>";
                     echo "</tr>";
 
@@ -207,7 +208,7 @@
                         echo "<td>" . ($row['tipo_pago'] === 'cheque' && !is_null($row_cheque['fecha_emision']) ? date('d/m/Y', strtotime($row_cheque['fecha_emision'])) : '') . "</td>";
                         echo "<td>" . ($row['tipo_pago'] === 'cheque' && !is_null($row_cheque['fecha_cobro']) ? date('d/m/Y', strtotime($row_cheque['fecha_cobro'])) : '') . "</td>";
                         echo "<td>$" . number_format($row_cheque['monto'], 2, ',', '.') . "</td>";
-                        echo "<td>{$row_cheque['observaciones']}</td>";
+                        echo "<td>{$row['nombre_clientes']} {$row['apellido_clientes']}</td>";
                         echo "<td>" .
                           (intval($row_cheque['cheque_rechazado']) === 1
                             ? '<i title="Rechazado" class="fa-solid fa-circle" style="color:red;"></i>'

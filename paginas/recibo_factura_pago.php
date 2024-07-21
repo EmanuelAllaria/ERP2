@@ -8,17 +8,19 @@ if (isset($_GET['proveedor'], $_GET['id_pago'])) {
 
 
     if ($tipo_pago !== 'cheque') {
-        $all_pagos_query = $link->query("SELECT facturas_pagos.*, facturas_pagos.id AS id_pagos, facturas_pagos.monto AS monto_factura, proveedores.razon_com_proveedor as proveedor
+        $all_pagos_query = $link->query("SELECT facturas_pagos.*, facturas_pagos.id AS id_pagos, facturas_pagos.monto AS monto_factura, proveedores.razon_com_proveedor as proveedor, clientes.nombre_clientes, clientes.apellido_clientes
                                         FROM facturas_pagos
                                         INNER JOIN proveedores ON proveedores.id_proveedor = facturas_pagos.id_proveedor
+                                        INNER JOIN clientes ON facturas_pagos.origen = clientes.id_clientes
                                         WHERE facturas_pagos.id_proveedor='$proveedor'
                                         AND facturas_pagos.id <= '$id_pago'
                                         ORDER BY facturas_pagos.id ASC");
     } else {
-        $all_pagos_query = $link->query("SELECT facturas_cheques.*, facturas_cheques.monto AS monto_factura, facturas_pagos.id AS id_pagos, facturas_pagos.id_proveedor, facturas_pagos.tipo_pago, proveedores.razon_com_proveedor as proveedor
+        $all_pagos_query = $link->query("SELECT facturas_cheques.*, facturas_cheques.monto AS monto_factura, facturas_pagos.id AS id_pagos, facturas_pagos.id_proveedor, facturas_pagos.tipo_pago, proveedores.razon_com_proveedor as proveedor, clientes.nombre_clientes, clientes.apellido_clientes
                             FROM facturas_cheques
                             INNER JOIN facturas_pagos ON facturas_pagos.id = facturas_cheques.id_pago
                             INNER JOIN proveedores ON proveedores.id_proveedor = facturas_pagos.id_proveedor
+                            INNER JOIN clientes ON facturas_cheques.origen = clientes.id_clientes or facturas_pagos.origen = clientes.id_clientes
                             WHERE facturas_pagos.id_proveedor='$proveedor'
                             AND facturas_cheques.id_pago='$id_pago'
                             ORDER BY facturas_cheques.id ASC");
@@ -147,7 +149,7 @@ if (isset($_GET['proveedor'], $_GET['id_pago'])) {
                                 <td>$<?php echo number_format($total, 2, ',', '.'); ?></td>
                                 <td>$<?php echo number_format($factura_pago['monto_factura'], 2, ',', '.'); ?></td>
                                 <td>$<?php echo number_format($saldo, 2, ',', '.'); ?></td>
-                                <td><?php echo $factura_pago['origen']; ?></td>
+                                <td><?php echo $factura_pago['nombre_clientes'] . " " . $factura_pago['apellido_clientes']; ?></td>
                                 <td><?php echo $factura_pago['observaciones']; ?></td>
                             </tr>
                         <?php } ?>
