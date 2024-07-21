@@ -767,12 +767,7 @@ if (isset($_GET['e']) && $_GET['e'] == 'crcok') {
                                 <?php
                                 $clientes_select = $link->query("SELECT * FROM clientes ORDER BY id_clientes DESC");
                                 while ($row = mysqli_fetch_array($clientes_select)) {
-                                    if (($row['nombre_clientes'] !== '' && $row['nombre_clientes'] !== 'undefined') &&
-                                        ($row['apellido_clientes'] !== '' && $row['apellido_clientes'] !== 'undefined') &&
-                                        $row['id_clientes'] != '1'
-                                    ) {
-                                        echo '<option value="' . $row['id_clientes'] . '">' . $row['nombre_clientes'] . ' ' . $row['apellido_clientes'] . '</option>';
-                                    }
+                                    echo '<option value="' . $row['id_clientes'] . '">' . $row['nombre_clientes'] . ' ' . $row['apellido_clientes'] . '</option>';
                                 }
                                 ?>
                             </select>
