@@ -762,7 +762,20 @@ if (isset($_GET['e']) && $_GET['e'] == 'crcok') {
                             <div class="input-group-prepend">
                                 <span class="input-group-text" id="basic-addon2"><i class="fas fa-earth-americas"></i></span>
                             </div>
-                            <input id="origen_factura_pago2" name="origen" placeholder="Ingrese origen" class="form-control" step="any" type="text">
+                            <select name="origen" id="origen_factura_pago2" class="form-control">
+                                <option value="">Seleccione un cliente</option>
+                                <?php
+                                $clientes_select = $link->query("SELECT * FROM clientes ORDER BY id_clientes DESC");
+                                while ($row = mysqli_fetch_array($clientes_select)) {
+                                    if (($row['nombre_clientes'] !== '' && $row['nombre_clientes'] !== 'undefined') &&
+                                        ($row['apellido_clientes'] !== '' && $row['apellido_clientes'] !== 'undefined') &&
+                                        $row['id_clientes'] != '1'
+                                    ) {
+                                        echo '<option value="' . $row['id_clientes'] . '">' . $row['nombre_clientes'] . ' ' . $row['apellido_clientes'] . '</option>';
+                                    }
+                                }
+                                ?>
+                            </select>
                         </div>
                     </div>
                 </div>

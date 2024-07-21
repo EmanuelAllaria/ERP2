@@ -60,7 +60,7 @@
                   $busqueda = "and (apellido_clientes like '%$palabra%' or nombre_clientes like '%$palabra%' or cuitcuil_com_clientes like '%$palabra%' or dni_clientes like '%$palabra%' or razon_com_clientes like '%$palabra%' or direccion_clientes like '%$palabra%' )";
                 }
                 $con_clientes = $link->query("SELECT * FROM clientes left join ciudad on ciudad.id_ciudad = clientes.ciudad_clientes where estado_clientes !='0' $busqueda order by apellido_clientes ASC ");
-                
+
                 while ($row = mysqli_fetch_array($con_clientes)) {
                   $id = $row['id_clientes'];
                   $acumula_pagos = '0';
@@ -70,41 +70,41 @@
                   while ($cc1 = mysqli_fetch_array($cuenta_corriente)) {
                     if ($cc1['tipo'] == 'pago') {
                       $acumula_pagos = $acumula_pagos + $cc1['monto2'];
-                      $saldo = $saldo - $cc1['monto2'];    
+                      $saldo = $saldo - $cc1['monto2'];
                     }
                     if ($cc1['tipo'] == 'pedido') {
                       $acumula_pedidos = $acumula_pedidos + $cc1['monto'];
                       $saldo = $saldo + $cc1['monto'];
                     }
                   }
-                  $alerta=false;
+                  $alerta = false;
                   $consulta_corriente = $link->query("SELECT * FROM transaccion WHERE cliente ='$id' 
                   and id > (SELECT MAX(id) from transaccion where tipo = 'pago' and cliente ='$id')
                   AND estado = 1 order by id LIMIT 1");
                   while ($cc = mysqli_fetch_array($consulta_corriente)) {
-                      if ($cc['tipo'] == 'pedido') {
-                        $fecha_actual = time(); // Timestamp actual
-                        $fecha_cc = strtotime($cc['fecha']); // Timestamp de la fecha del CC
-                        $dias_financiacion = $row['dias_financiacion']; // Número de días de financiación
-                        
-                        // Calcula la diferencia en segundos entre las fechas
-                        $diferencia_segundos = $fecha_actual - $fecha_cc;
-                        
-                        // Convierte los segundos en días
-                        $diferencia_dias = floor($diferencia_segundos / (60 * 60 * 24));
-                        
-                        // Compara con el número de días de financiación
-                        if ($diferencia_dias > $dias_financiacion) $alerta=true;
-                      }
+                    if ($cc['tipo'] == 'pedido') {
+                      $fecha_actual = time(); // Timestamp actual
+                      $fecha_cc = strtotime($cc['fecha']); // Timestamp de la fecha del CC
+                      $dias_financiacion = $row['dias_financiacion']; // Número de días de financiación
+
+                      // Calcula la diferencia en segundos entre las fechas
+                      $diferencia_segundos = $fecha_actual - $fecha_cc;
+
+                      // Convierte los segundos en días
+                      $diferencia_dias = floor($diferencia_segundos / (60 * 60 * 24));
+
+                      // Compara con el número de días de financiación
+                      if ($diferencia_dias > $dias_financiacion) $alerta = true;
+                    }
                   }
                 ?>
-                  <tr <?php if($alerta) echo " class='bg-danger'" ?>>
+                  <tr <?php if ($alerta) echo " class='bg-danger'" ?>>
                     <!--  <td><span class="footable-toggle"></span><?php echo $row['id_comclientes'] ?></td> -->
-                    <td class="font-weight-normal" >
+                    <td class="font-weight-normal">
                       <a href="index.php?pagina=clientes_view&id=<?php echo $row['id_clientes'] ?>" style="color:#078bdb">
 
                         <?php
-                        echo mb_strtoupper(utf8_encode($row['razon_com_clientes']));
+                        echo mb_strtoupper($row['razon_com_clientes']);
                         ?>
                       </a>
                     </td>
@@ -114,11 +114,11 @@
                         <?php echo $row['celular_clientes']; ?>
                       </a>
                     </td>
-                    <td class="font-weight-normal"><?php echo utf8_encode($row['direccion_clientes']) . ', ' . $row['dirnum_clientes'] . ' ( ' . $row['ciudad_alias'] . ' )' ?></td>
+                    <td class="font-weight-normal"><?php echo $row['direccion_clientes'] . ', ' . $row['dirnum_clientes'] . ' ( ' . $row['ciudad_alias'] . ' )' ?></td>
                     <td>$
                       <?php
                       $saldo_final = number_format($saldo, 0, '', '.');
-                       echo $saldo_final?>
+                      echo $saldo_final ?>
                     </td>
                     <td class="font-weight-normal"><span class="label label-<?php if ($row['estado_clientes'] == '2') {
                                                                               echo 'danger">Inactivo';
@@ -129,19 +129,19 @@
                                                   <a class=" btn-pure btn-outline-success view-row-btn btn-lg" style="padding:0px;" href="index.php?pagina=clientes_view&id=<?php echo $row['id_clientes'] ?>" data-toggle="tooltip" data-original-title="Ver"><i class="ti-eye" aria-hidden="true"></i></a>
                         <?php if ($_SESSION['tipo'] != 'User' && $row['id_clientes'] != '1') { ?> &nbsp;&nbsp;<a class="btn-pure btn-outline-info edit-row-btn btn-lg" style="padding:0px;" href="index.php?pagina=clientes_edit&id=<?php echo $row['id_clientes'] ?>" data-toggle="tooltip" data-original-title="Editar"><i class="ti-pencil" aria-hidden="true"></i></a>
                           &nbsp;&nbsp;<a class="btn-pure btn-outline-danger delete-row-btn btn-lg" style="padding:0px;" href="#" data-toggle="modal" data-target="#del_<?php echo $row['id_clientes'] ?>" data-original-title="Borrar"><i class="ti-close" aria-hidden="true"></i></a>
-                        <?php } ?> 
-                      </td>
-                      
-                      
-                      <td class="font-weight-normal">
-                        <a  onclick="envia_productos_wsp(<?php echo $row['lista_precio'] ?>,'<?php echo $row['celular_clientes'] ?>')" class="btn btn-success"> <img style="margin-left:5px;height:15px;" alt="Page principale de WhatsApp" src="https://static.whatsapp.net/rsrc.php/ym/r/36B424nhiL4.svg"></a>
-
-                        <?php if($row['estado_clientes'] =='1'){ ?>
-                          <button class="switch on" onclick="desactivarCliente(<?=$row['id_clientes']?>)"></button>
-                        <?php }else{ ?>
-                          <button class="switch" onclick="activarCliente(<?=$row['id_clientes']?>)"></button>
                         <?php } ?>
-                      </td>
+                    </td>
+
+
+                    <td class="font-weight-normal">
+                      <a onclick="envia_productos_wsp(<?php echo $row['lista_precio'] ?>,'<?php echo $row['celular_clientes'] ?>')" class="btn btn-success"> <img style="margin-left:5px;height:15px;" alt="Page principale de WhatsApp" src="https://static.whatsapp.net/rsrc.php/ym/r/36B424nhiL4.svg"></a>
+
+                      <?php if ($row['estado_clientes'] == '1') { ?>
+                        <button class="switch on" onclick="desactivarCliente(<?= $row['id_clientes'] ?>)"></button>
+                      <?php } else { ?>
+                        <button class="switch" onclick="activarCliente(<?= $row['id_clientes'] ?>)"></button>
+                      <?php } ?>
+                    </td>
                   </tr>
                 <?php echo '
                                             <div class="modal fade" id="del_' . $row['id_clientes'] . '" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">

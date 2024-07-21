@@ -97,6 +97,12 @@ $row = mysqli_fetch_array($con_detalle);
                                         $tipot = 'Pago';
                                         $id_fila = '';
                                     }
+                                    if ($cc['tipo'] == 'cheque_rechazado') {
+                                        $icono = "ti-shopping-cart-full";
+                                        $colorbt = 'btn-warning';
+                                        $tipot = 'Cheque Rechazado';
+                                        $id_fila = 'mChequeRechazado';
+                                    }
                                 ?>
                                     <div class="sl-item">
                                         <div class="sl-left"> <button type="button" class="btn <?php echo $colorbt ?>  btn-circle btn-lg"><i class="<?php echo $icono ?>"></i> </button> </div>
@@ -104,7 +110,7 @@ $row = mysqli_fetch_array($con_detalle);
                                             <div><a href="javascript:void(0)" class="link"><?php echo $tipot ?></a> <span class="sl-date"><?php echo date('d/m/Y', strtotime($mov['fecha'])); ?></span>
                                                 <p class="m-t-10">Detalle: <?php echo $mov['detalle']; ?></p>
                                             </div>
-                                            <div class="like-comm m-t-20"> <a href="javascript:void(0)" class="link m-r-10"><b>Monto: $ <?php if ($mov['tipo'] == 'pedido') {
+                                            <div class="like-comm m-t-20"> <a href="javascript:void(0)" class="link m-r-10"><b>Monto: $ <?php if ($mov['tipo'] == 'pedido' || $cc['tipo'] == 'cheque_rechazado') {
                                                                                                                                             echo number_format($mov['monto'], 0, ",", ".");
                                                                                                                                         } else {
                                                                                                                                             echo number_format($mov['monto2'], 0, ",", ".");
@@ -153,31 +159,56 @@ $row = mysqli_fetch_array($con_detalle);
                                                         $tipo = "<span class='label label-danger btn-block'>PEDIDO</span>";
                                                         $signo = '$';
                                                     }
+                                                    if ($cc['tipo'] == 'cheque_rechazado') {
+                                                        $acumula_pedidos = $acumula_pedidos + $cc['monto'];
+                                                        $saldo = $saldo + $cc['monto'];
+                                                        $tipo = "<span class='label label-danger btn-block'>CHEQUE RECHAZADO</span>";
+                                                        $signo = '$';
+                                                    }
                                                 ?>
                                                     <tr>
 
-                                                        <td><?php if($cc['tipo'] == 'pedido'){
-                                                            echo '<a href="javascript:void(0)" onclick="abrirPedido('.$cc['id'].')" data-toggle="modal" data-target="#myModal">'.date('d/m/Y', strtotime($cc['fecha'])).'</a>';}else{
-                                                                echo date('d/m/Y', strtotime($cc['fecha']));}?></td>
+                                                        <td><?php if ($cc['tipo'] == 'pedido') {
+                                                                echo '<a href="javascript:void(0)" onclick="abrirPedido(' . $cc['id'] . ')" data-toggle="modal" data-target="#myModal">' . date('d/m/Y', strtotime($cc['fecha'])) . '</a>';
+                                                            } else if ($cc['tipo'] == 'cheque_rechazado') {
+                                                                echo '<p style="color: #db3707">' . date('d/m/Y', strtotime($cc['fecha'])) . '</p>';
+                                                            } else {
+                                                                echo date('d/m/Y', strtotime($cc['fecha']));
+                                                            } ?></td>
                                                         <td><?php
-                                                            if($cc['tipo'] == 'pedido'){
-                                                                echo '<a href="javascript:void(0)" onclick="abrirPedido('.$cc['id'].')" data-toggle="modal" data-target="#myModal">'.$cc['detalle'].'</a>';}else{
-                                                                    echo $cc['detalle'];
-                                                                } 
-                                                         ?></td>
+                                                            if ($cc['tipo'] == 'pedido') {
+                                                                echo '<a href="javascript:void(0)" onclick="abrirPedido(' . $cc['id'] . ')" data-toggle="modal" data-target="#myModal">' . $cc['detalle'] . '</a>';
+                                                            } else if ($cc['tipo'] == 'cheque_rechazado') {
+                                                                echo '<p style="color: #db3707">' . $cc['detalle'] . '</p>';
+                                                            } else {
+                                                                echo $cc['detalle'];
+                                                            }
+                                                            ?></td>
                                                         <td><?php echo $tipo; ?></td>
-                                                        <td style="text-align: right;"><?php if ($cc['tipo'] == 'pedido') {                      echo '<a href="javascript:void(0)" onclick="abrirPedido('.$cc['id'].')" data-toggle="modal" data-target="#myModal">'.$signo . number_format($cc['monto'], 0, ',', '.').'</a>';} else {        echo $signo . number_format($cc['monto2'], 0, ',', '.');
+                                                        <td style="text-align: right;"><?php if ($cc['tipo'] == 'pedido') {
+                                                                                            echo '<a href="javascript:void(0)" onclick="abrirPedido(' . $cc['id'] . ')" data-toggle="modal" data-target="#myModal">' . $signo . number_format($cc['monto'], 0, ',', '.') . '</a>';
+                                                                                        } else if ($cc['tipo'] == 'cheque_rechazado') {
+                                                                                            echo '<p style="color: #db3707">' . $signo . number_format($cc['monto'], 0, ',', '.') . '</p>';
+                                                                                        } else {
+                                                                                            echo $signo . number_format($cc['monto2'], 0, ',', '.');
                                                                                         } ?></td>
                                                         <td style="text-align: right;"><?php
-                                                        if ($cc['tipo'] == 'pedido') {
-                                                             echo '<a href="javascript:void(0)" onclick="abrirPedido('.$cc['id'].')" data-toggle="modal" data-target="#myModal">$'.number_format($saldo, 0, '', '.').'</a>';
-                                                         }else{ echo number_format($saldo, 0, '', '.'); }?></td>
-                                                        <td><?php 
-                                                        if ($cc['tipo'] == 'pedido') {
-                                                            echo '<a href="javascript:void(0)" onclick="abrirPedido('.$cc['id'].')" data-toggle="modal" data-target="#myModal">'.$cc['id'].'</a>';
-                                                        }else{
-                                                        echo $cc['id'];} 
-                                                        ?></td>
+                                                                                        if ($cc['tipo'] == 'pedido') {
+                                                                                            echo '<a href="javascript:void(0)" onclick="abrirPedido(' . $cc['id'] . ')" data-toggle="modal" data-target="#myModal">$' . number_format($saldo, 0, '', '.') . '</a>';
+                                                                                        } else if ($cc['tipo'] == 'cheque_rechazado') {
+                                                                                            echo '<p style="color: #db3707">$' . number_format($saldo, 0, '', '.') . '</p>';
+                                                                                        } else {
+                                                                                            echo number_format($saldo, 0, '', '.');
+                                                                                        } ?></td>
+                                                        <td><?php
+                                                            if ($cc['tipo'] == 'pedido') {
+                                                                echo '<a href="javascript:void(0)" onclick="abrirPedido(' . $cc['id'] . ')" data-toggle="modal" data-target="#myModal">' . $cc['id'] . '</a>';
+                                                            } else if ($cc['tipo'] == 'cheque_rechazado') {
+                                                                echo '<p style="color: #db3707">' . $cc['id'] . '</p>';
+                                                            } else {
+                                                                echo $cc['id'];
+                                                            }
+                                                            ?></td>
                                                     </tr>
                                                 <?php }
                                                 $balance_final = number_format($acumula_pedidos - $acumula_pagos, 0, '', '.');
@@ -223,7 +254,7 @@ $row = mysqli_fetch_array($con_detalle);
     </div>
 </div>
 <div class="container-fluid pedi" style="display: none; width: 90%;">
-    
+
 </div>
 <script src="https://maps.googleapis.com/maps/api/js"></script>
 <script>

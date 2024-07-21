@@ -1063,6 +1063,7 @@ if ($_SESSION['usuario'] != '') {
 
     $uploads_dir = '../uploads/cheques';
     $nombre_imagen = null;
+    $fechaHoy = date('Y-m-d H:m:s');
 
     if (isset($_FILES['imagen_cheque']) && $_FILES['imagen_cheque']['error'] == UPLOAD_ERR_OK) {
       $nombre_imagen = uniqid() . '_' . str_replace(' ', '_', basename($_FILES['imagen_cheque']['name']));
@@ -1080,6 +1081,8 @@ if ($_SESSION['usuario'] != '') {
     }
     if ($_POST['cheque_rechazado'] == 1) {
       $inserta2 = $link->query("INSERT INTO facturas_cheques_rechazados SET id_cheque='$id', id_proveedor='$proveedor', banco='$banco', numero_cheque='$numero_cheque', fecha_emision='$fecha_emision', fecha_cobro='$fecha_cobro', titular='$titular', cuit='$cuit', monto='$monto', origen='$origen', rechazado='1'");
+      $monto = abs($monto);
+      $inserta3 = $link->query("INSERT INTO transaccion SET cliente = '$origen', fecha = '$fechaHoy', observacion = 'CHEQUE RECHAZADO', monto = '$monto', tipo = 'cheque_rechazado', abonada = '0', quien = '$proveedor', estado = '1', tipo_pedido = '0', forma_pago = '1', liquidacion = '0'");
     }
 
     if ($inserta) {
