@@ -196,6 +196,7 @@
                                                   ORDER BY id ASC");
 
                       while ($row_cheque = mysqli_fetch_assoc($con_cheque)) {
+                        $imagen_cheque = $link->query("SELECT * FROM imagen_cheque WHERE numero_cheque = 546546464;")->fetch_assoc()['url_imagen'];
                         echo "<tr style='width:100%;display:none;' class='tr_cheques_$id_pago'>";
                         echo "<td>{$row_cheque['id_pago']}</td>";
                         echo "<td>{$row_cheque['numero_cheque']}</td>";
@@ -213,7 +214,7 @@
                           (intval($row_cheque['cheque_rechazado']) === 1
                             ? '<i title="Rechazado" class="fa-solid fa-circle" style="color:red;"></i>'
                             : '<i title="Aceptado" class="fa-solid fa-circle" style="color:green;"></i>') .
-                          "</td>";
+                          " <a href='uploads/cheques/" . $imagen_cheque . "' target='_blank'><i class='fa-solid fa-image'></i></a></td>";
                         echo "</tr>";
                       }
                     }
