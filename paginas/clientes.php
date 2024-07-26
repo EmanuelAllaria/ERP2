@@ -57,24 +57,30 @@
                 $busqueda = '';
                 if (isset($_GET['buscar'])) {
                   $palabra = $_GET['buscar'];
-                  $busqueda = "and (apellido_clientes like '%$palabra%' or nombre_clientes like '%$palabra%' or cuitcuil_com_clientes like '%$palabra%' or dni_clientes like '%$palabra%' or razon_com_clientes like '%$palabra%' or direccion_clientes like '%$palabra%' )";
+                  $busqueda = "AND (apellido_clientes LIKE '%$palabra%' OR nombre_clientes LIKE '%$palabra%' OR cuitcuil_com_clientes LIKE '%$palabra%' OR dni_clientes LIKE '%$palabra%' OR razon_com_clientes LIKE '%$palabra%' OR direccion_clientes LIKE '%$palabra%')";
                 }
-                $con_clientes = $link->query("SELECT * FROM clientes left join ciudad on ciudad.id_ciudad = clientes.ciudad_clientes where estado_clientes !='0' $busqueda order by apellido_clientes ASC ");
+                $con_clientes = $link->query("SELECT * FROM clientes LEFT JOIN ciudad ON ciudad.id_ciudad = clientes.ciudad_clientes WHERE estado_clientes != '0' $busqueda ORDER BY apellido_clientes ASC");
 
                 while ($row = mysqli_fetch_array($con_clientes)) {
                   $id = $row['id_clientes'];
-                  $acumula_pagos = '0';
-                  $acumula_pedidos = '0';
-                  $saldo = '0';
-                  $cuenta_corriente = $link->query("SELECT * FROM transaccion WHERE cliente ='$id' AND estado = 1");
+                  $acumula_pagos = 0;
+                  $acumula_pedidos = 0;
+                  $saldo = 0;
+
+                  $cuenta_corriente = $link->query("SELECT * FROM transaccion WHERE cliente = '$id' AND estado = 1");
                   while ($cc1 = mysqli_fetch_array($cuenta_corriente)) {
+                    // Verificar cada transacción
+                    if ($cc1['tipo'] == 'cheque_rechazado') {
+                      $acumula_pedidos += $cc1['monto'];
+                      $saldo -= $cc1['monto'];
+                    }
                     if ($cc1['tipo'] == 'pago') {
-                      $acumula_pagos = $acumula_pagos + $cc1['monto2'];
-                      $saldo = $saldo - $cc1['monto2'];
+                      $acumula_pagos += $cc1['monto2'];
+                      $saldo -= $cc1['monto2'];
                     }
                     if ($cc1['tipo'] == 'pedido') {
-                      $acumula_pedidos = $acumula_pedidos + $cc1['monto'];
-                      $saldo = $saldo + $cc1['monto'];
+                      $acumula_pedidos += $cc1['monto'];
+                      $saldo += $cc1['monto'];
                     }
                   }
                   $alerta = false;
@@ -115,10 +121,7 @@
                       </a>
                     </td>
                     <td class="font-weight-normal"><?php echo $row['direccion_clientes'] . ', ' . $row['dirnum_clientes'] . ' ( ' . $row['ciudad_alias'] . ' )' ?></td>
-                    <td>$
-                      <?php
-                      $saldo_final = number_format($saldo, 0, '', '.');
-                      echo $saldo_final ?>
+                    <td>$ <?php echo number_format($saldo, 0, '', '.'); ?>
                     </td>
                     <td class="font-weight-normal"><span class="label label-<?php if ($row['estado_clientes'] == '2') {
                                                                               echo 'danger">Inactivo';

@@ -4,7 +4,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['rechazado']) && isset
   $id = intval($_POST['id']);
 
   $updateQuery = "UPDATE facturas_cheques_rechazados SET rechazado = $rechazado WHERE id = $id";
-  if ($link->query($updateQuery) === TRUE) {
+  $selectChequeUpdated = $link->query("SELECT id_cheque FROM facturas_cheques_rechazados WHERE id = $id")->fetch_assoc()['id_cheque'];
+  $updateQueryRechazadoPago = "UPDATE facturas_cheques SET cheque_rechazado = $rechazado WHERE id = $selectChequeUpdated";
+  if ($link->query($updateQuery) === TRUE && $link->query($updateQueryRechazadoPago) === TRUE) {
     echo "Estado actualizado correctamente.";
   } else {
     echo "Error actualizando el estado: " . $link->error;

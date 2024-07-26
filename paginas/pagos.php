@@ -74,7 +74,7 @@
               </div>
               <div class="col-md-2" style="margin-top:17px">
                 <a href="#" onclick="filtrar_vende()" class="btn btn-info btn-lg" role="button">Filtrar</a>
-                <?php if (isset($_GET['d']) || isset($_GET['h']) || isset($_GET['buscar'])) { ?><a href="index.php?pagina=pagos">Quitar Filtros</a><?php } ?>
+                <?php if (isset($_GET['d']) || isset($_GET['h'])) { ?><a href="index.php?pagina=pagos">Quitar Filtros</a><?php } ?>
               </div>
 
               <div class="col-md-2" style="align-self: center;">
@@ -84,7 +84,7 @@
                   $busquedaProveedor = '';
                   if (isset($_GET['buscar'])) {
                     $palabra = $_GET['buscar'];
-                    $busqueda = " and facturas_cheques.numero_cheque = '$palabra'";
+                    $busqueda = "and facturas_cheques.numero_cheque like '%$palabra%'";
                   }
                   if (isset($_GET['d']) && $_GET['d'] != '') {
                     $desde = $_GET['d'];
@@ -143,16 +143,25 @@
                 <tbody>
                   <?php
 
-                  $sqlDeuda = "SELECT facturas_pagos.*, proveedores.razon_com_proveedor AS proveedor, facturas_cheques.monto AS monto_rechazado, clientes.nombre_clientes, clientes.apellido_clientes,
-                                CASE 
-                                    WHEN (SELECT COUNT(*) FROM facturas WHERE facturas.id_proveedor = facturas_pagos.id_proveedor) = 0 
-                                    THEN 1 
-                                    ELSE 0 
-                                END AS pago_favor
+                  $sqlDeuda = "SELECT 
+                                  facturas_pagos.*, 
+                                  proveedores.razon_com_proveedor AS proveedor, 
+                                  clientes.nombre_clientes, 
+                                  clientes.apellido_clientes,
+                                  facturas_cheques.cheque_rechazado,
+                                  CASE 
+                                      WHEN facturas_cheques.cheque_rechazado = 1 THEN -ABS(facturas_cheques.monto)
+                                      ELSE ABS(facturas_cheques.monto)
+                                  END AS monto_rechazado,
+                                  CASE 
+                                      WHEN (SELECT COUNT(*) FROM facturas WHERE facturas.id_proveedor = facturas_pagos.id_proveedor) = 0 
+                                      THEN 1 
+                                      ELSE 0 
+                                  END AS pago_favor
                               FROM facturas_pagos
                               LEFT JOIN proveedores ON facturas_pagos.id_proveedor = proveedores.id_proveedor
                               LEFT JOIN facturas_cheques ON facturas_pagos.id = facturas_cheques.id_pago
-                              LEFT JOIN clientes ON facturas_cheques.origen = clientes.id_clientes or facturas_pagos.origen = clientes.id_clientes
+                              LEFT JOIN clientes ON facturas_cheques.origen = clientes.id_clientes OR facturas_pagos.origen = clientes.id_clientes
                               WHERE facturas_pagos.id > 0
                               $busqueda
                               GROUP BY facturas_pagos.id
@@ -183,13 +192,18 @@
                     echo "<td style='" . ($row['pago_favor'] == 1 ? 'color:green;' : '') . "'>" . date('d/m/Y', strtotime($row['fecha'])) . "</td>";
                     echo "<td style='" . ($row['pago_favor'] == 1 ? 'color:green;' : '') . "'>" . ($row['tipo_pago'] === 'cheque' && !is_null($row['fecha_emision']) ? date('d/m/Y', strtotime($row['fecha_emision'])) : '') . "</td>";
                     echo "<td style='" . ($row['pago_favor'] == 1 ? 'color:green;' : '') . "'>" . ($row['tipo_pago'] === 'cheque' && !is_null($row['fecha_cobro']) ? date('d/m/Y', strtotime($row['fecha_cobro'])) : '') . "</td>";
-                    echo "<td style='" . ($row['pago_favor'] == 1 ? 'color:green;' : '') . "'>$" . number_format($row['tipo_pago'] === 'cheque' ? $monto : $row['monto'], 2, ',', '.') . "</td>";
+                    echo "<td style='" . ($row['pago_favor'] == 1 ? 'color:green;' : '') . "'>$" . number_format(intval($row['monto_rechazado']), 2, ',', '.') . "</td>";
                     echo "<td style='" . ($row['pago_favor'] == 1 ? 'color:green;' : '') . "'>" . $row['nombre_clientes'] . ' ' . $row['apellido_clientes'] . "</td>";
                     echo "<td class='d-flex align-items-center' style='gap: 1em;" . ($row['pago_favor'] == 1 ? 'color:green;' : '') . "'>" . ($row['tipo_pago'] === 'cheque' ? '<button onclick="mostrar_tr_cheques(`tr_cheques_' . $row['id'] . '`)" class="btn btn-info btn-lg">Ver Cheques</button>' : '') . " <a target='_blank' href='paginas/recibo_factura_pago.php?id_pago={$id_pago}&proveedor={$row['id_proveedor']}&tipo_pago={$row['tipo_pago']}'><i class='fa-solid fa-receipt'></i></a></td>";
                     echo "</tr>";
 
                     if ($row['tipo_pago'] === 'cheque') {
-                      $con_cheque = $link->query("SELECT *
+                      $con_cheque = $link->query("SELECT 
+                                                    *,
+                                                      CASE 
+                                                          WHEN cheque_rechazado = 1 THEN -ABS(monto)
+                                                          ELSE ABS(monto)
+                                                      END AS monto
                                                   FROM facturas_cheques
                                                   WHERE id > 0
                                                   AND id_pago = '$id_pago'

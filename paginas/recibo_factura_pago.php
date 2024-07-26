@@ -86,7 +86,6 @@ if (isset($_GET['proveedor'], $_GET['id_pago'])) {
             <div class="col-md-6 d-flex flex-column align-items-end">
                 <p><strong>Fecha de pago:</strong> <?php echo date('d/m/Y', strtotime($fecha_de_pago)); ?></p>
                 <h3>Proveedor: <b><?php echo $nombre_proveedor; ?></b></h3>
-                <h3>Total debe a proveedor: $<?php echo number_format($total_factura, 2, ',', '.'); ?></h3>
             </div>
         </div>
         <div class="row mt-4">
@@ -102,11 +101,8 @@ if (isset($_GET['proveedor'], $_GET['id_pago'])) {
                             <th>Banco</th>
                             <th>Cuit</th>
                             <th>Tipo Pago</th>
-                            <th>Total</th>
                             <th>Pago</th>
-                            <th>Saldo</th>
                             <th>Origen</th>
-                            <th>Observaciónes</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -146,20 +142,12 @@ if (isset($_GET['proveedor'], $_GET['id_pago'])) {
                                 <td><?php echo $factura_pago['banco']; ?></td>
                                 <td><?php echo $factura_pago['cuit']; ?></td>
                                 <td><?php echo $factura_pago['tipo_pago']; ?></td>
-                                <td>$<?php echo number_format($total, 2, ',', '.'); ?></td>
                                 <td>$<?php echo number_format($factura_pago['monto_factura'], 2, ',', '.'); ?></td>
-                                <td>$<?php echo number_format($saldo, 2, ',', '.'); ?></td>
                                 <td><?php echo $factura_pago['nombre_clientes'] . " " . $factura_pago['apellido_clientes']; ?></td>
-                                <td><?php echo $factura_pago['observaciones']; ?></td>
                             </tr>
                         <?php } ?>
                     </tbody>
                 </table>
-            </div>
-        </div>
-        <div class="row mt-4">
-            <div class="col-md-12 d-flex justify-content-end">
-                <h3 class="border-top py-2"><strong>Total:</strong> $<?php echo number_format($saldo, 2, ',', '.'); ?></h3>
             </div>
         </div>
     </div>
