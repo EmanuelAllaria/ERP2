@@ -410,67 +410,6 @@ if (isset($_GET['e']) && $_GET['e'] == 'crcok') {
             </div>
         </div>
         <div class="col-lg-6">
-            <div class="card">
-                <div class="card-header bg-info">
-                    <h4 class="m-b-0 text-white">Ingreso de stock</h4>
-                </div>
-                <div class="card-body">
-
-                    <form id="precioadd" style="width:100%" name="precioadd" method="post">
-                        <div class="row" id="form-alqui">
-                            <input name="accion" value="add" type="hidden">
-                            <div class="col-md-12">
-                                <div class="form-group">
-                                    <label for="movimiento">Tipo de Movimiento</label>
-                                    <div class="input-group mb-3">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text" id="basic-addon2"><i class="fa fa-exchange"></i></span>
-                                        </div>
-                                        <select class="form-control" id="movimiento" name="tipo" aria-describedby="basic-addon2">
-                                            <option value="0">Salida</option>
-                                            <option value="1">Sueldos</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="comprobante">Nº Comprobante</label>
-                                    <div class="input-group mb-3">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text" id="basic-addon2"><i class="fa fa-outdent"></i></span>
-                                        </div>
-                                        <input id="comprobante" name="comprobante" id="comprobante" placeholder="Ingrese el Nº de comprobante" class="form-control" type="text">
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="comprobante">Ingrese monto</label>
-                                    <div class="input-group mb-3">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text" id="basic-addon2"><i class="fa fa-money"></i></span>
-                                        </div>
-                                        <input id="monto" name="monto" placeholder="Ingrese monto" class="form-control" step="any" type="number">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-12">
-                                <textarea id="detalle-alqui" name="detalle" rows="4" placeholder="Ingrese el detalle del mismo" class="form-control"></textarea>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-12">
-                                <button class="btn btn-success" type="button" id="agregarGasto">Guardar</button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
             <div class="card ">
                 <div class="card-header bg-info">
                     <h4 class="m-b-0 text-white"> Ingreso de Comprobantes</h4>
