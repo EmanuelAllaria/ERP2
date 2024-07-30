@@ -295,6 +295,7 @@ if (isset($_GET['e']) && $_GET['e'] == 'crcok') {
                                 </div>
                             </div>
                             <div id="list_cheque_card" style="width:100%"></div>
+                            <br>
                         </div>
                         <div class="row banco">
                             <div class="col-md-12">
@@ -410,67 +411,7 @@ if (isset($_GET['e']) && $_GET['e'] == 'crcok') {
             </div>
         </div>
         <div class="col-lg-6">
-            <div class="card">
-                <div class="card-header bg-info">
-                    <h4 class="m-b-0 text-white">Ingreso de stock</h4>
-                </div>
-                <div class="card-body">
-
-                    <form id="precioadd" style="width:100%" name="precioadd" method="post">
-                        <div class="row" id="form-alqui">
-                            <input name="accion" value="add" type="hidden">
-                            <div class="col-md-12">
-                                <div class="form-group">
-                                    <label for="movimiento">Tipo de Movimiento</label>
-                                    <div class="input-group mb-3">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text" id="basic-addon2"><i class="fa fa-exchange"></i></span>
-                                        </div>
-                                        <select class="form-control" id="movimiento" name="tipo" aria-describedby="basic-addon2">
-                                            <option value="0">Salida</option>
-                                            <option value="1">Sueldos</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="comprobante">Nº Comprobante</label>
-                                    <div class="input-group mb-3">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text" id="basic-addon2"><i class="fa fa-outdent"></i></span>
-                                        </div>
-                                        <input id="comprobante" name="comprobante" id="comprobante" placeholder="Ingrese el Nº de comprobante" class="form-control" type="text">
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="comprobante">Ingrese monto</label>
-                                    <div class="input-group mb-3">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text" id="basic-addon2"><i class="fa fa-money"></i></span>
-                                        </div>
-                                        <input id="monto" name="monto" placeholder="Ingrese monto" class="form-control" step="any" type="number">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-12">
-                                <textarea id="detalle-alqui" name="detalle" rows="4" placeholder="Ingrese el detalle del mismo" class="form-control"></textarea>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-12">
-                                <button class="btn btn-success" type="button" id="agregarGasto">Guardar</button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
+            
             <div class="card ">
                 <div class="card-header bg-info">
                     <h4 class="m-b-0 text-white"> Ingreso de Comprobantes</h4>
@@ -529,7 +470,6 @@ if (isset($_GET['e']) && $_GET['e'] == 'crcok') {
                                     </select>
                                 </div>
                             </div>
-                            <!--/span-->
                             <div class="col-md-3">
                                 <div class="form-group">
                                     <label class="control-label">Cantidad</label>
@@ -543,8 +483,7 @@ if (isset($_GET['e']) && $_GET['e'] == 'crcok') {
                                     <button onclick="llena_canasta_compra_stock()" class="btn btn-success"> +</button>
                                 </div>
                             </div>
-                            <div id="list_prod_card" style="width:100%"></div>
-                            <!--/span-->
+                            <br>
                         </div>
                         <div class="modal" id="myModal">
                             <div class="modal-dialog">
@@ -564,6 +503,10 @@ if (isset($_GET['e']) && $_GET['e'] == 'crcok') {
                                             <h4 class="col-md-12" id="producto"></h4>
                                         </div>
                                         <div class="row">
+                                            <h4 class="col-md-12">Precio: </h4>
+                                            <h4 class="col-md-12" id="precio"></h4>
+                                        </div>
+                                        <div class="row">
                                             <h4 class="col-md-12">Cantidad: </h4>
                                             <input type="number" id="ncantproducto_card" class="form-control" min="1">
                                         </div>
@@ -580,7 +523,92 @@ if (isset($_GET['e']) && $_GET['e'] == 'crcok') {
                             </div>
                         </div>
                         <!--/row-->
+                        <div class="row p-t-20">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="control-label">IVA</label>
+                                    <select id="iva" class="form-control" disabled onchange="calculoIVA();">
+                                        <option value="0" disabled selected>Seleccione IVA</option>
+                                        <option value="21">21%</option>
+                                        <option value="10.5">10,5%</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="control-label">Percepción Ingresos Brutos</label>
+                                    <select id="percepcion_iibb" class="form-control" disabled onchange="calculoIIBB();">
+                                        <option value="0" disabled selected>Seleccione IIBB</option>
+                                        <option value="4">Percepcion IIBB 4%</option>
+                                        <option value="1.9">Coca Cola Percepcion 1,9%</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row p-t-20">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="control-label">Percepción I.V.A</label>
+                                    <select id="per_iva" class="form-control" disabled onchange="calculoPER_IVA();">
+                                        <option value="0" disabled selected>Seleccione Percepción IVA</option>
+                                        <option value="1.5">Percepción I.V.A 1,5%</option>
+                                        <option value="3">Coca Cola Percepción I.V.A 3%</option>
+                                        <option value="1.75">Comar Design Percepción I.V.A 1,75%</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="control-label">Impuestos Internos</label>
+                                    <select id="imp_int" class="form-control" disabled onchange="calculoIITT();">
+                                        <option value="0" disabled selected>Seleccione Impuesto Interno</option>
+                                        <option value="7.4">Coca Cola Impuesto Interno 7,4%</option>
+                                        <option value="8.5">Combustible Impuesto Interno 8,5%</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row p-t-20">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label class="control-label">Tasas</label>
+                                    <select id="tasa" class="form-control" disabled onchange="calculoTASA();">
+                                        <option value="0" disabled selected>Seleccione Tasa</option>
+                                        <option value="4">Combustible 4%</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <br>
                         <hr>
+                        <div id="list_prod_card" style="width:100%"></div>
+                        <br>
+                        <div id="list_iva" style="width:100%">
+                            <table style="width:100%">
+                                <thead>
+                                    <tr>
+                                        <th>I.V.A</th>
+                                        <th>Percepción Ingresos Brutos</th>
+                                        <th>Percepción I.V.A</th>
+                                        <th>Impuesto Interno</th>
+                                        <th>Tasas</th>
+                                        <th>Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td id="iva_result">$0</td>
+                                        <td id="iibb_result">$0</td>
+                                        <td id="pi_result">$0</td>
+                                        <td id="ii_result">$0</td>
+                                        <td id="tasa_result">$0</td>
+                                        <td id="total">$0</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <hr>
+                        <br>
                         <div class="row p-t-20">
                             <div class="col-md-6">
                                 <div class="form-group">
@@ -682,103 +710,120 @@ if (isset($_GET['e']) && $_GET['e'] == 'crcok') {
         <h2>Agregar pago a factura</h2>
     </div>
     <div class="modal-body">
-        <form id="pagofacturaadd2" style="width:100%" name="pagofacturaadd" method="post"></form>
-        <div class="row">
-            <div class="col-md-6">
-                <div class="form-group">
-                    <label for="comprobante">Ingrese banco</label>
-                    <div class="input-group mb-3">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text" id="basic-addon2"><i class="fa fa-bank"></i></span>
+        <form id="pagofacturaadd2" style="width:100%" name="pagofacturaadd" method="post">
+            <div class="row">
+                <div class="col-md-6 col-sm-12">
+                    <div class="form-group">
+                        <label for="comprobante">Ingrese banco</label>
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="basic-addon2"><i class="fa fa-bank"></i></span>
+                            </div>
+                            <input id="banco_factura_pago2" name="banco" placeholder="Ingrese banco" class="form-control" step="any" type="text">
                         </div>
-                        <input id="banco_factura_pago2" name="banco" placeholder="Ingrese banco" class="form-control" step="any" type="text">
                     </div>
                 </div>
-            </div>
-            <div class="col-md-6">
-                <div class="form-group">
-                    <label for="comprobante">Ingrese numero de cheque</label>
-                    <div class="input-group mb-3">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text" id="basic-addon2"><i class="fas fa-money-check"></i></span>
+                <div class="col-md-6 col-sm-12">
+                    <div class="form-group">
+                        <label for="comprobante">Ingrese numero de cheque</label>
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="basic-addon2"><i class="fas fa-money-check"></i></span>
+                            </div>
+                            <input id="numero_cheque_factura_pago2" name="numero_cheque" placeholder="Ingrese numero de cheque" class="form-control" step="any" type="number">
                         </div>
-                        <input id="numero_cheque_factura_pago2" name="numero_cheque" placeholder="Ingrese numero de cheque" class="form-control" step="any" type="number">
                     </div>
                 </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-6">
-                <div class="form-group">
-                    <label for="comprobante">Ingrese fecha de emision</label>
-                    <div class="input-group mb-3">
-                        <input id="fecha_emision_factura_pago2" name="fecha_emision" placeholder="Ingrese fecha de emision" class="form-control" step="any" type="date" value="<?php echo date('Y-m-d') ?>">
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="form-group">
-                    <label for="comprobante">Ingrese fecha de cobro</label>
-                    <div class="input-group mb-3">
-                        <input id="fecha_cobro_factura_pago2" name="fecha_cobro" placeholder="Ingrese fecha de cobro" class="form-control" step="any" type="date" value="<?php echo date('Y-m-d') ?>">
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-6">
-                <div class="form-group">
-                    <label for="comprobante">Ingrese titular</label>
-                    <div class="input-group mb-3">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text" id="basic-addon2"><i class="fas fa-user"></i></span>
+                <div class="col-md-6 col-sm-12">
+                    <div class="form-group">
+                        <label for="comprobante">Ingrese fecha de emision</label>
+                        <div class="input-group mb-3">
+                            <input id="fecha_emision_factura_pago2" name="fecha_emision" placeholder="Ingrese fecha de emision" class="form-control" step="any" type="date" value="<?php echo date('Y-m-d') ?>">
                         </div>
-                        <input id="titular_factura_pago2" name="titular" placeholder="Ingrese titular" class="form-control" step="any" type="text">
                     </div>
                 </div>
-            </div>
-            <div class="col-md-6">
-                <div class="form-group">
-                    <label for="comprobante">Ingrese cuit</label>
-                    <div class="input-group mb-3">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text" id="basic-addon2"><i class="fas fa-address-card"></i></span>
+                <div class="col-md-6 col-sm-12">
+                    <div class="form-group">
+                        <label for="comprobante">Ingrese fecha de cobro</label>
+                        <div class="input-group mb-3">
+                            <input id="fecha_cobro_factura_pago2" name="fecha_cobro" placeholder="Ingrese fecha de cobro" class="form-control" step="any" type="date" value="<?php echo date('Y-m-d') ?>">
                         </div>
-                        <input id="cuit_factura_pago2" name="cuit" placeholder="Ingrese cuit" class="form-control" step="any" type="number">
                     </div>
                 </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-6">
-                <div class="form-group">
-                    <label for="comprobante">Ingrese monto</label>
-                    <div class="input-group mb-3">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text" id="basic-addon2"><i class="fa fa-money"></i></span>
+                <div class="col-md-6 col-sm-12">
+                    <div class="form-group">
+                        <label for="comprobante">Ingrese titular</label>
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="basic-addon2"><i class="fas fa-user"></i></span>
+                            </div>
+                            <input id="titular_factura_pago2" name="titular" placeholder="Ingrese titular" class="form-control" step="any" type="text">
                         </div>
-                        <input id="monto_factura_pago2" name="monto" placeholder="Ingrese monto" class="form-control" step="any" type="number">
                     </div>
                 </div>
-            </div>
-            <div class="col-md-6">
-                <div class="form-group">
-                    <label for="comprobante">Ingrese origen</label>
-                    <div class="input-group mb-3">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text" id="basic-addon2"><i class="fas fa-earth-americas"></i></span>
+                <div class="col-md-6 col-sm-12">
+                    <div class="form-group">
+                        <label for="comprobante">Ingrese cuit</label>
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="basic-addon2"><i class="fas fa-address-card"></i></span>
+                            </div>
+                            <input id="cuit_factura_pago2" name="cuit" placeholder="Ingrese cuit" class="form-control" step="any" type="number">
                         </div>
-                        <input id="origen_factura_pago2" name="origen" placeholder="Ingrese origen" class="form-control" step="any" type="text">
+                    </div>
+                </div>
+                <div class="col-md-6 col-sm-12">
+                    <div class="form-group">
+                        <label for="comprobante">Ingrese monto</label>
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="basic-addon2"><i class="fa fa-money"></i></span>
+                            </div>
+                            <input id="monto_factura_pago2" name="monto" placeholder="Ingrese monto" class="form-control" step="any" type="number">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-sm-12">
+                    <div class="form-group">
+                        <label for="comprobante">Ingrese origen</label>
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="basic-addon2"><i class="fas fa-earth-americas"></i></span>
+                            </div>
+                            <select name="origen" id="origen_factura_pago2" class="form-control">
+                                <option value="">Seleccione un cliente</option>
+                                <?php
+                                $clientes_select = $link->query("SELECT * FROM clientes ORDER BY id_clientes DESC");
+                                while ($row = mysqli_fetch_array($clientes_select)) {
+                                    echo '<option value="' . $row['id_clientes'] . '">' . $row['nombre_clientes'] . ' ' . $row['apellido_clientes'] . '</option>';
+                                }
+                                ?>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-sm-12">
+                    <div class="form-group">
+                        <label for="comprobante">El cheque esta rechazado?</label>
+                        <div class="input-group mb-3">
+                            <select class="form-control" name="cheque_rechazado" id="cheque_rechazado_factura_pago2">
+                                <option value="1">Si</option>
+                                <option selected value="0">No</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-sm-12">
+                    <button class="btn btn-success" type="button" onclick="add_factura_pago_cheque()">Guardar</button>
+                    <button class="btn btn-cancel" type="button" onclick="$('#modal_agregar_pago_factura').hide()">Cancelar</button>
+                </div>
+                <div class="col-md-6 col-sm-12">
+                    <div class="form-group">
+                        <label for="imagen_cheque">Cargar Imagen</label>
+                        <input id="imagen_cheque" name="imagen_cheque" class="form-control" type="file" accept="image/*">
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="row">
-            <div class="col-md-6">
-                <button class="btn btn-success" type="button" onclick="add_factura_pago_cheque()">Guardar</button>
-                <button class="btn btn-cancel" type="button" onclick="$('#modal_agregar_pago_factura').hide()">Cancelar</button>
-            </div>
-        </div>
         </form>
     </div>
 </div>

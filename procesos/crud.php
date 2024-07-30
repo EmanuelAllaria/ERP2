@@ -312,11 +312,27 @@ if ($_SESSION['usuario'] != '') {
     $nro_comp = $_POST['numero_comprobante'];
     $en_stock = $_POST['en_stock'];
     $vencimiento = $_POST['vencimiento'];
+    $total = $_POST['total'];
     $estado = 1;
 
     $items = $_POST['items'];
 
     $itemDecodificados = json_decode($items, true);
+
+    $iva = $_POST['iva'];
+    $por_iva = $_POST['por_iva'];
+
+    $iibb = $_POST['iibb'];
+    $por_iibb = $_POST['por_iibb'];
+
+    $per_iva = $_POST['per_iva'];
+    $por_per_iva = $_POST['por_per_iva'];
+
+    $imp_int = $_POST['imp_int'];
+    $por_imp_int = $_POST['por_imp_int'];
+
+    $tasa = $_POST['tasa'];
+    $por_tasa = $_POST['por_tasa'];
 
     /*inserto los datos en compra mercaderia*/
 
@@ -325,9 +341,28 @@ if ($_SESSION['usuario'] != '') {
       fecha_compram = '$fecha_compra',
       tipocom_compram = '$tipo_comp',
       numcom_compram = '$nro_comp',
+      total_compra = '$total',
       ingresastock_compram = '$en_stock',
       vencimiento_compram = '$vencimiento',
       estado_compram = '$estado'
+    ");
+
+    $id_compram = $link->query("SELECT id_compram FROM compra_mercaderia ORDER BY id_compram DESC LIMIT 1");
+      $rowmer = mysqli_fetch_array($id_compram);
+      $id_ult_compram = $rowmer['id_compram'];
+
+    $inserta2 = $link->query("INSERT INTO impuesto_compra_mercaderia SET
+      por_iva = '$por_iva',
+      iva = '$iva',
+      por_iibb = '$por_iibb',
+      iibb = '$iibb',
+      por_per_iva = '$por_per_iva',
+      per_iva = '$per_iva',
+      por_imp_interno = '$por_imp_int',
+      imp_interno = '$imp_int',
+      tasa = '$tasa',
+      por_tasa = '$por_tasa',
+      id_compra_mercaderia = '$id_ult_compram';
     ");
 
     /*creo un for para tomar las cantidades de cada productos y poder actualizar el stock*/
@@ -346,7 +381,7 @@ if ($_SESSION['usuario'] != '') {
     }
 
 
-    if ($inserta == true) {
+    if ($inserta == true && $inserta == true) {
       $id_compra = $link->query("SELECT id_compram FROM compra_mercaderia ORDER BY id_compram DESC LIMIT 1");
       $rowm = mysqli_fetch_array($id_compra);
       $id_ult_compra = $rowm['id_compram'];
@@ -846,24 +881,7 @@ if ($_SESSION['usuario'] != '') {
     $tipo = $_POST['tipo'];
     $monto = $_POST['monto'];
     $obs = $_POST['obs'];
-    $sqlHayPagosAFavor = $link->query("SELECT * FROM facturas_pagos WHERE id_factura='-1' ORDER BY monto DESC LIMIT 1");
-    $pagoAFavor = array();
-    if ($sqlHayPagosAFavor->num_rows > 0) {
-      $pagoAFavor = $sqlHayPagosAFavor->fetch_assoc();
-    }
-
     $parseTipo = intval($tipo);
-    if ($parseTipo === 7 || $parseTipo === 8 || $parseTipo === 9 || $parseTipo === 10) {
-      $sqlHayFacturaErronea = $link->query("SELECT * FROM facturas WHERE id_proveedor='$proveedor' AND nro_factura='$nro_factura' OR monto='$monto'");
-      if (mysqli_num_rows($sqlHayFacturaErronea) === 0) {
-        echo 'ERROR NO EXISTE FACTURA';
-        exit;
-      }
-      if (intval(mysqli_fetch_ASSOC($sqlHayFacturaErronea)['monto']) !== abs(intval($monto))) {
-        echo 'ERROR EL MONTO NO COINCIDE';
-        exit;
-      }
-    }
 
     if ($parseTipo === 7 || $parseTipo === 8 || $parseTipo === 9 || $parseTipo === 10) {
       $inserta = $link->query("INSERT INTO facturas SET nro_factura='$nro_factura', id_proveedor='$proveedor',  tipo='$tipo', monto='-$monto', observaciones='$obs'");
@@ -871,28 +889,6 @@ if ($_SESSION['usuario'] != '') {
       $inserta = $link->query("INSERT INTO facturas SET nro_factura='$nro_factura', id_proveedor='$proveedor',  tipo='$tipo', monto='$monto', observaciones='$obs'");
     }
     $id = mysqli_insert_id($link);
-    if ($pagoAFavor && ($parseTipo !== 7 || $parseTipo !== 8 || $parseTipo !== 9 || $parseTipo !== 10)) {
-      $idPagoAFavor = $pagoAFavor['id'];
-      $tipo_pago = $pagoAFavor['tipo_pago'];
-      $fecha = $pagoAFavor['fecha'];
-      $banco = $pagoAFavor['banco'];
-      $numero_cheque = $pagoAFavor['numero_cheque'];
-      $fecha_emision = $pagoAFavor['fecha_emision'];
-      $fecha_cobro = $pagoAFavor['fecha_cobro'];
-      $cuit = $pagoAFavor['cuit'];
-      $titular = $pagoAFavor['titular'];
-      $montoFactura = intval($pagoAFavor['monto']) - intval($monto);
-      $origen = $pagoAFavor['origen'];
-      if (intval($pagoAFavor['monto']) > intval($monto)) {
-        $link->query("UPDATE facturas_pagos SET id_factura='$id', monto='$monto' WHERE id=$idPagoAFavor and id_proveedor='$proveedor';");
-        if ($link->affected_rows > 0) {
-          $razon_com_proveedor = $link->query("SELECT razon_com_proveedor FROM proveedores WHERE id_proveedor='$proveedor'")->fetch_assoc()['razon_com_proveedor'];
-          $link->query("INSERT INTO facturas_pagos SET id_factura='-1', id_proveedor='$proveedor', tipo_pago='$tipo_pago', fecha='$fecha', banco='$banco', numero_cheque='$numero_cheque', fecha_emision='$fecha_emision', fecha_cobro='$fecha_cobro', titular='$titular', cuit='$cuit', monto='$montoFactura', origen='$origen', observaciones='Pago a favor a $razon_com_proveedor'");
-        }
-      } else {
-        $link->query("UPDATE facturas_pagos SET id_factura='$id' WHERE id=$idPagoAFavor and id_proveedor='$proveedor';");
-      }
-    }
 
     if ($inserta) {
       echo $id . '@' . $nro_factura . ', ' . $tipo . '@' . $monto;
@@ -1002,11 +998,12 @@ if ($_SESSION['usuario'] != '') {
   }
   /*termina insercion adelanto*/
 
-  if (isset($_POST['accion']) && $_POST['accion'] == 'remove_pago') {
+  if (isset($_POST['accion']) && $_POST['accion'] == 'remove_cheque') {
     $id_pago = $_POST['id_pago'];
-    $remove_pago = $link->query("DELETE FROM facturas_pagos WHERE id='$id_pago'");
+    $remove_cheque = $link->query("DELETE FROM facturas_cheques WHERE id='$id_pago'");
+    $remove_cheque2 = $link->query("DELETE FROM facturas_cheques_rechazados WHERE id_cheque='$id_pago'");
 
-    if ($remove_pago) {
+    if ($remove_cheque && $remove_cheque2) {
       echo $id_pago;
     } else {
       echo 'FALSE';
@@ -1026,34 +1023,72 @@ if ($_SESSION['usuario'] != '') {
     $cuit = $_POST['cuit'];
     $monto = $_POST['monto'];
     $origen = $_POST['origen'];
-    $esMasDeUno = isset($_POST['esMasDeUno']) ? $_POST['esMasDeUno'] : 'FALSE';
-    $data = array();
+    $ids_cheques = $_POST['tipo_pago'] === 'cheque' ? explode(', ', $_POST['ids_cheques']) : null;
     $inserta = null;
-    $inserta2 = null;
 
-    if (intval($total) >= intval($monto)) {
-      $inserta = $link->query("INSERT INTO facturas_pagos SET id_proveedor='$proveedor', tipo_pago='$tipo_pago', fecha='$fecha', banco='$banco', numero_cheque='$numero_cheque', fecha_emision='$fecha_emision', fecha_cobro='$fecha_cobro', titular='$titular', cuit='$cuit', monto='$monto', origen='$origen'");
-    } else if (intval($monto) > intval($total)) {
-      $nombreProveedor = $link->query("select razon_com_proveedor from proveedores where id_proveedor = '$proveedor'")->fetch_assoc()['razon_com_proveedor'];
-      $saldo = intval($monto) - intval($total);
-      $inserta = $link->query("INSERT INTO facturas_pagos SET id_proveedor='$proveedor', tipo_pago='$tipo_pago', fecha='$fecha', banco='$banco', numero_cheque='$numero_cheque', fecha_emision='$fecha_emision', fecha_cobro='$fecha_cobro', titular='$titular', cuit='$cuit', monto='$total', origen='$origen'");
-      $inserta2 = $link->query("INSERT INTO facturas_pagos SET id_proveedor='$proveedor', tipo_pago='$tipo_pago', fecha='$fecha', banco='$banco', numero_cheque='$numero_cheque', fecha_emision='$fecha_emision', fecha_cobro='$fecha_cobro', titular='$titular', cuit='$cuit', monto='$saldo', origen='$origen', observaciones='Sobró del pago a el Proveedor: $nombreProveedor'");
+    if ($_POST['tipo_pago'] !== 'cheque') {
+      $inserta = $link->query("INSERT INTO facturas_pagos SET id_proveedor='$proveedor', tipo_pago='$tipo_pago', fecha='$fecha', banco='$banco', fecha_emision='$fecha_emision', fecha_cobro='$fecha_cobro', titular='$titular', cuit='$cuit', monto='$monto', origen='$origen'");
+      $id = mysqli_insert_id($link);
+    } else {
+      $inserta = $link->query("INSERT INTO facturas_pagos SET id_proveedor='$proveedor', tipo_pago='$tipo_pago', fecha='$fecha', monto='$monto'");
+      $id = mysqli_insert_id($link);
+      foreach ($ids_cheques as $key => $id_cheque) {
+        $link->query("UPDATE facturas_cheques SET id_pago='$id' WHERE id='$id_cheque'");
+      }
     }
 
+    if ($inserta) {
+      echo $id . '@' . $monto;
+    } else {
+      echo 'FALSE';
+    }
+  }
+
+  if (isset($_POST['accion']) && $_POST['accion'] == 'add_facturas_cheque') {
+    $proveedor = $_POST['proveedor'];
+    $total = $_POST['total'];
+    $banco = $_POST['banco'];
+    $numero_cheque = $_POST['numero_cheque'];
+    $fecha_emision = $_POST['fecha_emision'];
+    $fecha_cobro = $_POST['fecha_cobro'];
+    $titular = $_POST['titular'];
+    $cuit = $_POST['cuit'];
+    $monto = $_POST['cheque_rechazado'] == 1 ? -$_POST['monto'] : $_POST['monto'];
+    $origen = $_POST['origen'];
+    $cheque_rechazado = $_POST['cheque_rechazado'];
+
+    $uploads_dir = '../uploads/cheques';
+    $nombre_imagen = null;
+    $fechaHoy = date('Y-m-d H:m:s');
+
+    if (isset($_FILES['imagen_cheque']) && $_FILES['imagen_cheque']['error'] == UPLOAD_ERR_OK) {
+      $nombre_imagen = uniqid() . '_' . str_replace(' ', '_', basename($_FILES['imagen_cheque']['name']));
+      $ruta_imagen = $uploads_dir . '/' . $nombre_imagen;
+
+      move_uploaded_file($_FILES['imagen_cheque']['tmp_name'], $ruta_imagen);
+    }
+
+    $inserta = $link->query("INSERT INTO facturas_cheques SET banco='$banco', numero_cheque='$numero_cheque', fecha_emision='$fecha_emision', fecha_cobro='$fecha_cobro', titular='$titular', cuit='$cuit', monto='$monto', origen='$origen', cheque_rechazado='$cheque_rechazado'");
     $id = mysqli_insert_id($link);
+    if (isset($nombre_imagen) && $nombre_imagen !== '') {
+      if ($link->query("INSERT INTO imagen_cheque SET numero_cheque='$numero_cheque', url_imagen='$nombre_imagen'") === FALSE) {
+        echo "Error en la consulta imagen_cheque: " . $link->error;
+      }
+    }
+    if ($_POST['cheque_rechazado'] == 1) {
+      $inserta2 = $link->query("INSERT INTO facturas_cheques_rechazados SET id_cheque='$id', id_proveedor='$proveedor', banco='$banco', numero_cheque='$numero_cheque', fecha_emision='$fecha_emision', fecha_cobro='$fecha_cobro', titular='$titular', cuit='$cuit', monto='$monto', origen='$origen', rechazado='1'");
+      $monto = abs($monto);
+      $inserta3 = $link->query("INSERT INTO transaccion SET cliente = '$origen', fecha = '$fechaHoy', observacion = 'CHEQUE RECHAZADO', monto = '$monto', tipo = 'cheque_rechazado', abonada = '0', quien = '$proveedor', estado = '1', tipo_pedido = '0', forma_pago = '1', liquidacion = '0'");
+    }
 
     if ($inserta) {
-      if ($esMasDeUno === 'TRUE') {
-        $nombreProveedor = $link->query("select razon_com_proveedor from proveedores where id_proveedor = '$proveedor'")->fetch_assoc()['razon_com_proveedor'];
-        $selectPagoGuardado = $link->query("SELECT * FROM facturas_pagos WHERE id='$id'")->fetch_assoc();
-        $selectPagoGuardado['nombre_proveedor'] = $nombreProveedor;
-        if ($selectPagoGuardado) {
-          echo json_encode($selectPagoGuardado, JSON_PRETTY_PRINT);
-        } else {
-          echo $id . '@' . $monto;
-        }
-      } else {
-        echo $id . '@' . $monto;
+      $nombreProveedor = $link->query("select razon_com_proveedor from proveedores where id_proveedor = '$proveedor'")->fetch_assoc()['razon_com_proveedor'];
+      $selectPagoGuardado = $link->query("SELECT * FROM facturas_cheques WHERE id='$id'")->fetch_assoc();
+      $selectPagoGuardado['nombre_proveedor'] = $nombreProveedor;
+      $selectPagoGuardado['tipo_pago'] = 'cheque';
+      $selectPagoGuardado['imagen_cheque'] = $nombre_imagen;
+      if ($selectPagoGuardado) {
+        echo json_encode($selectPagoGuardado, JSON_PRETTY_PRINT);
       }
     } else {
       echo 'FALSE';

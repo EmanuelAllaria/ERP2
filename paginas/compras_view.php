@@ -2,7 +2,7 @@
 $id=$_GET['id'];
 $consul_id = $link->query("SELECT * FROM `compra_mercaderia`
                         left join proveedores on proveedores.id_proveedor = compra_mercaderia.prov_compram
-                        left join tipo_comprobantes on proveedores.id_proveedor = tipo_comprobantes.id_comprobantes
+                        left join tipo_comprobantes on compra_mercaderia.tipocom_compram = tipo_comprobantes.id_comprobantes
                              WHERE compra_mercaderia.id_compram = '$id'");
   $rowid= mysqli_fetch_array($consul_id);
 ?>
@@ -61,6 +61,7 @@ $consul_id = $link->query("SELECT * FROM `compra_mercaderia`
                                     <tr>
                                         <th>Cantidad</th>
                                         <th>Producto</th>
+                                        <th>Precio</th>
                                         <th>Codigo</th>
                                         <th class="text-center">#</th>
                                     </tr>
@@ -68,14 +69,17 @@ $consul_id = $link->query("SELECT * FROM `compra_mercaderia`
                                 <tbody>
                                   <?php
                                   $num='1';
+                                  $subtotal = 0;
                                     $consul_items = $link->query("
                                         SELECT * FROM `productos_comprados`
                                         left join productos on productos.id_producto = productos_comprados.idProducto
                              WHERE productos_comprados.idCMercaderia = '$id'");
                                     while ($row= mysqli_fetch_array($consul_items)){
+                                    $subtotal += $row['costo_producto'] * $row['cantidad'];
                                     echo '<tr>
                                         <td>'.$row['cantidad'].'</td>
                                         <td>'.$row['detalle_producto'].'</td>
+                                        <td>$'.$row['costo_producto'].'</td>
                                         <td>'.strtoupper($row['codigo_producto']).'</td>
                                         <td class="text-center">'.$num.'</td>
                                     </tr>';
@@ -86,13 +90,47 @@ $consul_id = $link->query("SELECT * FROM `compra_mercaderia`
                             </table>
                         </div>
                     </div>
-                    <div class="col-md-12">
+                    <div class="col-md-4">
                         <div class="clearfix"></div>
                         <hr>
                         <h3><b>Tipo y Número de Comprobante:</b></h3>
                         <p><?php echo $rowid['nombre_comprobantes'].':  NRO '.$rowid['numcom_compram']?></p>
                         <hr>
 
+                    </div>
+                    <div class="col-md-8">
+                        <div class="clearfix"></div>
+                        <hr>
+                        <table style="width: 100%;">
+                            <thead>
+                                <tr>
+                                    <th>Subtotal</th>
+                                    <th>I.V.A</th>
+                                    <th>Percepción Ingresos brutos</th>
+                                    <th>Percepción I.V.A</th>
+                                    <th>Impuestos Internos</th>
+                                    <th>Tasas</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php
+                                    $impuestos = $link->query("
+                                        SELECT * FROM `impuesto_compra_mercaderia`
+                                    WHERE id_compra_mercaderia = '$id'");
+                                    $row2= mysqli_fetch_array($impuestos);
+                                ?>
+                                <tr>
+                                    <td>$<?=$subtotal?></td>
+                                    <td>$<?=$row2['iva']?></td>
+                                    <td>$<?=$row2['iibb']?></td>
+                                    <td>$<?=$row2['per_iva']?></td>
+                                    <td>$<?=$row2['imp_interno']?></td>
+                                    <td>$<?=$row2['tasa']?></td>
+                                    <td>$<?=$rowid['total_compra']?></td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
