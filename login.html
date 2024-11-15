@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+    <!-- Favicon icon -->
+
+    <title>Ingreso ERP</title>
+    <!-- page css -->
+    <link href="./css/login-register-lock.css" rel="stylesheet" />
+    <!-- Custom CSS -->
+    <link href="./css/style.min.css" rel="stylesheet" />
+    <script src="js/funciones.js?v=1"></script>
+  </head>
+
+  <body>
+    <div class="preloader" style="display: none">
+      <div class="loader">
+        <div class="loader__figure"></div>
+        <p class="loader__label"></p>
+      </div>
+    </div>
+
+    <section
+      id="wrapper"
+      class="login-register login-sidebar"
+      style="background-image: url(img/login-register.jpg)"
+    >
+      <div class="login-box card">
+        <div class="card-body">
+          <form
+            action="procesos/auth.php"
+            method="post"
+            class="form-horizontal form-material"
+            id="loginform"
+          >
+            <input type="hidden" name="login" value="1" />
+            <center><img src="./img/logo.png" alt="Inicio" /><br /></center>
+            <div class="form-group m-t-40">
+              <div class="col-xs-12">
+                <input
+                  class="form-control"
+                  name="usuario"
+                  type="email"
+                  required=""
+                  placeholder="E-mail"
+                />
+              </div>
+            </div>
+            <div class="form-group">
+              <div class="col-xs-12" style="position: relative;"> 
+                <input
+                  class="form-control"
+                  name="password"
+                  id="password"
+                  type="password"
+                  required=""
+                  placeholder="Password"
+                />
+                <div class="input-group-append"  style="position: absolute; right: 8px; top: 8px;">
+                  <a href="javascript:void(0)" onclick="verPass();" id="showPasswordToggle">
+                      <i id="icono" class="fa fa-eye-slash"></i>
+                  </a>
+                </div>
+              </div>
+            </div>
+            <div class="form-group row">
+              <div class="col-md-12">
+                <div class="custom-control custom-checkbox">
+                  <a
+                    href="javascript:void(0)"
+                    id="to-recover"
+                    class="text-dark pull-right"
+                    ><i class="fa fa-lock m-r-5"></i>Recuperar Cuenta</a
+                  >
+                </div>
+              </div>
+            </div>
+            <div class="form-group text-center m-t-20">
+              <div class="col-xs-12">
+                <button
+                  type="submit"
+                  class="btn btn-info btn-lg btn-block text-uppercase btn-rounded"
+                >
+                  Ingresar
+                </button>
+              </div>
+            </div>
+          </form>
+          <form class="form-horizontal" id="recoverform">
+            <div class="form-group">
+              <div class="col-xs-12">
+                <h3>Recuperar Clave</h3>
+                <p class="text-muted">
+                  Ingrese el correo asociado a su cuenta de usuario para recibir
+                  instrucciones!
+                </p>
+              </div>
+            </div>
+            <div class="form-group">
+              <div class="col-xs-12">
+                <input
+                  id="emailr"
+                  class="form-control"
+                  type="text"
+                  required=""
+                  placeholder="Email"
+                />
+              </div>
+            </div>
+            <div class="form-group row">
+              <div class="col-md-12">
+                <div class="custom-control custom-checkbox">
+                  <a
+                    href="javascript:void(0)"
+                    id="to-login"
+                    class="text-dark pull-right"
+                    ><i class="fa fa-arrow-left m-r-5"></i>Regresar</a
+                  >
+                </div>
+              </div>
+            </div>
+            <div class="form-group text-center m-t-20">
+              <div class="col-xs-12">
+                <button
+                  id="change_password"
+                  class="btn btn-primary btn-lg btn-block text-uppercase waves-effect waves-light"
+                >
+                  Recuperar
+                </button>
+              </div>
+              <div id="respuesta_recu"></div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+    <script src="./js/jquery-3.2.1.min.js"></script>
+    <!-- Bootstrap tether Core JavaScript -->
+    <script src="./js/popper.min.js"></script>
+    <script src="./js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="js/auth.js"></script>
+    <!--Custom JavaScript -->
+    <script type="text/javascript">
+      $(function () {
+        $(".preloader").fadeOut();
+      });
+      $(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+      });
+
+      $("#to-recover").on("click", function () {
+        $("#loginform").slideUp();
+        $("#recoverform").fadeIn();
+      });
+      $("#to-login").on("click", function () {
+        $("#recoverform").slideUp();
+        $("#loginform").fadeIn();
+      });
+
+      //Change Password
+      $("#change_password").click(function () {
+        var url2 = "#";
+        var emailr = $("#emailr").val();
+        console.log("Email: " + emailr);
+        var dataString2 = "email=" + emailr + "&recupera=";
+        /*	if($.trim(emailr).length>0 )
+		{*/
+        $.ajax({
+          type: "POST",
+          url: url2,
+          data: dataString2,
+          crossDomain: true,
+          cache: false,
+          beforeSend: function () {
+            $("#change_password").val("Enviando...");
+          },
+          success: function (data) {
+            if ((data["respuesta"] = "TRUE")) {
+              $("#respuesta_recu").html(
+                "Se envio un correo " +
+                  emailr +
+                  " con el link para reactivar su cuenta<br>Por favor, revise la bandeja de correo no deseado."
+              );
+            } else {
+              alert("Algo Salio Mal...");
+            }
+          },
+        });
+        // }
+      });
+
+      function getParameterByName(name) {
+        name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+        var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+          results = regex.exec(location.search);
+        return results === null
+          ? ""
+          : decodeURIComponent(results[1].replace(/\+/g, " "));
+      }
+
+      if (getParameterByName("msg") == "error") {
+        alert("Datos incorrectos");
+      }
+    </script>
+  </body>
+</html>
